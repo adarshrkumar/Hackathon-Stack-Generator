@@ -1,0 +1,45 @@
+---
+import Header from '../components/Header.astro';
+import Hero from '../components/Hero.astro';
+import Footer from '../components/Footer.astro';
+
+import '../styles/reset.scss';
+import '../styles/globals.scss';
+
+const { title } = Astro.props;
+
+const lTitle = 'AWS Cost Explorer - SCU AWS Hackathon Project';
+const sTitle = 'AWS Cost Explorer';
+
+const pageIsHome = !title || title === '' || title === 'Home' || title === 'Index' || title === sTitle || title === lTitle;
+
+let pTitle
+if (pageIsHome) {
+    pTitle = sTitle;
+} else {
+    pTitle = `${title} | ${sTitle}`;
+}
+---
+
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <meta name="viewport" content="width=device-width" />
+        <meta name="generator" content={Astro.generator} />
+        <title>{pTitle}</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    </head>
+    <body>
+        <Header />
+
+        <main>
+            {pageIsHome ? <Hero /> : ''}
+            <slot />
+        </main>
+
+        <Footer />
+    </body>
+</html>

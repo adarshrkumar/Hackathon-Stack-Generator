@@ -1,0 +1,28 @@
+@use '../variables/globals.scss' as *;
+
+@use 'sass:math';
+@use 'sass:color';
+
+$hero-bg-clr: oklch(0 0 0);
+$hero-bg-mark-clr-alpha: -0.75;
+
+$_shadow-size: 2px;
+
+.hero {
+    margin: #{-1*$main-padding} #{-1*$main-padding} #{$main-padding} #{-1*$main-padding};
+    padding: $main-padding;
+
+    min-height: 50dvh;
+
+    color: white;
+
+    background-image: 
+        linear-gradient(color.adjust($hero-bg-clr, $alpha: $hero-bg-mark-clr-alpha) 00),
+        url('/assets/banner.png');
+    background-size: cover;
+    background-position: center;
+
+    * {
+        text-shadow: #{$_shadow-size} #{$_shadow-size} 0 $hero-bg-clr;
+    }
+}

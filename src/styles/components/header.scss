@@ -1,0 +1,78 @@
+@use 'sass:color';
+@use 'sass:math';
+
+@use '../variables/colors' as *;
+
+$_spacing: 2rem;
+
+.header {
+    padding: #{math.div($_spacing, 2)} #{math.div($_spacing, 1.5)};
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 2rem;
+
+    background: $header-color;
+
+    &__logo {
+        &__link, &__img {
+            display: block;
+        }
+
+        &__img {
+            height: 5rem;
+            aspect-ratio: 1;
+            border-radius: 50%;
+            outline: solid 1px #ddd;
+        }
+    }
+}
+
+.nav {
+    flex: 1;
+
+    margin-inline: auto;
+    width: fit-content;
+    height: fit-content;
+
+    display: flex;
+    justify-content: space-between;
+    gap: inherit;
+
+    &__links {
+        list-style: none;
+
+        margin: 0;
+
+        display: flex;
+        gap: inherit;
+        align-items: center;
+
+        border-radius: 100vw;
+
+        &:not(.app) {
+            padding: #{math.div($_spacing, 2)};
+            background-color: color.adjust($header-color, $lightness: -0.05);
+        }
+    }
+
+    &__btn {
+        padding: #{math.div($_spacing, 4)} #{math.div($_spacing, 3)};
+
+        background-color: color.adjust($header-color, $lightness: -0.1);
+        
+        border-radius: 100vw;
+
+        text-align: center;
+    }
+
+    &__link {
+        &:not(:hover, :focus-visible) {
+            text-decoration: none;
+        }
+        &:focus {
+            outline: none;
+        }
+    }
+}
