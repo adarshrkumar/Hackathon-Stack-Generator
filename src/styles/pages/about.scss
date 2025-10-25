@@ -1,0 +1,188 @@
+@use '../variables/globals.scss' as *;
+
+section {
+    margin: 3rem 0;
+
+    h2 {
+        font-size: 2rem;
+        margin-bottom: 1.5rem;
+        text-align: center;
+    }
+}
+
+.about-intro {
+    text-align: center;
+    max-width: 800px;
+    margin: 2rem auto 4rem;
+
+    h1 {
+        font-size: 2.5rem;
+        margin-bottom: 1.5rem;
+        color: #333;
+    }
+
+    .lead {
+        font-size: 1.25rem;
+        line-height: 1.8;
+        color: #555;
+    }
+}
+
+.mission {
+    max-width: 900px;
+    margin: 4rem auto;
+    padding: 2.5rem;
+    background: #f8f9fa;
+    border-left: 4px solid #ff6b35;
+    border-radius: 8px;
+
+    h2 {
+        color: #333;
+        margin-bottom: 1.5rem;
+    }
+
+    p {
+        font-size: 1.15rem;
+        line-height: 1.8;
+        text-align: center;
+        color: #555;
+    }
+}
+
+.how-we-help {
+    margin: 4rem 0;
+}
+
+.help-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.help-card {
+    padding: 2rem;
+    background: #f8f9fa;
+    border-radius: 12px;
+    text-align: center;
+    transition: transform 0.2s, box-shadow 0.2s;
+
+    &:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    }
+
+    .help-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+
+    h3 {
+        font-size: 1.3rem;
+        margin-bottom: 1rem;
+        color: #333;
+    }
+
+    p {
+        line-height: 1.6;
+        color: #555;
+    }
+}
+
+.what-we-cover {
+    margin: 4rem 0;
+    padding: 3rem $main-padding;
+    background: #f8f9fa;
+    margin-left: -$main-padding;
+    margin-right: -$main-padding;
+}
+
+.coverage-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    max-width: 1200px;
+    margin: 2rem auto 0;
+}
+
+.coverage-item {
+    padding: 1.5rem;
+    background: white;
+    border-radius: 8px;
+    border-left: 4px solid #ff6b35;
+
+    h3 {
+        font-size: 1.2rem;
+        margin-bottom: 0.5rem;
+        color: #333;
+    }
+
+    p {
+        color: #666;
+        line-height: 1.6;
+        font-size: 0.95rem;
+    }
+}
+
+.our-approach {
+    max-width: 1000px;
+    margin: 4rem auto;
+}
+
+.approach-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.approach-item {
+    h3 {
+        font-size: 1.2rem;
+        margin-bottom: 1rem;
+        color: #ff6b35;
+    }
+
+    p {
+        line-height: 1.7;
+        color: #555;
+    }
+}
+
+.cta-about {
+    text-align: center;
+    padding: 4rem 2rem;
+    margin: 4rem 0;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 12px;
+
+    h2 {
+        font-size: 2.2rem;
+        color: white;
+        margin-bottom: 1rem;
+    }
+
+    p {
+        font-size: 1.2rem;
+        margin-bottom: 2rem;
+        opacity: 0.95;
+    }
+}
+
+.btn-primary-large {
+    display: inline-block;
+    padding: 1.25rem 3rem;
+    background: white;
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 1.1rem;
+    border-radius: 8px;
+    transition: transform 0.2s, box-shadow 0.2s;
+
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+    }
+}

@@ -2,5 +2,101 @@
 import Layout from '../layouts/Layout.astro';
 ---
 <Layout title="About">
+    <section class="about-intro">
+        <h1>About Tech Stack ROI Calculator</h1>
+        <p class="lead">Making informed technology decisions shouldn't require hours of research and complex calculations. Our tool simplifies the process of evaluating tech stacks by providing instant cost estimates and ROI predictions.</p>
+    </section>
 
+    <section class="mission">
+        <h2>Our Mission</h2>
+        <p>We empower developers, tech leads, and decision-makers to build better software by providing transparent, data-driven insights into the true cost and value of technology choices. Whether you're launching a startup, planning a migration, or scaling your infrastructure, we help you make confident decisions backed by real numbers.</p>
+    </section>
+
+    <section class="how-we-help">
+        <h2>How We Help You Succeed</h2>
+        <div class="help-grid">
+            <div class="help-card">
+                <div class="help-icon">🎯</div>
+                <h3>For Startups</h3>
+                <p>Launch with confidence knowing your tech stack won't blow your budget. Compare alternatives and find the sweet spot between cost and capability.</p>
+            </div>
+            <div class="help-card">
+                <div class="help-icon">🏢</div>
+                <h3>For Enterprises</h3>
+                <p>Justify infrastructure investments with detailed ROI projections. Present stakeholders with clear cost-benefit analysis for technology decisions.</p>
+            </div>
+            <div class="help-card">
+                <div class="help-icon">👨‍💻</div>
+                <h3>For Developers</h3>
+                <p>Explore different architectures without the hassle of manual pricing research. Focus on building while we handle the cost calculations.</p>
+            </div>
+            <div class="help-card">
+                <div class="help-icon">📊</div>
+                <h3>For Consultants</h3>
+                <p>Deliver professional recommendations backed by comprehensive cost analysis. Impress clients with detailed financial projections.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="what-we-cover">
+        <h2>What We Cover</h2>
+        <div class="coverage-list">
+            <div class="coverage-item">
+                <h3>☁️ Cloud Providers</h3>
+                <p>AWS, Azure, Google Cloud Platform, DigitalOcean, Linode, and more</p>
+            </div>
+            <div class="coverage-item">
+                <h3>🗄️ Databases</h3>
+                <p>PostgreSQL, MySQL, MongoDB, Redis, DynamoDB, and managed database services</p>
+            </div>
+            <div class="coverage-item">
+                <h3>🚀 Hosting & CDN</h3>
+                <p>Vercel, Netlify, Cloudflare, AWS CloudFront, Fastly, and edge computing platforms</p>
+            </div>
+            <div class="coverage-item">
+                <h3>📈 Monitoring & Analytics</h3>
+                <p>Datadog, New Relic, Sentry, LogRocket, Google Analytics, and observability tools</p>
+            </div>
+            <div class="coverage-item">
+                <h3>🔐 Authentication & Security</h3>
+                <p>Auth0, Okta, AWS Cognito, Firebase Auth, and security services</p>
+            </div>
+            <div class="coverage-item">
+                <h3>📧 Communication Services</h3>
+                <p>SendGrid, Twilio, AWS SES, Mailgun, and notification platforms</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="our-approach">
+        <h2>Our Approach</h2>
+        <div class="approach-content">
+            <div class="approach-item">
+                <h3>Real-Time Pricing Data</h3>
+                <p>We continuously update our pricing database with the latest information from service providers, ensuring your estimates reflect current market rates.</p>
+            </div>
+            <div class="approach-item">
+                <h3>Industry Benchmarks</h3>
+                <p>Our ROI calculations are based on real-world data from thousands of projects, giving you reliable predictions for development time and operational efficiency.</p>
+            </div>
+            <div class="approach-item">
+                <h3>Transparent Methodology</h3>
+                <p>We show you exactly how we calculate costs and ROI. No hidden assumptions or black-box algorithms—just clear, understandable math.</p>
+            </div>
+            <div class="approach-item">
+                <h3>Continuous Improvement</h3>
+                <p>Built during the SCU AWS Hackathon, we're constantly refining our algorithms and expanding our service coverage based on user feedback.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="cta-about">
+        <h2>Ready to Get Started?</h2>
+        <p>Join developers and teams who are making smarter technology decisions with data-driven insights.</p>
+        <a href="/app" class="btn-primary-large">Start Building Your Stack</a>
+    </section>
 </Layout>
+
+<style lang="scss">
+    @use '../styles/pages/about.scss';
+</style>
