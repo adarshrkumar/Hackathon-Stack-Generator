@@ -1,0 +1,105 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+<Layout title="Contact">
+    <section class="contact-intro">
+        <h1>Get In Touch</h1>
+        <p class="lead">Have questions about our Tech Stack ROI Calculator? We'd love to hear from you.</p>
+    </section>
+
+    <section class="contact-methods">
+        <h2>Contact Information</h2>
+        <div class="methods-grid">
+            <div class="method-card">
+                <div class="method-icon">📧</div>
+                <h3>Email Us</h3>
+                <p>For general inquiries and support</p>
+                <a href="mailto:support@stackcalculator.com" class="contact-link">support@stackcalculator.com</a>
+            </div>
+            <div class="method-card">
+                <div class="method-icon">💼</div>
+                <h3>Business Inquiries</h3>
+                <p>Partnership and enterprise opportunities</p>
+                <a href="mailto:business@stackcalculator.com" class="contact-link">business@stackcalculator.com</a>
+            </div>
+            <div class="method-card">
+                <div class="method-icon">🐛</div>
+                <h3>Report Issues</h3>
+                <p>Found a bug or have feedback?</p>
+                <a href="https://github.com/yourusername/repo/issues" class="contact-link" target="_blank">GitHub Issues</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="social-section">
+        <h2>Connect With Us</h2>
+        <div class="social-grid">
+            <a href="#" class="social-card" target="_blank">
+                <div class="social-icon">💻</div>
+                <h3>GitHub</h3>
+                <p>View our code and contribute</p>
+            </a>
+            <a href="#" class="social-card" target="_blank">
+                <div class="social-icon">🐦</div>
+                <h3>Twitter</h3>
+                <p>Follow for updates</p>
+            </a>
+            <a href="#" class="social-card" target="_blank">
+                <div class="social-icon">💼</div>
+                <h3>LinkedIn</h3>
+                <p>Connect professionally</p>
+            </a>
+            <a href="#" class="social-card" target="_blank">
+                <div class="social-icon">💬</div>
+                <h3>Discord</h3>
+                <p>Join our community</p>
+            </a>
+        </div>
+    </section>
+
+    <section class="faq-preview">
+        <h2>Frequently Asked Questions</h2>
+        <div class="faq-list">
+            <div class="faq-item">
+                <h3>How accurate are the cost estimates?</h3>
+                <p>Our estimates are based on current pricing data from service providers and are updated regularly. However, actual costs may vary based on your specific usage patterns and any promotional pricing available.</p>
+            </div>
+            <div class="faq-item">
+                <h3>Is this tool free to use?</h3>
+                <p>Yes! The Tech Stack ROI Calculator was built as part of the SCU AWS Hackathon and is currently free to use for all users.</p>
+            </div>
+            <div class="faq-item">
+                <h3>Which cloud providers do you support?</h3>
+                <p>We currently support AWS, Azure, Google Cloud Platform, DigitalOcean, and Linode, with more providers being added regularly.</p>
+            </div>
+            <div class="faq-item">
+                <h3>Can I save and share my stack configurations?</h3>
+                <p>This feature is coming soon! We're working on user accounts and shareable stack configurations.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="office-info">
+        <h2>Project Information</h2>
+        <div class="info-content">
+            <div class="info-card">
+                <h3>🎓 SCU AWS Hackathon Project</h3>
+                <p>This tool was developed as part of the Santa Clara University AWS Hackathon, showcasing innovative solutions for cloud cost management and ROI calculation.</p>
+            </div>
+            <div class="info-card">
+                <h3>⏰ Support Hours</h3>
+                <p>We typically respond to inquiries within 24-48 hours during weekdays. For urgent issues, please use our GitHub issues tracker.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="cta-contact">
+        <h2>Ready to Start?</h2>
+        <p>Don't wait – start building and analyzing your tech stack today.</p>
+        <a href="/app" class="btn-primary-large">Start Building Your Stack</a>
+    </section>
+</Layout>
+
+<style lang="scss">
+    @use '../styles/pages/contact.scss';
+</style>
