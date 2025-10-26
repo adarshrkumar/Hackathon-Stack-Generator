@@ -548,3 +548,82 @@ export function formatContextData(companyInfo: any[], webServices: any[]): strin
 
     return contextString;
 }
+
+/**
+  * Update Thread Cost
+  *
+  * Updates the cost attribute of a thread by adding the provided cost increment
+  * to the current cost value. If the thread doesn't have a cost attribute yet,
+  * it initializes it with the provided value.
+  *
+  * This function performs an atomic update operation using DynamoDB's
+  * ADD operation, which is safe for concurrent updates.
+  *
+  * @param threadId - The unique thread identifier to update
+  * @param costIncrement - The cost amount to add to the current cost (in dollars)
+  * @param userId - Optional user ID to verify ownership before updating
+  * @returns The updated cost value after the increment
+  * @throws Error if unauthorized or DynamoDB operation fails
+  */
+export async function updateThreadCost(
+    threadId: string,
+    costIncrement: number,
+    userId?: string
+): Promise<number> {
+    try {
+        console.log(`💰 Updating thread ${threadId} cost by ${costIncrement}`);
+
+        /**
+          * Build Dynamic Update Expression
+          *
+          * Use the ADD operation which atomically increments a numeric attribute.
+          * If the attribute doesn't exist, it's initialized with the increment value.
+          * Also update the updatedAt timestamp.
+          */
+        const updateExpression = 'ADD cost :costIncrement SET updatedAt = :updatedAt';
+
+        /**
+          * Expression Attribute Values
+          */
+        const expressionAttributeValues: Record<string, any> = {
+            ':costIncrement': costIncrement,
+            ':updatedAt': new Date().toISOString(),
+        };
+
+        /**
+          * Build Ownership Verification Condition
+          *
+          * If userId is provided, verify ownership before updating
+          */
+        const conditionExpression = userId ? 'attribute_not_exists(userId) OR userId = :userId' : undefined;
+        if (userId) {
+            expressionAttributeValues[':userId'] = userId;
+        }
+
+        /**
+          * Create Update Command
+          */
+        const command = new UpdateCommand({
+            TableName: TABLE_NAME,
+            Key: {
+                id: threadId,
+            },
+            UpdateExpression: updateExpression,
+            ExpressionAttributeValues: expressionAttributeValues,
+            ConditionExpression: conditionExpression,
+            ReturnValues: 'ALL_NEW',  // Return the updated item
+        });
+
+        // Send the command and get response
+        const response = await docClient.send(command);
+
+        // Extract and return the updated cost value
+        const updatedCost = response.Attributes?.cost || 0;
+        console.log(`✅ Thread cost updated successfully. New total: $${updatedCost.toFixed(6)}`);
+
+        return updatedCost;
+    } catch (error) {
+        console.error('Error updating thread cost in DynamoDB:', error);
+        throw new Error(`Failed to update thread cost: ${error instanceof Error ? error.message : String(error)}`);
+    }
+}
