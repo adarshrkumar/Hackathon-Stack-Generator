@@ -3,6 +3,7 @@ import config from '../../../lib/config';
 import { nanoid } from 'nanoid';
 import { invokeBedrockLlama, generateConversationTitle } from '../../../lib/bedrock';
 import type { Message } from '../../../lib/types';
+import { createThread, getThread, updateThread, type Thread } from '../../../lib/dynamodb';
 
 export const POST: APIRoute = async ({ request }) => {
     const requestId = nanoid();
@@ -16,23 +17,16 @@ export const POST: APIRoute = async ({ request }) => {
 
         // Create a new thread if none provided
         let isNewThread = false;
-        
+
         if (!current_thread_id) {
             try {
-                // Check thread limit for user
                 const newThreadId = nanoid();
                 if (!newThreadId) {
                     console.error(`❌ [${requestId}] Failed to generate thread ID`);
                     throw new Error('Failed to generate thread ID');
                 }
-                
-                const newThread = {
-                    id: newThreadId,
-                    title: '',
-                    thread: { messages: [] },
-                };
-                
-                // TODO: Add to DB
+
+                console.log(`🆕 [${requestId}] Creating new thread with ID: ${newThreadId}`);
                 current_thread_id = newThreadId;
                 isNewThread = true;
             } catch (error) {
@@ -45,60 +39,48 @@ export const POST: APIRoute = async ({ request }) => {
                     }
                 );
             }
-        } else {
         }
 
-        // @ts-ignore
-        const systemPrompt = (config ).systemPrompt;
+        const systemPrompt = config.systemPrompt;
         
         const systemObj = {
             role: 'system',
             content: systemPrompt,
         }
         
-        let convoHistory: any[] = [systemObj];
+        let convoHistory: Message[] = [systemObj as Message];
 
-        // --- Conversation History Fetch from DB ---
-        let userData = {thread: '', title: ''};
-        if (current_thread_id) {
+        // --- Conversation History Fetch from DynamoDB ---
+        let existingThread: Thread | null = null;
+        if (current_thread_id && !isNewThread) {
             try {
-                // TODO: Get all threads from db
-                // @ts-ignore
-                const threads: any = [] // await db.select().from(threadsTable).where(eq(threadsTable.id, current_thread_id));
+                console.log(`🔍 [${requestId}] Fetching thread from DynamoDB: ${current_thread_id}`);
+                existingThread = await getThread(current_thread_id);
 
-                if (threads.length > 0) {
-                    userData = threads[0];
-                    return new Response(
-                        JSON.stringify({ error: 'Unauthorized access to thread' }),
-                        {
-                            status: 403,
-                            headers: { 'Content-Type': 'application/json' },
-                        }
-                    );
-                }
-
-                if (
-                    userData.thread &&
-                    typeof userData.thread === 'object' &&
-                    'messages' in userData.thread &&
-                    Array.isArray((userData.thread as { messages: any[] }).messages)
-                ) {
-                    convoHistory = [systemObj, ...(userData.thread as { messages: any[] }).messages];
+                if (existingThread) {
+                    console.log(`✅ [${requestId}] Thread found in DynamoDB:`, {
+                        threadId: existingThread.id,
+                        title: existingThread.title,
+                        messageCount: existingThread.messages.length
+                    });
+                    // Load existing conversation history (excluding system prompt which we add separately)
+                    convoHistory = [systemObj as Message, ...existingThread.messages];
                 } else {
-                    console.log(`⚠️ [${requestId}] Thread not found in database, using system message only:`, current_thread_id);
+                    console.log(`⚠️ [${requestId}] Thread not found in DynamoDB, treating as new thread: ${current_thread_id}`);
+                    isNewThread = true;
                 }
             } catch (error) {
                 console.error(`❌ [${requestId}] Error fetching conversation history:`, error);
                 return new Response(
-                    JSON.stringify({ error: `Failed to fetch conversation history: ${error}` }),
+                    JSON.stringify({ error: `Failed to fetch conversation history: ${error instanceof Error ? error.message : String(error)}` }),
                     {
                         status: 500,
                         headers: { 'Content-Type': 'application/json' },
                     }
                 );
             }
-        } else {
-            console.log(`🆕 [${requestId}] No thread ID provided, using system message only`);
+        } else if (isNewThread) {
+            console.log(`🆕 [${requestId}] New thread, starting with system message only`);
         }
 
         // --- Append new user message ---
@@ -155,12 +137,12 @@ export const POST: APIRoute = async ({ request }) => {
         convoHistory.push({ role: 'assistant', content: generatedText });
 
         // --- Generate conversation title ---
-        let convoTitle = userData?.title;
+        let convoTitle = existingThread?.title || '';
         if (!convoTitle) {
             console.log(`🏷️ [${requestId}] Generating conversation title`);
             const titleStartTime = Date.now();
             try {
-                convoTitle = await generateConversationTitle(convoHistory as Message[], config.model);
+                convoTitle = await generateConversationTitle(convoHistory, config.model);
                 const titleEndTime = Date.now();
                 const titleDuration = titleEndTime - titleStartTime;
                 console.log(`✅ [${requestId}] Title generated successfully:`, {
@@ -175,26 +157,48 @@ export const POST: APIRoute = async ({ request }) => {
             console.log(`🏷️ [${requestId}] Using existing title:`, convoTitle);
         }
 
-        // --- Save updated history back to DB ---
-        console.log(`💾 [${requestId}] Saving conversation to database`);
+        // --- Save updated history back to DynamoDB ---
+        console.log(`💾 [${requestId}] Saving conversation to DynamoDB`);
         const saveStartTime = Date.now();
         try {
-            if (current_thread_id && userData) {
-                // TODO: Update thread in DB
-            } else if (current_thread_id && !userData && !isNewThread) {
-                if (!current_thread_id) {
-                    throw new Error('Thread ID is null or undefined');
-                }
-                // TODO: Insert new thread to DB
-            } else if (isNewThread) {
-                // TODO: Update new thread in DB
+            if (!current_thread_id) {
+                throw new Error('Thread ID is null or undefined');
             }
-            
+
+            // Remove system message from stored history (we add it dynamically)
+            const messagesToStore = convoHistory.filter(msg => msg.role !== 'system');
+
+            if (isNewThread) {
+                // Create new thread in DynamoDB
+                console.log(`🆕 [${requestId}] Creating new thread in DynamoDB`);
+                await createThread({
+                    id: current_thread_id,
+                    title: convoTitle,
+                    messages: messagesToStore,
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString(),
+                });
+            } else {
+                // Update existing thread in DynamoDB
+                console.log(`🔄 [${requestId}] Updating existing thread in DynamoDB`);
+                await updateThread(
+                    current_thread_id,
+                    messagesToStore,
+                    convoTitle
+                );
+            }
+
             const saveEndTime = Date.now();
             const saveDuration = saveEndTime - saveStartTime;
+            console.log(`✅ [${requestId}] Conversation saved to DynamoDB:`, {
+                duration: `${saveDuration}ms`,
+                threadId: current_thread_id,
+                messageCount: messagesToStore.length
+            });
         } catch (error) {
+            console.error(`❌ [${requestId}] Error saving conversation:`, error);
             return new Response(
-                JSON.stringify({ error: `Failed to save conversation: ${error}` }),
+                JSON.stringify({ error: `Failed to save conversation: ${error instanceof Error ? error.message : String(error)}` }),
                 {
                     status: 500,
                     headers: { 'Content-Type': 'application/json' },
