@@ -3,45 +3,43 @@ import App from '../../layouts/App.astro';
 ---
 
 <App title="AI Chat">
-    <div class="chat-container">
-        <div class="chat-header">
-            <h1><i class="fa-solid fa-comments"></i> AI Chat Assistant</h1>
-            <p class="subtitle">Powered by AWS Bedrock & Llama 3.1</p>
+    <div class="chat-header">
+        <h1><i class="fa-solid fa-comments"></i> AI Chat Assistant</h1>
+        <p class="subtitle">Powered by AWS Bedrock & Llama 3.1</p>
+    </div>
+
+    <div class="chat-wrapper">
+        <div class="chat-messages" id="chatMessages">
+            <div class="welcome-message">
+                <i class="fa-solid fa-robot"></i>
+                <p>Hello! I'm your AI assistant. Ask me anything!</p>
+            </div>
         </div>
 
-        <div class="chat-wrapper">
-            <div class="chat-messages" id="chatMessages">
-                <div class="welcome-message">
-                    <i class="fa-solid fa-robot"></i>
-                    <p>Hello! I'm your AI assistant. Ask me anything!</p>
-                </div>
+        <div class="chat-input-container">
+            <div class="error-banner" id="errorBanner"></div>
+            <div class="input-wrapper">
+                <textarea
+                    id="messageInput"
+                    placeholder="Type your message here..."
+                    rows="1"
+                ></textarea>
+                <button id="sendButton" class="send-btn">
+                    <i class="fa-solid fa-paper-plane"></i>
+                </button>
             </div>
-
-            <div class="chat-input-container">
-                <div class="error-banner" id="errorBanner"></div>
-                <div class="input-wrapper">
-                    <textarea
-                        id="messageInput"
-                        placeholder="Type your message here..."
-                        rows="1"
-                    ></textarea>
-                    <button id="sendButton" class="send-btn">
-                        <i class="fa-solid fa-paper-plane"></i>
-                    </button>
-                </div>
-                <div class="chat-info">
-                    <span id="threadInfo">New conversation</span>
-                    <button id="newChatBtn" class="new-chat-btn">
-                        <i class="fa-solid fa-plus"></i> New Chat
-                    </button>
-                </div>
+            <div class="chat-info">
+                <span id="threadInfo">New conversation</span>
+                <button id="newChatBtn" class="new-chat-btn">
+                    <i class="fa-solid fa-plus"></i> New Chat
+                </button>
             </div>
         </div>
     </div>
 </App>
 
 <style lang="scss">
-    @use '../../styles/pages/app/chat' as *;
+    @use '../../styles/pages/app/chat.scss';
 </style>
 
 <script>

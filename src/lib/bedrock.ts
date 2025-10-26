@@ -1,72 +1,144 @@
+/**
+ * AWS Bedrock Integration Module
+ *
+ * This module handles all interactions with AWS Bedrock Runtime API for AI text generation.
+ * It specifically supports Meta's Llama language models with proper prompt formatting
+ * and response parsing.
+ *
+ * Key Features:
+ * - Bedrock client initialization with AWS credentials
+ * - Llama-specific prompt formatting with special tokens
+ * - Response cleaning and parsing
+ * - Conversation title generation
+ */
+
+// Import AWS SDK components for Bedrock Runtime
 import {
-    BedrockRuntimeClient,
-    InvokeModelCommand,
+    BedrockRuntimeClient,    // Client for AWS Bedrock Runtime service
+    InvokeModelCommand,      // Command to invoke AI models
 } from '@aws-sdk/client-bedrock-runtime';
+
+// Import application configuration
 import config from './config';
+
+// Import TypeScript type definitions
 import type { Message } from './types';
 
-// Initialize Bedrock client with credentials from environment
-// Note: In Astro SSR, environment variables are available via import.meta.env
+/**
+ * AWS Credentials Configuration
+ *
+ * Credentials are loaded from environment variables for security.
+ * In Astro SSR mode, environment variables are accessed via import.meta.env
+ *
+ * Required environment variables:
+ * - AWS_ACCESS_KEY_ID: Your AWS access key
+ * - AWS_SECRET_ACCESS_KEY: Your AWS secret access key
+ */
 const credentials = {
     accessKeyId: import.meta.env.AWS_ACCESS_KEY_ID || '',
     secretAccessKey: import.meta.env.AWS_SECRET_ACCESS_KEY || '',
 };
 
+/**
+ * Bedrock Runtime Client Instance
+ *
+ * Initialized once and reused across invocations for efficiency.
+ * Configured with the appropriate AWS region and credentials.
+ */
 const client = new BedrockRuntimeClient({
+    // Use AWS_REGION from environment, fall back to config, then to us-east-1
     region: import.meta.env.AWS_REGION || config.region || 'us-east-1',
     credentials: credentials,
 });
 
 /**
-  * Invoke AWS Bedrock with Llama model
-  * @param messages - Conversation history
-  * @param modelId - Bedrock model ID (defaults to config model)
-  * @param maxTokens - Maximum tokens to generate
-  * @returns Generated text response
-  */
+ * Invoke AWS Bedrock with Llama Model
+ *
+ * This is the main function for generating AI responses using AWS Bedrock.
+ * It handles the complete request-response cycle including:
+ * - Formatting the conversation history for Llama
+ * - Sending the request to AWS Bedrock
+ * - Parsing and cleaning the response
+ *
+ * @param messages - Array of conversation messages (system, user, assistant)
+ * @param modelId - Bedrock model identifier (defaults to config.model)
+ * @param maxTokens - Maximum number of tokens to generate (default: 2048)
+ * @returns The generated text response from the AI model
+ * @throws Error if Bedrock invocation fails
+ */
 export async function invokeBedrockLlama(
     messages: Message[],
     modelId: string = config.model,
     maxTokens: number = 2048
 ): Promise<string> {
     try {
-        // Format messages for Llama prompt format
+        // Format the messages array into Llama's expected prompt format
+        // Llama models require special tokens like <|begin_of_text|>, <|start_header_id|>, etc.
         const prompt = formatMessagesForLlama(messages);
 
-        // Prepare the request payload for Llama models
-        // Using AWS Bedrock defaults: temperature 0.5, top_p 0.9
+        /**
+         * Request Body Configuration
+         *
+         * Configure the model parameters for generation:
+         * - prompt: The formatted conversation prompt
+         * - max_gen_len: Maximum tokens to generate
+         * - temperature: Controls randomness (0.0 = deterministic, 1.0 = creative)
+         *   Lower values (0.5) reduce repetition and increase consistency
+         * - top_p: Nucleus sampling - considers tokens with cumulative probability up to p
+         *   0.9 balances diversity and quality
+         */
         const requestBody = {
             prompt: prompt,
             max_gen_len: maxTokens,
-            temperature: 0.5,  // Lower temperature reduces randomness and repetition
-            top_p: 0.9
+            temperature: 0.5,  // Lower temperature for more focused, consistent responses
+            top_p: 0.9         // Nucleus sampling for balanced token selection
         };
 
+        // Create the command to invoke the Bedrock model
         const command = new InvokeModelCommand({
-            modelId: modelId,
-            contentType: 'application/json',
-            accept: 'application/json',
-            body: JSON.stringify(requestBody),
+            modelId: modelId,                    // The specific model to invoke
+            contentType: 'application/json',     // Request format
+            accept: 'application/json',          // Response format
+            body: JSON.stringify(requestBody),   // Serialized request payload
         });
+
+        // Send the command to AWS Bedrock and await the response
         const response = await client.send(command);
 
-        // Parse the response
+        // Decode and parse the binary response body into a JSON object
         const responseBody = JSON.parse(new TextDecoder().decode(response.body));
 
-        // Extract the generated text
+        /**
+         * Extract Generated Text
+         *
+         * Different Bedrock models may return text in different fields:
+         * - generation: Standard field for Llama models
+         * - outputs[0].text: Alternative field structure
+         * Falls back to empty string if neither is present
+         */
         const generatedText = responseBody.generation || responseBody.outputs?.[0]?.text || '';
 
-        // Log for debugging
+        /**
+         * Debug Logging
+         *
+         * Log response metadata for debugging and monitoring:
+         * - First 200 characters of the generated text
+         * - Stop reason (why generation ended)
+         * - Token count (for usage tracking)
+         */
         console.log('Raw Bedrock response:', {
             generation: generatedText.substring(0, 200) + '...',
             stop_reason: responseBody.stop_reason,
             token_count: responseBody.generation_token_count
         });
 
-        // Clean up Llama formatting tokens from the response
+        // Clean up Llama-specific formatting tokens and extract the final response
         return cleanLlamaResponse(generatedText);
     } catch (error) {
+        // Log the error for debugging
         console.error('Error invoking Bedrock:', error);
+
+        // Throw a user-friendly error with the original error message
         throw new Error(`Bedrock invocation failed: ${error instanceof Error ? error.message : String(error)}`);
     }
 }
