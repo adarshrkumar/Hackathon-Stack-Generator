@@ -199,8 +199,8 @@ import Layout from '../../layouts/App.astro';
             responseText.textContent = data.generatedText || 'No text generated';
             responseDiv.classList.add('show');
 
-            // Update thread ID input for follow-up messages
-            if (data.id && !threadIdInput.value) {
+            // Always update thread ID input with the response thread ID for follow-up messages
+            if (data.id) {
                 threadIdInput.value = data.id;
             }
 
