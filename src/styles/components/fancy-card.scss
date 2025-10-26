@@ -1,24 +1,53 @@
+/**
+ * FancyCard Component Styles
+ *
+ * Styling for the reusable FancyCard component (FancyCard.astro).
+ * Creates styled content cards with a colored left border accent.
+ *
+ * Key Features:
+ * - Light gray background
+ * - Colored left accent bar (using ::before pseudo-element)
+ * - Rounded corners
+ * - Improved line height for readability
+ *
+ * Used by: FancyCard.astro (homepage, about, contact pages)
+ */
+
+/* Import global variables */
 @use '../variables/globals.scss' as *;
 
+/* FancyCard Container */
 .fancy-card {
+    /* Position for pseudo-element */
     position: relative;
 
-    background: #f8f9fa;
-    
+    /* Background Color */
+    background: #f8f9fa;  /* Light gray */
+
+    /* Border Radius */
     border-radius: 8px;
+
+    /* Overflow Hidden - clips pseudo-element to border radius */
     overflow: hidden;
 
-    line-height: 1.6;
+    /* Typography */
+    line-height: 1.6;  /* Improved readability */
 
+    /* Left Accent Bar */
+    /* Created using ::before pseudo-element */
     &::before {
-        content: '';
-        position: absolute;
+        content: '';                /* Required for pseudo-element */
+        position: absolute;         /* Position relative to .fancy-card */
         top: 0;
         left: 0;
-        height: 100%;
-        width: 4px;
+        height: 100%;              /* Full height */
+        width: 4px;                /* Narrow vertical bar */
+
+        /* Match parent's border radius on left side */
         border-top-left-radius: inherit;
         border-bottom-left-radius: inherit;
+
+        /* Accent Color - coral/orange gradient color */
         background-color: #ff7e5f;
     }
 }

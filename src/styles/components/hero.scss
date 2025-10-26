@@ -1,27 +1,65 @@
+/**
+ * Hero Component Styles
+ *
+ * Styling for the hero banner section (Hero.astro).
+ * Full-width banner with background image and text overlay.
+ *
+ * Key Features:
+ * - Full-bleed design (negative margins)
+ * - Background image with dark overlay
+ * - White text with shadow for readability
+ * - Minimum height of 50% viewport
+ *
+ * Used by: Hero.astro (homepage only)
+ */
+
+/* Import variables */
 @use '../variables/globals.scss' as *;
 
+/* Import Sass built-in modules */
 @use 'sass:math';
 @use 'sass:color';
 
+/* Hero Background Color */
+/* Pure black using OKLCH */
 $hero-bg-clr: oklch(0 0 0);
+
+/* Alpha Adjustment for Overlay */
+/* Negative value creates semi-transparent overlay (-0.75 = 25% opacity) */
 $hero-bg-mark-clr-alpha: -0.75;
 
+/* Text Shadow Size */
 $_shadow-size: 2px;
 
+/* Hero Section */
 .hero {
+    /* Negative Margins - extend hero to full viewport width */
+    /* Cancels out main padding on top, left, and right */
+    /* Maintains padding on bottom for spacing from next section */
     margin: #{-1*$main-padding} #{-1*$main-padding} #{$main-padding} #{-1*$main-padding};
+
+    /* Internal Padding */
     padding: $main-padding;
 
-    min-height: 50dvh;
+    /* Minimum Height - at least half the viewport */
+    min-height: 50dvh;  /* dvh = dynamic viewport height (accounts for mobile browsers) */
 
+    /* Text Color */
     color: white;
 
-    background-image: 
+    /* Background with Image and Overlay */
+    /* Layer 1: Semi-transparent black gradient overlay */
+    /* Layer 2: Background image */
+    background-image:
         linear-gradient(color.adjust($hero-bg-clr, $alpha: $hero-bg-mark-clr-alpha) 00),
         url('/assets/banner.png');
-    background-size: cover;
-    background-position: center;
 
+    /* Background Sizing and Positioning */
+    background-size: cover;       /* Cover entire area */
+    background-position: center;  /* Center the image */
+
+    /* Text Shadow for All Child Elements */
+    /* Ensures white text is readable over varying background images */
     * {
         text-shadow: #{$_shadow-size} #{$_shadow-size} 0 $hero-bg-clr;
     }
