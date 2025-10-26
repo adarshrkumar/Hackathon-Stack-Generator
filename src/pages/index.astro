@@ -1,31 +1,65 @@
 ---
+/**
+ * Homepage (Index Page)
+ *
+ * Main landing page for the Stack Generator application.
+ * Showcases the product's key features, benefits, and how it works.
+ *
+ * Sections:
+ * - Key Features: 6 main product features in a grid
+ * - How It Works: 3-step process explanation
+ * - Benefits: Why use the ROI calculator (using FancyCard components)
+ * - CTA: Call-to-action buttons to start building or learn more
+ *
+ * Layout: Uses Layout.astro which includes Header, Hero, and Footer
+ */
+
+// Import the marketing layout
 import Layout from '../layouts/Layout.astro';
+
+// Import FancyCard component for styled content sections
 import FancyCard from '../components/FancyCard.astro';
 ---
+
+<!-- Homepage Content -->
 <Layout title="Home">
+    <!-- Key Features Section -->
     <section class="features">
         <h2>Key Features</h2>
+
+        <!-- Features Grid (6 feature cards) -->
         <div class="features-grid">
+            <!-- Feature 1: Stack Builder -->
             <div class="feature-card">
                 <h3>🏗️ Stack Builder</h3>
                 <p>Select from a comprehensive library of cloud services, databases, frameworks, and tools to design your perfect tech stack.</p>
             </div>
+
+            <!-- Feature 2: Real-time Cost Calculation -->
             <div class="feature-card">
                 <h3>💰 Real-time Cost Calculation</h3>
                 <p>Get instant cost estimates as you build. See pricing for AWS, Azure, GCP, and other services updated in real-time.</p>
             </div>
+
+            <!-- Feature 3: ROI Prediction -->
             <div class="feature-card">
                 <h3>📈 ROI Prediction</h3>
                 <p>Discover your projected return on investment based on industry benchmarks, development time, and operational efficiency gains.</p>
             </div>
+
+            <!-- Feature 4: Compare Alternatives -->
             <div class="feature-card">
                 <h3>⚖️ Compare Alternatives</h3>
                 <p>Evaluate different tech stack configurations side-by-side. Find the optimal balance between cost and performance.</p>
             </div>
+
+            <!-- Feature 5: Cost Breakdown -->
             <div class="feature-card">
                 <h3>📊 Cost Breakdown</h3>
                 <p>Visualize where your money goes with detailed breakdowns by service category, region, and time period.</p>
             </div>
+
+            <!-- Feature 6: Smart Recommendations -->
             <div class="feature-card">
                 <h3>💡 Smart Recommendations</h3>
                 <p>Get AI-powered suggestions for cost optimization and alternative services that deliver better value for your use case.</p>
