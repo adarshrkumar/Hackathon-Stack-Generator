@@ -34,25 +34,25 @@ import '../styles/layouts/App.scss';     // App-specific layout styles
 const { title } = Astro.props;
 
 /**
- * Application Title
- *
- * Use "Stack Generator App" as the base title for application pages
- * to differentiate from marketing pages
- */
+  * Application Title
+  *
+  * Use "Stack Generator App" as the base title for application pages
+  * to differentiate from marketing pages
+  */
 const sTitle = 'Stack Generator App';
 
 /**
- * Homepage Detection
- *
- * Determine if this is the app index page (/app/)
- */
+  * Homepage Detection
+  *
+  * Determine if this is the app index page (/app/)
+  */
 const pageIsHome = !title || title === '' || title === 'Home' || title === 'Index' || title === sTitle;
 
 /**
- * Page Title Generation
- *
- * Format: "{Page Title} | Stack Generator App"
- */
+  * Page Title Generation
+  *
+  * Format: "{Page Title} | Stack Generator App"
+  */
 let pTitle
 if (pageIsHome) {
     pTitle = sTitle;  // App index title
