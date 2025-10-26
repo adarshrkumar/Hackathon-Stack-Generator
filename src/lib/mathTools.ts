@@ -189,10 +189,34 @@ export function executeTool(toolName: string, toolInput: any): MathToolResult {
 }
 
 /**
+ * Update Thread Cost Tool Definition
+ *
+ * Tool schema that tells the AI how to update the cost for a thread
+ */
+export const updateCostToolDefinition: ToolDefinition = {
+    name: 'update_thread_cost',
+    description: 'Updates the total cost for a conversation thread in the database by adding the provided cost increment to the current cost value. Use this tool to track API usage costs.',
+    input_schema: {
+        type: 'object',
+        properties: {
+            threadId: {
+                type: 'string',
+                description: 'The unique identifier of the thread to update'
+            },
+            costIncrement: {
+                type: 'number',
+                description: 'The cost amount to add to the current thread cost (in dollars). This will be added to any existing cost value.'
+            }
+        },
+        required: ['threadId', 'costIncrement']
+    }
+};
+
+/**
  * Get All Tool Definitions
  *
  * Returns an array of all available tool definitions
  */
 export function getAllToolDefinitions(): ToolDefinition[] {
-    return [mathToolDefinition];
+    return [mathToolDefinition, updateCostToolDefinition];
 }
