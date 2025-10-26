@@ -31,6 +31,7 @@ Run all commands from the project root:
   - `api/message/generate.ts` - Main AI chat endpoint (uses AWS Bedrock)
 - **src/lib/** - Shared utilities and services
   - `bedrock.ts` - AWS Bedrock client and Llama model integration
+  - `dynamodb.ts` - DynamoDB client and thread CRUD operations
   - `config.ts` - Application configuration (model, region, system prompts)
   - `types.ts` - TypeScript interfaces (Message, BedrockResponse)
 - **src/layouts/** - Page layouts (dual layout system)
@@ -79,7 +80,7 @@ The application integrates with AWS Bedrock for AI conversations:
 - `src/pages/api/message/generate.ts` - API endpoint handling conversation flow
 
 **Environment Requirements**:
-AWS credentials must be configured via environment variables or AWS credential chain for Bedrock access.
+AWS credentials must be configured via environment variables for Bedrock and DynamoDB access (see `.env` file).
 
 ### API Architecture
 
@@ -88,14 +89,32 @@ AWS credentials must be configured via environment variables or AWS credential c
 - Returns: `{ generatedText: string, generatedTitle: string, id: string }`
 - Flow:
   1. Generates or retrieves thread ID using `nanoid`
-  2. Fetches conversation history (currently stubbed, TODO: database integration)
-  3. Formats messages for Llama prompt
+  2. Fetches conversation history from DynamoDB (if thread exists)
+  3. Formats messages for Llama prompt format
   4. Invokes AWS Bedrock with conversation history
   5. Generates conversation title on first message
-  6. Saves conversation to database (currently stubbed)
+  6. Saves conversation to DynamoDB (creates new or updates existing thread)
   7. Returns AI response with thread ID and title
 
-**Database Integration Status**: The API has TODO markers for database operations (thread creation, retrieval, updates). Currently uses in-memory conversation management.
+### DynamoDB Integration
+
+**Database**: Amazon DynamoDB for persistent thread storage
+
+**Key files**:
+- `src/lib/dynamodb.ts` - DynamoDB client and CRUD operations
+  - `createThread()` - Creates new conversation thread
+  - `getThread()` - Retrieves thread by ID
+  - `updateThread()` - Updates thread with new messages
+  - `getUserThreads()` - Gets all threads for a user (requires GSI)
+  - `deleteThread()` - Deletes a thread
+
+**Table Schema**:
+- Table name: `stack-generator-threads` (configurable via `DYNAMODB_TABLE_NAME`)
+- Partition key: `id` (String)
+- Attributes: `userId`, `title`, `messages[]`, `createdAt`, `updatedAt`
+- Optional GSI: `userId-index` for multi-user support
+
+**Setup**: See `DYNAMODB_SETUP.md` for detailed setup instructions including AWS Console, CLI, and Terraform options.
 
 ### Styling Architecture
 
@@ -117,7 +136,17 @@ AWS credentials must be configured via environment variables or AWS credential c
 
 - Astro v5.15.1 (SSR framework with Vercel adapter)
 - AWS Bedrock Runtime SDK v3.917.0 (AI model integration)
+- AWS DynamoDB SDK v3 (`@aws-sdk/client-dynamodb`, `@aws-sdk/lib-dynamodb`)
 - SCSS/Sass v1.93.2 (styling)
 - TypeScript with strict configuration
 - nanoid v5.1.6 (unique ID generation)
 - Deployment: Vercel
+
+## Setup Instructions
+
+1. **Install dependencies**: `npm install`
+2. **Configure environment variables**: Copy `.env.example` to `.env` and add:
+   - AWS credentials (`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_REGION`)
+   - DynamoDB table name (`DYNAMODB_TABLE_NAME`)
+3. **Set up DynamoDB table**: Follow instructions in `DYNAMODB_SETUP.md`
+4. **Start development server**: `npm run dev`
