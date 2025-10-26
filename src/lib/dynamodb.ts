@@ -29,6 +29,7 @@ import {
     UpdateCommand,           // Update existing items
     QueryCommand,            // Query with conditions (requires indexes)
     DeleteCommand,           // Delete items
+    ScanCommand,             // Scan entire table
 } from '@aws-sdk/lib-dynamodb';
 
 // Import Message type definition
@@ -69,6 +70,15 @@ const docClient = DynamoDBDocumentClient.from(client);
   * Defaults to 'threads' if not specified.
   */
 const TABLE_NAME = import.meta.env.DYNAMODB_TABLE_NAME || 'threads';
+
+/**
+  * DynamoDB Context Tables
+  *
+  * Table names for company information and web services data
+  * that will be used as context for AI conversations
+  */
+const COMPANY_INFO_TABLE = 'company-info';
+const WEB_SERVICES_TABLE = 'web-services';
 
 /**
   * Thread Interface
@@ -421,4 +431,120 @@ export async function deleteThread(threadId: string, userId?: string): Promise<v
         // Throw user-friendly error
         throw new Error(`Failed to delete thread: ${error instanceof Error ? error.message : String(error)}`);
     }
+}
+
+/**
+  * Get All Company Info
+  *
+  * Retrieves all items from the company-info DynamoDB table.
+  * This data is used as context for AI conversations to provide
+  * information about the company.
+  *
+  * @returns Array of all company information items
+  * @throws Error if DynamoDB operation fails
+  */
+export async function getAllCompanyInfo(): Promise<any[]> {
+    try {
+        console.log('📋 Fetching all company info from DynamoDB');
+
+        /**
+          * Create Scan Command
+          *
+          * ScanCommand reads all items from the table
+          * Note: Scan operations can be expensive for large tables
+          */
+        const command = new ScanCommand({
+            TableName: COMPANY_INFO_TABLE,
+        });
+
+        // Send the command and get response
+        const response = await docClient.send(command);
+
+        console.log(`✅ Fetched ${response.Items?.length || 0} company info items`);
+
+        // Return the items array (empty array if no items found)
+        return response.Items || [];
+    } catch (error) {
+        // Log error for debugging
+        console.error('Error fetching company info from DynamoDB:', error);
+
+        // Throw user-friendly error
+        throw new Error(`Failed to fetch company info: ${error instanceof Error ? error.message : String(error)}`);
+    }
+}
+
+/**
+  * Get All Web Services
+  *
+  * Retrieves all items from the web-services DynamoDB table.
+  * This data is used as context for AI conversations to provide
+  * information about available web services.
+  *
+  * @returns Array of all web services items
+  * @throws Error if DynamoDB operation fails
+  */
+export async function getAllWebServices(): Promise<any[]> {
+    try {
+        console.log('🌐 Fetching all web services from DynamoDB');
+
+        /**
+          * Create Scan Command
+          *
+          * ScanCommand reads all items from the table
+          * Note: Scan operations can be expensive for large tables
+          */
+        const command = new ScanCommand({
+            TableName: WEB_SERVICES_TABLE,
+        });
+
+        // Send the command and get response
+        const response = await docClient.send(command);
+
+        console.log(`✅ Fetched ${response.Items?.length || 0} web services items`);
+
+        // Return the items array (empty array if no items found)
+        return response.Items || [];
+    } catch (error) {
+        // Log error for debugging
+        console.error('Error fetching web services from DynamoDB:', error);
+
+        // Throw user-friendly error
+        throw new Error(`Failed to fetch web services: ${error instanceof Error ? error.message : String(error)}`);
+    }
+}
+
+/**
+  * Format Context Data for AI
+  *
+  * Formats the company info and web services data into a readable
+  * string format that can be included in the system prompt.
+  *
+  * @param companyInfo - Array of company information items
+  * @param webServices - Array of web services items
+  * @returns Formatted string with all context data
+  */
+export function formatContextData(companyInfo: any[], webServices: any[]): string {
+    let contextString = '';
+
+    // Add company information section
+    if (companyInfo && companyInfo.length > 0) {
+        contextString += '\n\n=== COMPANY INFORMATION ===\n';
+        companyInfo.forEach((item, index) => {
+            contextString += `\nCompany ${index + 1}:\n`;
+            contextString += JSON.stringify(item, null, 2);
+            contextString += '\n';
+        });
+    }
+
+    // Add web services section
+    if (webServices && webServices.length > 0) {
+        contextString += '\n\n=== AVAILABLE WEB SERVICES ===\n';
+        webServices.forEach((item, index) => {
+            contextString += `\nService ${index + 1}:\n`;
+            contextString += JSON.stringify(item, null, 2);
+            contextString += '\n';
+        });
+    }
+
+    return contextString;
 }

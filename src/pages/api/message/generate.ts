@@ -41,7 +41,15 @@ import { invokeBedrockLlama, generateConversationTitle } from '../../../lib/bedr
 import type { Message } from '../../../lib/types';
 
 // Import DynamoDB functions and Thread type
-import { createThread, getThread, updateThread, type Thread } from '../../../lib/dynamodb';
+import {
+    createThread,
+    getThread,
+    updateThread,
+    getAllCompanyInfo,
+    getAllWebServices,
+    formatContextData,
+    type Thread
+} from '../../../lib/dynamodb';
 
 /**
   * POST Request Handler
@@ -118,12 +126,49 @@ export const POST: APIRoute = async ({ request }) => {
         }
 
         /**
+          * FETCH CONTEXT DATA FROM DYNAMODB
+          *
+          * Retrieve company information and web services data from DynamoDB
+          * to provide context to the AI model for better responses.
+          */
+        console.log(`📚 [${requestId}] Fetching context data from DynamoDB`);
+        const contextStartTime = Date.now();
+
+        let contextData = '';
+        try {
+            // Fetch both tables in parallel for better performance
+            const [companyInfo, webServices] = await Promise.all([
+                getAllCompanyInfo(),
+                getAllWebServices()
+            ]);
+
+            // Format the context data into a readable string
+            contextData = formatContextData(companyInfo, webServices);
+
+            const contextEndTime = Date.now();
+            const contextDuration = contextEndTime - contextStartTime;
+
+            console.log(`✅ [${requestId}] Context data fetched successfully:`, {
+                duration: `${contextDuration}ms`,
+                companyInfoCount: companyInfo.length,
+                webServicesCount: webServices.length,
+                contextLength: contextData.length
+            });
+        } catch (error) {
+            // If context fetching fails, log the error but continue with empty context
+            // This ensures the chat still works even if context tables are unavailable
+            console.error(`⚠️ [${requestId}] Error fetching context data (continuing without context):`, error);
+            contextData = '';
+        }
+
+        /**
           * System Prompt Setup
           *
-          * Get the system prompt from configuration. The system prompt establishes
-          * the AI's behavior and persona for the entire conversation.
+          * Get the system prompt from configuration and append the context data.
+          * The system prompt establishes the AI's behavior and persona for the entire conversation.
           */
-        const systemPrompt = config.systemPrompt;
+        const baseSystemPrompt = config.systemPrompt;
+        const systemPrompt = baseSystemPrompt + contextData;
 
         /**
           * System Message Object

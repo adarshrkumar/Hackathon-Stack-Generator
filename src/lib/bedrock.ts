@@ -23,6 +23,7 @@ import config from './config';
 
 // Import TypeScript type definitions
 import type { Message } from './types';
+import type { ToolDefinition } from './mathTools';
 
 /**
   * AWS Credentials Configuration

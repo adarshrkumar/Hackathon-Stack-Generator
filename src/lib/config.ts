@@ -17,8 +17,19 @@ export default {
       *
       * The default system prompt sent to the AI model to establish its behavior and persona.
       * This instructs the model on how to respond to user queries.
+      *
+      * Note: Context data from DynamoDB (company-info and web-services) will be appended
+      * to this prompt dynamically in the API route.
       */
-    systemPrompt: `You are a helpful AI assistant. Provide clear, accurate, and concise responses to user queries.`,
+    systemPrompt: `You are a helpful AI assistant for the Stack Generator application.
+
+You have access to information about companies and available web services. Use this information to provide accurate, relevant recommendations when helping users build their technology stacks.
+
+When answering questions:
+- Reference specific companies and services from the provided context when relevant
+- Provide clear, accurate, and concise responses
+- If asked about services or companies not in the context, acknowledge that and provide general guidance
+- Focus on helping users make informed decisions about their technology choices`,
 
      /**
       * AI Model ID
