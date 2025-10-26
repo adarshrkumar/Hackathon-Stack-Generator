@@ -34,11 +34,12 @@ export async function invokeBedrockLlama(
         const prompt = formatMessagesForLlama(messages);
 
         // Prepare the request payload for Llama models
+        // Using AWS Bedrock defaults: temperature 0.5, top_p 0.9
         const requestBody = {
             prompt: prompt,
             max_gen_len: maxTokens,
-            temperature: 0.7,
-            top_p: 0.9,
+            temperature: 0.5,  // Lower temperature reduces randomness and repetition
+            top_p: 0.9
         };
 
         const command = new InvokeModelCommand({
@@ -55,11 +56,66 @@ export async function invokeBedrockLlama(
         // Extract the generated text
         const generatedText = responseBody.generation || responseBody.outputs?.[0]?.text || '';
 
-        return generatedText.trim();
+        // Log for debugging
+        console.log('Raw Bedrock response:', {
+            generation: generatedText.substring(0, 200) + '...',
+            stop_reason: responseBody.stop_reason,
+            token_count: responseBody.generation_token_count
+        });
+
+        // Clean up Llama formatting tokens from the response
+        return cleanLlamaResponse(generatedText);
     } catch (error) {
         console.error('Error invoking Bedrock:', error);
         throw new Error(`Bedrock invocation failed: ${error instanceof Error ? error.message : String(error)}`);
     }
+}
+
+/**
+ * Clean Llama formatting tokens from the generated response
+ * Extracts only the assistant's response, removing conversation replay
+ */
+function cleanLlamaResponse(text: string): string {
+    // Remove Llama special tokens
+    let cleaned = text
+        .replace(/<\|begin_of_text\|>/g, '')
+        .replace(/<\|start_header_id\|>/g, '')
+        .replace(/<\|end_header_id\|>/g, '')
+        .replace(/<\|eot_id\|>/g, '');
+
+    // Split by common conversation markers to find just the assistant's response
+    // The model sometimes replays the conversation, so we need to extract the last part
+    const conversationMarkers = [
+        /Your last message was/i,
+        /\buser\b\s*\n/i,
+        /\bassistant\b\s*\n/i,
+        /\bsystem\b\s*\n/i
+    ];
+
+    // Check if the response contains conversation replay
+    let hasReplay = false;
+    for (const marker of conversationMarkers) {
+        if (marker.test(cleaned)) {
+            hasReplay = true;
+            break;
+        }
+    }
+
+    // If there's conversation replay, try to extract just the final response
+    if (hasReplay) {
+        // Split on double newlines or conversation markers
+        const parts = cleaned.split(/\n\n+/);
+        // Take the last substantial part (more than 20 characters)
+        for (let i = parts.length - 1; i >= 0; i--) {
+            const part = parts[i].trim();
+            if (part.length > 20 && !conversationMarkers.some(m => m.test(part))) {
+                cleaned = part;
+                break;
+            }
+        }
+    }
+
+    return cleaned.trim();
 }
 
 /**
