@@ -1,12 +1,58 @@
+/**
+ * Message Generation API Route
+ *
+ * This API endpoint handles AI message generation requests for the Stack Generator application.
+ * It manages the complete conversation flow including:
+ * - Thread creation and retrieval
+ * - Conversation history management
+ * - AI response generation via AWS Bedrock
+ * - Conversation title generation
+ * - Persistent storage in DynamoDB
+ *
+ * Endpoint: POST /api/message/generate
+ *
+ * Request Body:
+ * {
+ *   text: string,     // User's message
+ *   id?: string       // Optional thread ID (creates new thread if omitted)
+ * }
+ *
+ * Response:
+ * {
+ *   generatedText: string,  // AI-generated response
+ *   generatedTitle: string, // Conversation title
+ *   id: string              // Thread ID
+ * }
+ */
+
+// Import Astro API route type
 import type { APIRoute } from 'astro';
+
+// Import application configuration
 import config from '../../../lib/config';
+
+// Import nanoid for generating unique thread IDs
 import { nanoid } from 'nanoid';
+
+// Import Bedrock AI functions
 import { invokeBedrockLlama, generateConversationTitle } from '../../../lib/bedrock';
+
+// Import type definitions
 import type { Message } from '../../../lib/types';
+
+// Import DynamoDB functions and Thread type
 import { createThread, getThread, updateThread, type Thread } from '../../../lib/dynamodb';
 
+/**
+ * POST Request Handler
+ *
+ * Handles POST requests to generate AI responses and manage conversation threads.
+ */
 export const POST: APIRoute = async ({ request }) => {
+    // Generate a unique ID for request tracking and logging
     const requestId = nanoid();
+
+    // Record start time for performance monitoring
     const startTime = Date.now();
 
     try {
