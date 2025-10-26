@@ -1,21 +1,49 @@
-.app-layout {
-    display: grid;
+/**
+ * Application Layout Styles
+ *
+ * CSS Grid layout for the application pages (/app/*).
+ * Creates a two-column layout with a vertical navigation sidebar and main content area.
+ *
+ * Grid Structure:
+ * ┌─────────┬──────────────┐
+ * │   Nav   │     Main     │  ← navmain row
+ * │ (auto)  │   (1fr)      │
+ * ├─────────┴──────────────┤
+ * │      Footer (auto)     │  ← footer row
+ * └────────────────────────┘
+ *
+ * Used by: App.astro
+ */
 
+/* App Layout Container */
+.app-layout {
+    display: grid;  /* Enable CSS Grid layout */
+
+    /* Column Definition:
+       - nav-start to nav-end: Auto-width for navigation (fits content)
+       - main-start to main-end: 1fr for main content (fills remaining space) */
     grid-template-columns: [nav-start] auto [nav-end main-start] 1fr [main-end];
+
+    /* Row Definition:
+       - navmain-start to navmain-end: 1fr for nav and main (fills available height)
+       - footer-start to footer-end: Auto height for footer (fits content) */
     grid-template-rows: [navmain-start] 1fr [navmain-end footer-start] auto [footer-end];
 }
 
+/* Navigation Sidebar */
 .nav {
-    grid-column: nav-start / nav-end;
-    grid-row: navmain-start / navmain-end;
+    grid-column: nav-start / nav-end;       /* Place in left column */
+    grid-row: navmain-start / navmain-end;  /* Span from top to footer */
 }
 
+/* Main Content Area */
 .main.app {
-    grid-column: main-start / main-end;
-    grid-row: navmain-start / navmain-end;
+    grid-column: main-start / main-end;     /* Place in right column */
+    grid-row: navmain-start / navmain-end;  /* Span from top to footer */
 }
 
+/* Footer */
 .footer {
-    grid-column: nav-start / main-end;
-    grid-row: footer-start / footer-end;
+    grid-column: nav-start / main-end;      /* Span both columns */
+    grid-row: footer-start / footer-end;    /* Bottom row */
 }
