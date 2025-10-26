@@ -1,26 +1,51 @@
 ---
-
+/**
+ * App Navigation Component
+ *
+ * Navigation bar for the application pages (/app/*).
+ * Uses icon-based navigation instead of text links for a cleaner app interface.
+ *
+ * Features:
+ * - Logo link to homepage
+ * - Icon-based navigation menu using Font Awesome
+ * - Links to user profile, chat, contact, and app home
+ * - Responsive design via SCSS
+ *
+ * Used in: App.astro (application layout)
+ */
 ---
+
+<!-- App Navigation -->
 <nav class="nav app">
+    <!-- Logo Link (returns to marketing homepage) -->
     <a href="/" class="nav__logo__link">
         <img class="nav__logo__img" src="/assets/logo.png" alt="Our logo" srcset="">
     </a>
+
+    <!-- Icon Navigation Links -->
     <ul class="nav__links">
+        <!-- User Profile Link -->
         <li class="nav__btn">
             <a href="/" class="nav__link">
                 <i class="fa-regular fa-user"></i>
             </a>
         </li>
+
+        <!-- Chat Link (AI Chat Interface) -->
         <li class="nav__btn">
             <a href="/app/chat" class="nav__link">
                 <i class="fa-regular fa-comment"></i>
             </a>
         </li>
+
+        <!-- Contact Link -->
         <li class="nav__btn">
             <a href="/contact" class="nav__link">
                 <i class="fa-regular fa-user"></i>
             </a>
         </li>
+
+        <!-- App Home Link (highlighted with .app class) -->
         <li class="nav__btn app">
             <a href="/app" class="nav__link">
                 <i class="fa-regular fa-home"></i>
@@ -28,6 +53,8 @@
         </li>
     </ul>
 </nav>
+
+<!-- Component Styles -->
 <style lang="scss">
     @use '../../styles/components/app/nav.scss' as *;
 </style>
