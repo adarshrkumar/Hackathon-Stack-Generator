@@ -38,19 +38,19 @@ section {
     gap: 2rem;
     max-width: 1000px;
     margin: 0 auto;
+
+    .fancy-card {
+        transition: transform 0.2s, box-shadow 0.2s;
+
+        &:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        }
+    }
 }
 
 .method-card {
-    padding: 2rem;
-    background: #f8f9fa;
-    border-left: 4px solid #ff6b35;
     text-align: center;
-    transition: transform 0.2s, box-shadow 0.2s;
-
-    &:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-    }
 
     .method-icon {
         font-size: 3rem;
@@ -101,6 +101,7 @@ section {
 .social-card {
     padding: 2rem 1.5rem;
     background: white;
+    border-radius: 8px;
     text-align: center;
     text-decoration: none;
     color: inherit;
@@ -137,12 +138,6 @@ section {
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
-}
-
-.faq-item {
-    padding: 1.5rem;
-    background: #f8f9fa;
-    border-left: 4px solid #ff6b35;
 
     h3 {
         font-size: 1.2rem;
@@ -172,6 +167,7 @@ section {
     padding: 2rem;
     background: white;
     border: 1px solid #e0e0e0;
+    border-radius: 8px;
 
     h3 {
         font-size: 1.3rem;
@@ -191,6 +187,7 @@ section {
     margin: 4rem 0;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
+    border-radius: 12px;
 
     h2 {
         font-size: 2.2rem;
@@ -213,6 +210,7 @@ section {
     text-decoration: none;
     font-weight: 700;
     font-size: 1.1rem;
+    border-radius: 8px;
     transition: transform 0.2s, box-shadow 0.2s;
 
     &:hover {

@@ -1,0 +1,23 @@
+@use '../variables/globals.scss' as *;
+
+.fancy-card {
+    position: relative;
+
+    background: #f8f9fa;
+    
+    border-radius: 8px;
+    overflow: hidden;
+    
+    line-height: 1.6;
+
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 4px;
+        border-radius: inherit 0 0 inherit;
+        background-color: #ff7e5f;
+    }
+}

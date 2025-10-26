@@ -1,5 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import FancyCard from '../components/FancyCard.astro';
 ---
 <Layout title="Home">
     <section class="features">
@@ -55,20 +56,20 @@ import Layout from '../layouts/Layout.astro';
 
     <section class="benefits">
         <h2>Why Use Our ROI Calculator?</h2>
-        <ul class="benefits-list">
-            <li>
+        <div class="benefits-list">
+            <FancyCard>
                 <strong>Avoid Costly Mistakes:</strong> Know the true cost before you build. Prevent budget overruns and unexpected expenses that can derail your project.
-            </li>
-            <li>
+            </FancyCard>
+            <FancyCard>
                 <strong>Make Data-Driven Decisions:</strong> Compare multiple stack options with real pricing data. Choose the configuration that delivers the best value for your specific needs.
-            </li>
-            <li>
+            </FancyCard>
+            <FancyCard>
                 <strong>Accelerate Planning:</strong> Skip the hours of manual research and calculations. Get comprehensive cost estimates in minutes, not days.
-            </li>
-            <li>
+            </FancyCard>
+            <FancyCard>
                 <strong>Justify Your Budget:</strong> Present stakeholders with detailed ROI projections and cost breakdowns. Build confidence in your technical decisions with solid financial data.
-            </li>
-        </ul>
+            </FancyCard>
+        </div>
     </section>
 
     <section class="cta">

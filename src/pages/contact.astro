@@ -1,5 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import FancyCard from '../components/FancyCard.astro';
 ---
 <Layout title="Contact">
     <section class="contact-intro">
@@ -10,24 +11,30 @@ import Layout from '../layouts/Layout.astro';
     <section class="contact-methods">
         <h2>Contact Information</h2>
         <div class="methods-grid">
-            <div class="method-card">
-                <div class="method-icon">📧</div>
-                <h3>Email Us</h3>
-                <p>For general inquiries and support</p>
-                <a href="mailto:support@stackcalculator.com" class="contact-link">support@stackcalculator.com</a>
-            </div>
-            <div class="method-card">
-                <div class="method-icon">💼</div>
-                <h3>Business Inquiries</h3>
-                <p>Partnership and enterprise opportunities</p>
-                <a href="mailto:business@stackcalculator.com" class="contact-link">business@stackcalculator.com</a>
-            </div>
-            <div class="method-card">
-                <div class="method-icon">🐛</div>
-                <h3>Report Issues</h3>
-                <p>Found a bug or have feedback?</p>
-                <a href="https://github.com/yourusername/repo/issues" class="contact-link" target="_blank">GitHub Issues</a>
-            </div>
+            <FancyCard padding="2rem">
+                <div class="method-card">
+                    <div class="method-icon">📧</div>
+                    <h3>Email Us</h3>
+                    <p>For general inquiries and support</p>
+                    <a href="mailto:support@stackcalculator.com" class="contact-link">support@stackcalculator.com</a>
+                </div>
+            </FancyCard>
+            <FancyCard padding="2rem">
+                <div class="method-card">
+                    <div class="method-icon">💼</div>
+                    <h3>Business Inquiries</h3>
+                    <p>Partnership and enterprise opportunities</p>
+                    <a href="mailto:business@stackcalculator.com" class="contact-link">business@stackcalculator.com</a>
+                </div>
+            </FancyCard>
+            <FancyCard padding="2rem">
+                <div class="method-card">
+                    <div class="method-icon">🐛</div>
+                    <h3>Report Issues</h3>
+                    <p>Found a bug or have feedback?</p>
+                    <a href="https://github.com/yourusername/repo/issues" class="contact-link" target="_blank">GitHub Issues</a>
+                </div>
+            </FancyCard>
         </div>
     </section>
 
@@ -60,22 +67,22 @@ import Layout from '../layouts/Layout.astro';
     <section class="faq-preview">
         <h2>Frequently Asked Questions</h2>
         <div class="faq-list">
-            <div class="faq-item">
+            <FancyCard>
                 <h3>How accurate are the cost estimates?</h3>
                 <p>Our estimates are based on current pricing data from service providers and are updated regularly. However, actual costs may vary based on your specific usage patterns and any promotional pricing available.</p>
-            </div>
-            <div class="faq-item">
+            </FancyCard>
+            <FancyCard>
                 <h3>Is this tool free to use?</h3>
                 <p>Yes! The Tech Stack ROI Calculator was built as part of the SCU AWS Hackathon and is currently free to use for all users.</p>
-            </div>
-            <div class="faq-item">
+            </FancyCard>
+            <FancyCard>
                 <h3>Which cloud providers do you support?</h3>
                 <p>We currently support AWS, Azure, Google Cloud Platform, DigitalOcean, and Linode, with more providers being added regularly.</p>
-            </div>
-            <div class="faq-item">
+            </FancyCard>
+            <FancyCard>
                 <h3>Can I save and share my stack configurations?</h3>
                 <p>This feature is coming soon! We're working on user accounts and shareable stack configurations.</p>
-            </div>
+            </FancyCard>
         </div>
     </section>
 

@@ -29,16 +29,12 @@ section {
 }
 
 .mission {
-    max-width: 900px;
-    margin: 4rem auto;
-    padding: 2.5rem;
-    background: #f8f9fa;
-    border-left: 4px solid #ff6b35;
-    border-radius: 8px;
+    margin: 4rem 0;
 
     h2 {
         color: #333;
         margin-bottom: 1.5rem;
+        text-align: center;
     }
 
     p {
@@ -108,8 +104,8 @@ section {
 .coverage-item {
     padding: 1.5rem;
     background: white;
-    border-radius: 8px;
     border-left: 4px solid #ff6b35;
+    border-radius: 8px;
 
     h3 {
         font-size: 1.2rem;

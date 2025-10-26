@@ -1,0 +1,11 @@
+---
+const { padding = "1.5rem", maxWidth, centered = false } = Astro.props;
+---
+
+<div class="fancy-card" style={`padding: ${padding}; ${maxWidth ? `max-width: ${maxWidth};` : ''} ${centered ? 'margin-left: auto; margin-right: auto;' : ''}`}>
+    <slot />
+</div>
+
+<style lang="scss">
+    @use '../styles/components/fancy-card.scss';
+</style>

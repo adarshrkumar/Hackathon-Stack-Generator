@@ -1,5 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import FancyCard from '../components/FancyCard.astro';
 ---
 <Layout title="About">
     <section class="about-intro">
@@ -7,10 +8,12 @@ import Layout from '../layouts/Layout.astro';
         <p class="lead">Making informed technology decisions shouldn't require hours of research and complex calculations. Our tool simplifies the process of evaluating tech stacks by providing instant cost estimates and ROI predictions.</p>
     </section>
 
-    <section class="mission">
-        <h2>Our Mission</h2>
-        <p>We empower developers, tech leads, and decision-makers to build better software by providing transparent, data-driven insights into the true cost and value of technology choices. Whether you're launching a startup, planning a migration, or scaling your infrastructure, we help you make confident decisions backed by real numbers.</p>
-    </section>
+    <FancyCard padding="2.5rem" maxWidth="900px" centered>
+        <div class="mission">
+            <h2>Our Mission</h2>
+            <p>We empower developers, tech leads, and decision-makers to build better software by providing transparent, data-driven insights into the true cost and value of technology choices. Whether you're launching a startup, planning a migration, or scaling your infrastructure, we help you make confident decisions backed by real numbers.</p>
+        </div>
+    </FancyCard>
 
     <section class="how-we-help">
         <h2>How We Help You Succeed</h2>
