@@ -340,19 +340,40 @@ export const POST: APIRoute = async ({ request }) => {
             console.log(`🏷️ [${requestId}] Using existing title:`, convoTitle);
         }
 
-        // --- Save updated history back to DynamoDB ---
+        /**
+         * SAVE CONVERSATION TO DYNAMODB
+         *
+         * Persist the updated conversation history to DynamoDB.
+         * - For new threads: Create a new DynamoDB item
+         * - For existing threads: Update the existing item
+         */
         console.log(`💾 [${requestId}] Saving conversation to DynamoDB`);
         const saveStartTime = Date.now();
+
         try {
+            // Validate thread ID before attempting to save
             if (!current_thread_id) {
                 throw new Error('Thread ID is null or undefined');
             }
 
-            // Remove system message from stored history (we add it dynamically)
+            /**
+             * Prepare Messages for Storage
+             *
+             * Filter out the system message before storing.
+             * We don't store system messages in DynamoDB because:
+             * 1. They're static and can be added dynamically
+             * 2. Saves storage space
+             * 3. Allows updating system prompts without migrating data
+             */
             const messagesToStore = convoHistory.filter(msg => msg.role !== 'system');
 
             if (isNewThread) {
-                // Create new thread in DynamoDB
+                /**
+                 * Create New Thread
+                 *
+                 * For new conversations, create a new item in DynamoDB
+                 * with the thread ID, title, and initial messages
+                 */
                 console.log(`🆕 [${requestId}] Creating new thread in DynamoDB`);
                 await createThread({
                     id: current_thread_id,
@@ -362,7 +383,12 @@ export const POST: APIRoute = async ({ request }) => {
                     updatedAt: new Date().toISOString(),
                 });
             } else {
-                // Update existing thread in DynamoDB
+                /**
+                 * Update Existing Thread
+                 *
+                 * For continuing conversations, update the existing DynamoDB item
+                 * with the new messages and updated timestamp
+                 */
                 console.log(`🔄 [${requestId}] Updating existing thread in DynamoDB`);
                 await updateThread(
                     current_thread_id,
@@ -371,14 +397,22 @@ export const POST: APIRoute = async ({ request }) => {
                 );
             }
 
+            // Log save performance metrics
             const saveEndTime = Date.now();
             const saveDuration = saveEndTime - saveStartTime;
+
             console.log(`✅ [${requestId}] Conversation saved to DynamoDB:`, {
                 duration: `${saveDuration}ms`,
                 threadId: current_thread_id,
                 messageCount: messagesToStore.length
             });
         } catch (error) {
+            /**
+             * Save Error Handling
+             *
+             * If we fail to save to DynamoDB, return an error response.
+             * Note: The AI response was generated successfully, but persistence failed.
+             */
             console.error(`❌ [${requestId}] Error saving conversation:`, error);
             return new Response(
                 JSON.stringify({ error: `Failed to save conversation: ${error instanceof Error ? error.message : String(error)}` }),
