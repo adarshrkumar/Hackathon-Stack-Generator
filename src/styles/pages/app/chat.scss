@@ -36,6 +36,7 @@
     font-family: 'Montserrat', sans-serif;
     transition: all 0.2s;
     font-weight: 500;
+    white-space: normal;
 
     &:hover:not(:disabled) {
         border-color: #FF9900;
