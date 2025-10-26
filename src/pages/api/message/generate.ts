@@ -265,35 +265,93 @@ export const POST: APIRoute = async ({ request }) => {
         });
 
         /**
-          * AI TEXT GENERATION WITH AWS BEDROCK
+          * AI TEXT GENERATION WITH AWS BEDROCK (with Tool Support)
           *
           * This section handles the core AI interaction:
-          * 1. Send the conversation history to AWS Bedrock
-          * 2. Invoke the Llama model to generate a response
-          * 3. Handle any errors that occur during generation
+          * 1. Get available tools
+          * 2. Send the conversation history to AWS Bedrock with tool definitions
+          * 3. Check if the AI wants to use a tool
+          * 4. Execute the tool if requested
+          * 5. Send the tool result back to the AI for final response
           */
         console.log(`🧠 [${requestId}] Starting AI text generation with AWS Bedrock`);
         const aiStartTime = Date.now();
         let generatedText = '';
 
         try {
+            // Get all available tool definitions
+            const availableTools = getAllToolDefinitions();
+            console.log(`🔧 [${requestId}] Available tools:`, availableTools.map(t => t.name));
+
             // Log request details for debugging
             console.log(`📤 [${requestId}] Sending to Bedrock:`, {
                 model: config.model,
                 messageCount: convoHistory.length,
                 firstMessageRole: convoHistory[0]?.role,
                 lastMessageRole: convoHistory[convoHistory.length - 1]?.role,
+                toolsEnabled: availableTools.length > 0
             });
 
             /**
-              * Invoke Bedrock Llama
+              * Invoke Bedrock Llama with Tools
               *
               * Call the Bedrock API with:
               * - convoHistory: Complete conversation context
               * - config.model: The Llama model ID
               * - 2048: Max tokens to generate
+              * - availableTools: Tool definitions for function calling
               */
-            generatedText = await invokeBedrockLlama(convoHistory as Message[], config.model, 2048);
+            generatedText = await invokeBedrockLlama(
+                convoHistory as Message[],
+                config.model,
+                2048,
+                availableTools
+            );
+
+            /**
+              * Tool Call Detection and Execution
+              *
+              * Check if the AI response contains a tool call.
+              * If so, execute the tool and get a final response.
+              */
+            const toolCallParse = parseToolCall(generatedText);
+
+            if (toolCallParse.isToolCall && toolCallParse.toolName && toolCallParse.toolInput) {
+                console.log(`🔧 [${requestId}] Tool call detected:`, {
+                    toolName: toolCallParse.toolName,
+                    toolInput: toolCallParse.toolInput
+                });
+
+                // Execute the tool
+                const toolResult = executeTool(toolCallParse.toolName, toolCallParse.toolInput);
+
+                console.log(`✅ [${requestId}] Tool execution result:`, toolResult);
+
+                // Add the tool call and result to conversation history
+                convoHistory.push({
+                    role: 'assistant',
+                    content: generatedText
+                });
+
+                convoHistory.push({
+                    role: 'user',
+                    content: `Tool "${toolCallParse.toolName}" execution result: ${JSON.stringify(toolResult)}\n\nPlease provide your final answer to the user based on this tool result.`
+                });
+
+                // Get the final response from the AI
+                console.log(`🧠 [${requestId}] Getting final response after tool execution`);
+                generatedText = await invokeBedrockLlama(
+                    convoHistory as Message[],
+                    config.model,
+                    2048,
+                    availableTools
+                );
+
+                console.log(`✅ [${requestId}] Final response after tool use:`, {
+                    responseLength: generatedText.length,
+                    responsePreview: generatedText.substring(0, 200) + (generatedText.length > 200 ? '...' : '')
+                });
+            }
 
             // Calculate and log performance metrics
             const aiEndTime = Date.now();
@@ -303,6 +361,7 @@ export const POST: APIRoute = async ({ request }) => {
                 duration: `${aiDuration}ms`,
                 generatedTextLength: generatedText.length,
                 generatedTextPreview: generatedText.substring(0, 200) + (generatedText.length > 200 ? '...' : ''),
+                toolUsed: toolCallParse.isToolCall ? toolCallParse.toolName : 'none'
             });
         } catch (error) {
             /**
