@@ -1,10 +1,30 @@
 ---
-
+/**
+ * Hero Component
+ *
+ * Hero banner section displayed on the homepage only.
+ * Features the main headline and value proposition for the Stack Generator application.
+ *
+ * Features:
+ * - Large headline introducing the product
+ * - Subheading explaining the value proposition
+ * - Prominent styling to catch user attention
+ * - Responsive design via SCSS
+ *
+ * Used in: Layout.astro (conditionally rendered on homepage)
+ */
 ---
+
+<!-- Hero Section -->
 <section class="hero">
+    <!-- Main Headline -->
     <h1>Tech Stack ROI Calculator</h1>
+
+    <!-- Value Proposition -->
     <p>Build your ideal tech stack and discover the true cost and ROI before you commit.</p>
 </section>
+
+<!-- Component Styles -->
 <style lang="scss">
     @use '../styles/components/hero.scss' as *;
 </style>

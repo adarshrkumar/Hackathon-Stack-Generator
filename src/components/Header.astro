@@ -1,19 +1,46 @@
 ---
-
+/**
+ * Header Component
+ *
+ * Main navigation header for the marketing pages (homepage, about, contact).
+ * Contains the site logo and primary navigation links.
+ *
+ * Features:
+ * - Logo with link to homepage
+ * - Navigation menu with links to main sections
+ * - "Open App" button highlighted with .app class
+ * - Responsive design via SCSS
+ *
+ * Used in: Layout.astro (marketing layout)
+ */
 ---
+
+<!-- Header Element -->
 <header class="header">
+    <!-- Logo Link (returns to homepage) -->
     <a href="/" class="header__logo__link">
         <img class="header__logo__img" src="/assets/logo.png" alt="Our logo" srcset="">
     </a>
+
+    <!-- Main Navigation -->
     <nav class="nav">
         <ul class="nav__links">
+            <!-- Home Link -->
             <li class="nav__btn"><a href="/" class="nav__link">Home</a></li>
+
+            <!-- About Link -->
             <li class="nav__btn"><a href="/about" class="nav__link">About</a></li>
+
+            <!-- Contact Link -->
             <li class="nav__btn"><a href="/contact" class="nav__link">Contact</a></li>
+
+            <!-- App Link (highlighted with .app class) -->
             <li class="nav__btn app"><a href="/app" class="nav__link">Open App</a></li>
         </ul>
     </nav>
 </header>
+
+<!-- Component Styles -->
 <style lang="scss">
     @use '../styles/components/header.scss' as *;
 </style>

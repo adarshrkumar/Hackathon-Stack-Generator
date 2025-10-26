@@ -1,8 +1,26 @@
 ---
+/**
+ * Footer Component
+ *
+ * Global footer component used across all pages (marketing and app).
+ * Displays copyright information.
+ *
+ * Features:
+ * - Simple copyright notice
+ * - Consistent styling across all pages
+ * - Responsive design via SCSS
+ *
+ * Used in: Both Layout.astro and App.astro
+ */
 ---
+
+<!-- Footer Element -->
 <footer class="footer">
+    <!-- Copyright Notice -->
     <p>© 2024 Astro. All rights reserved.</p>
 </footer>
+
+<!-- Component Styles -->
 <style lang="scss">
     @use '../styles/components/footer.scss' as *;
 </style>
