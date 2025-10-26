@@ -56,27 +56,60 @@ export const POST: APIRoute = async ({ request }) => {
     const startTime = Date.now();
 
     try {
+        /**
+         * Parse Request Body
+         *
+         * Extract the user's message (text) and optional thread ID (id)
+         * from the JSON request body
+         */
         const { text: user_prompt, id: thread_id } = await request.json();
-        
+
         // TODO: Use category and mode for context-specific prompts
+        // This could be extended to support different system prompts based on use case
+
+        /**
+         * Thread ID Management
+         *
+         * Initialize thread ID variable to track the current conversation thread
+         */
         let current_thread_id: string | undefined = thread_id;
 
-        // Create a new thread if none provided
+        /**
+         * New Thread Flag
+         *
+         * Track whether this is a new conversation (true) or continuing
+         * an existing one (false). This determines whether we create or update
+         * the thread in DynamoDB.
+         */
         let isNewThread = false;
 
+        /**
+         * Thread ID Generation (if needed)
+         *
+         * If no thread ID was provided in the request, this is a new conversation.
+         * Generate a unique ID using nanoid for the new thread.
+         */
         if (!current_thread_id) {
             try {
+                // Generate a unique thread identifier
                 const newThreadId = nanoid();
+
+                // Validate that nanoid successfully generated an ID
                 if (!newThreadId) {
                     console.error(`❌ [${requestId}] Failed to generate thread ID`);
                     throw new Error('Failed to generate thread ID');
                 }
 
                 console.log(`🆕 [${requestId}] Creating new thread with ID: ${newThreadId}`);
+
+                // Set the current thread ID and mark as new thread
                 current_thread_id = newThreadId;
                 isNewThread = true;
             } catch (error) {
+                // Log thread generation error
                 console.error(`❌ [${requestId}] Error generating thread:`, error);
+
+                // Return error response
                 return new Response(
                     JSON.stringify({ error: `Failed to generate thread: ${error}` }),
                     {
@@ -87,35 +120,76 @@ export const POST: APIRoute = async ({ request }) => {
             }
         }
 
+        /**
+         * System Prompt Setup
+         *
+         * Get the system prompt from configuration. The system prompt establishes
+         * the AI's behavior and persona for the entire conversation.
+         */
         const systemPrompt = config.systemPrompt;
-        
+
+        /**
+         * System Message Object
+         *
+         * Create the system message that will be prepended to every conversation.
+         * This is always the first message sent to the AI model.
+         */
         const systemObj = {
-            role: 'system',
+            role: 'system' as const,  // Type assertion for role
             content: systemPrompt,
         }
-        
+
+        /**
+         * Conversation History Initialization
+         *
+         * Initialize the conversation history with the system message.
+         * For existing threads, we'll load previous messages from DynamoDB.
+         * For new threads, it starts with just the system message.
+         */
         let convoHistory: Message[] = [systemObj as Message];
 
-        // --- Conversation History Fetch from DynamoDB ---
+        /**
+         * CONVERSATION HISTORY RETRIEVAL FROM DYNAMODB
+         *
+         * For existing threads, fetch the conversation history from DynamoDB
+         * to maintain context across multiple requests.
+         */
         let existingThread: Thread | null = null;
+
         if (current_thread_id && !isNewThread) {
             try {
                 console.log(`🔍 [${requestId}] Fetching thread from DynamoDB: ${current_thread_id}`);
+
+                // Attempt to retrieve the thread from DynamoDB
                 existingThread = await getThread(current_thread_id);
 
                 if (existingThread) {
+                    // Thread found - log details
                     console.log(`✅ [${requestId}] Thread found in DynamoDB:`, {
                         threadId: existingThread.id,
                         title: existingThread.title,
                         messageCount: existingThread.messages.length
                     });
-                    // Load existing conversation history (excluding system prompt which we add separately)
+
+                    /**
+                     * Load Existing History
+                     *
+                     * Prepend system message to the stored conversation history
+                     * (system message is added dynamically, not stored in DB)
+                     */
                     convoHistory = [systemObj as Message, ...existingThread.messages];
                 } else {
+                    /**
+                     * Thread Not Found
+                     *
+                     * If the thread ID doesn't exist in DynamoDB, treat this as
+                     * a new thread (might happen if the thread was deleted)
+                     */
                     console.log(`⚠️ [${requestId}] Thread not found in DynamoDB, treating as new thread: ${current_thread_id}`);
                     isNewThread = true;
                 }
             } catch (error) {
+                // Log and return error if DynamoDB fetch fails
                 console.error(`❌ [${requestId}] Error fetching conversation history:`, error);
                 return new Response(
                     JSON.stringify({ error: `Failed to fetch conversation history: ${error instanceof Error ? error.message : String(error)}` }),
@@ -126,6 +200,7 @@ export const POST: APIRoute = async ({ request }) => {
                 );
             }
         } else if (isNewThread) {
+            // Log for new thread creation
             console.log(`🆕 [${requestId}] New thread, starting with system message only`);
         }
 
