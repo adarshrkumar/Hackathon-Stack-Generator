@@ -151,6 +151,123 @@
     line-height: 1.5;           /* Improve readability */
     word-wrap: break-word;      /* Break long words/URLs */
     white-space: pre-wrap;      /* Preserve newlines */
+
+    /* Markdown element styles */
+    p {
+        margin: 0 0 0.5rem 0;
+
+        &:last-child {
+            margin-bottom: 0;
+        }
+    }
+
+    /* Code blocks */
+    pre {
+        background: rgba(0, 0, 0, 0.05);
+        padding: 0.75rem;
+        border-radius: 6px;
+        overflow-x: auto;
+        margin: 0.5rem 0;
+
+        code {
+            background: transparent;
+            padding: 0;
+        }
+    }
+
+    /* Inline code */
+    code {
+        background: rgba(0, 0, 0, 0.05);
+        padding: 0.2rem 0.4rem;
+        border-radius: 3px;
+        font-family: 'Courier New', monospace;
+        font-size: 0.9em;
+    }
+
+    /* Lists */
+    ul, ol {
+        margin: 0.5rem 0;
+        padding-left: 1.5rem;
+
+        li {
+            margin: 0.25rem 0;
+        }
+    }
+
+    /* Headings */
+    h1, h2, h3, h4, h5, h6 {
+        margin: 0.75rem 0 0.5rem 0;
+        font-weight: 600;
+
+        &:first-child {
+            margin-top: 0;
+        }
+    }
+
+    h1 { font-size: 1.5rem; }
+    h2 { font-size: 1.3rem; }
+    h3 { font-size: 1.1rem; }
+    h4 { font-size: 1rem; }
+
+    /* Blockquotes */
+    blockquote {
+        border-left: 3px solid rgba(0, 0, 0, 0.2);
+        padding-left: 1rem;
+        margin: 0.5rem 0;
+        color: rgba(0, 0, 0, 0.7);
+    }
+
+    /* Tables */
+    table {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 0.5rem 0;
+
+        th, td {
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            padding: 0.5rem;
+            text-align: left;
+        }
+
+        th {
+            background: rgba(0, 0, 0, 0.05);
+            font-weight: 600;
+        }
+    }
+
+    /* Links */
+    a {
+        color: #0066cc;
+        text-decoration: underline;
+
+        &:hover {
+            color: #0052a3;
+        }
+    }
+
+    /* Horizontal rules */
+    hr {
+        border: none;
+        border-top: 1px solid rgba(0, 0, 0, 0.1);
+        margin: 0.75rem 0;
+    }
+
+    /* Strong/bold */
+    strong, b {
+        font-weight: 600;
+    }
+
+    /* Emphasis/italic */
+    em, i {
+        font-style: italic;
+    }
+}
+
+/* Special styling for code in user messages */
+.message.user .message-content {
+    code, pre {
+        background: rgba(255, 255, 255, 0.2);
+    }
 }
 
 /* Typing indicator - three bouncing dots */

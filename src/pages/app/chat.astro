@@ -91,7 +91,16 @@ import App from '../../layouts/App.astro';
      * - Thread management
      * - Error handling
      * - Input validation and formatting
+     * - Markdown rendering for AI responses
      */
+
+    import { marked } from 'marked';
+
+    // Configure marked for better rendering
+    marked.setOptions({
+        breaks: true,  // Convert line breaks to <br>
+        gfm: true,     // GitHub Flavored Markdown
+    });
 
     /**
      * State Variables
@@ -297,6 +306,7 @@ import App from '../../layouts/App.astro';
      * Add Message to UI
      *
      * Creates a message element and appends it to the chat messages container
+     * AI messages are rendered as markdown for better formatting
      *
      * @param role - 'user' or 'assistant'
      * @param content - The message text
@@ -309,12 +319,22 @@ import App from '../../layouts/App.astro';
         // Select appropriate icon
         const icon = role === 'user' ? 'fa-user' : 'fa-robot';
 
+        // Format content based on role
+        let formattedContent: string;
+        if (role === 'assistant') {
+            // Render markdown for AI responses
+            formattedContent = marked.parse(content) as string;
+        } else {
+            // Escape HTML for user messages to prevent XSS
+            formattedContent = escapeHtml(content).replace(/\n/g, '<br>');
+        }
+
         // Build message HTML with icon and content
         messageEl.innerHTML = `
             <div class="message-icon">
                 <i class="fa-solid ${icon}"></i>
             </div>
-            <div class="message-content">${escapeHtml(content)}</div>
+            <div class="message-content">${formattedContent}</div>
         `;
 
         // Append to chat and scroll to bottom
