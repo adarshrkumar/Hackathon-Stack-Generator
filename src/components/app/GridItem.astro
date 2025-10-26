@@ -1,29 +1,29 @@
 ---
 /**
- * GridItem Component
- *
- * Individual item component for use within the Grid component.
- * Displays a card with an image, title, description, and cost.
- *
- * Props:
- * - imgSrc (string): URL to the item image
- * - title (string): Item title/name
- * - cost (string): Cost/price to display
- *
- * Features:
- * - Image display
- * - Title and description layout
- * - Cost badge/label
- * - Slot for custom description content
- * - Responsive design via Grid.scss
- *
- * Usage:
- * <GridItem title="AWS Lambda" cost="$0.20/million" imgSrc="/aws-lambda.png">
- *   Serverless compute service
- * </GridItem>
- *
- * Used in: Grid component on app pages
- */
+  * GridItem Component
+  *
+  * Individual item component for use within the Grid component.
+  * Displays a card with an image, title, description, and cost.
+  *
+  * Props:
+  * - imgSrc (string): URL to the item image
+  * - title (string): Item title/name
+  * - cost (string): Cost/price to display
+  *
+  * Features:
+  * - Image display
+  * - Title and description layout
+  * - Cost badge/label
+  * - Slot for custom description content
+  * - Responsive design via Grid.scss
+  *
+  * Usage:
+  * <GridItem title="AWS Lambda" cost="$0.20/million" imgSrc="/aws-lambda.png">
+  *   Serverless compute service
+  * </GridItem>
+  *
+  * Used in: Grid component on app pages
+  */
 
 // Extract props with fallback to empty strings
 const { imgSrc, title, cost } = Astro.props;
