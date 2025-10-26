@@ -1,45 +1,114 @@
 ---
+/**
+ * Marketing Layout Component
+ *
+ * This layout is used for the marketing/public pages of the Stack Generator website:
+ * - Homepage (index.astro)
+ * - About page
+ * - Contact page
+ *
+ * Features:
+ * - Includes Header, Hero (homepage only), and Footer components
+ * - Uses Montserrat Google Font for typography
+ * - Responsive design via SCSS
+ * - SEO-friendly title management
+ *
+ * Layout Structure:
+ * - Header (navigation)
+ * - Hero (homepage only - conditional rendering)
+ * - Main content (via <slot />)
+ * - Footer
+ */
+
+// Import global components
 import Header from '../components/Header.astro';
 import Hero from '../components/Hero.astro';
 import Footer from '../components/Footer.astro';
 
-import '../styles/reset.scss';
-import '../styles/layouts/Layout.scss';
+// Import global styles
+import '../styles/reset.scss';        // CSS reset for consistent styling
+import '../styles/layouts/Layout.scss'; // Layout-specific styles
 
+/**
+ * Extract title prop from component properties
+ * This allows pages to pass a custom title to the layout
+ */
 const { title } = Astro.props;
 
+/**
+ * Title Constants
+ *
+ * Define the long and short title formats for the application
+ */
 const lTitle = 'Stack Generator - Cost & ROI | SCU AWS Hackathon Project';
 const sTitle = 'Stack Generator';
 
+/**
+ * Homepage Detection
+ *
+ * Determine if the current page is the homepage by checking if:
+ * - No title was provided, OR
+ * - Title matches common homepage values
+ *
+ * This is used to conditionally render the Hero component
+ */
 const pageIsHome = !title || title === '' || title === 'Home' || title === 'Index' || title === sTitle || title === lTitle;
 
+/**
+ * Page Title Generation
+ *
+ * Generate the final page title based on whether it's the homepage:
+ * - Homepage: Just "Stack Generator"
+ * - Other pages: "{Page Title} | Stack Generator"
+ */
 let pTitle
 if (pageIsHome) {
-    pTitle = sTitle;
+    pTitle = sTitle;  // Homepage title
 } else {
-    pTitle = `${title} | ${sTitle}`;
+    pTitle = `${title} | ${sTitle}`;  // Page-specific title with branding
 }
 ---
 
+<!-- HTML Document -->
 <html lang="en">
     <head>
+        <!-- Character encoding for proper text rendering -->
         <meta charset="utf-8" />
+
+        <!-- Favicon (SVG format for scalability) -->
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+        <!-- Responsive viewport settings for mobile devices -->
         <meta name="viewport" content="width=device-width" />
+
+        <!-- Generator meta tag (added by Astro) -->
         <meta name="generator" content={Astro.generator} />
+
+        <!-- Page title (dynamically generated) -->
         <title>{pTitle}</title>
+
+        <!-- Google Fonts: Montserrat -->
+        <!-- Preconnect to Google Fonts CDN for faster loading -->
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+        <!-- Load Montserrat font family with all weights (100-900) -->
         <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
     </head>
     <body>
+        <!-- Header Component: Navigation bar at the top -->
         <Header />
 
+        <!-- Main Content Area -->
         <main>
+            <!-- Hero Component: Conditionally rendered on homepage only -->
             {pageIsHome ? <Hero /> : ''}
+
+            <!-- Slot: Page-specific content injected here -->
             <slot />
         </main>
 
+        <!-- Footer Component: Site footer at the bottom -->
         <Footer />
     </body>
 </html>
