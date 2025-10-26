@@ -1,44 +1,106 @@
 ---
+/**
+ * Application Layout Component
+ *
+ * This layout is used for the application pages (/app/*) of the Stack Generator:
+ * - /app/index.astro - Application dashboard
+ * - /app/chat.astro - AI chat interface
+ * - /app/test.astro - Test/demo pages
+ *
+ * Key Differences from Marketing Layout:
+ * - Uses Nav component instead of Header
+ * - No Hero component (apps don't need hero sections)
+ * - Includes Font Awesome for icons in the UI
+ * - Has app-specific CSS classes and styles
+ *
+ * Layout Structure:
+ * - Nav (app navigation)
+ * - Main content with .app class (via <slot />)
+ * - Footer
+ */
+
+// Import app-specific components
 import Nav from '../components/app/Nav.astro';
 import Footer from '../components/Footer.astro';
 
-import '../styles/reset.scss';
-import '../styles/layouts/Layout.scss';
-import '../styles/layouts/App.scss';
+// Import styles
+import '../styles/reset.scss';           // CSS reset
+import '../styles/layouts/Layout.scss';  // Base layout styles
+import '../styles/layouts/App.scss';     // App-specific layout styles
 
+/**
+ * Extract title prop from component properties
+ */
 const { title } = Astro.props;
 
+/**
+ * Application Title
+ *
+ * Use "Stack Generator App" as the base title for application pages
+ * to differentiate from marketing pages
+ */
 const sTitle = 'Stack Generator App';
 
-const pageIsHome = !title || title === '' || title === 'Home' || title === 'Index' || title === sTitle  ;
+/**
+ * Homepage Detection
+ *
+ * Determine if this is the app index page (/app/)
+ */
+const pageIsHome = !title || title === '' || title === 'Home' || title === 'Index' || title === sTitle;
 
+/**
+ * Page Title Generation
+ *
+ * Format: "{Page Title} | Stack Generator App"
+ */
 let pTitle
 if (pageIsHome) {
-    pTitle = sTitle;
+    pTitle = sTitle;  // App index title
 } else {
-    pTitle = `${title} | ${sTitle}`;
+    pTitle = `${title} | ${sTitle}`;  // Page-specific app title
 }
 ---
 
+<!-- HTML Document for Application Pages -->
 <html lang="en">
     <head>
+        <!-- Character encoding -->
         <meta charset="utf-8" />
+
+        <!-- Favicon -->
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+        <!-- Responsive viewport -->
         <meta name="viewport" content="width=device-width" />
+
+        <!-- Generator meta tag -->
         <meta name="generator" content={Astro.generator} />
+
+        <!-- Page title -->
         <title>{pTitle}</title>
+
+        <!-- Google Fonts: Montserrat -->
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+
+        <!-- Font Awesome Icons -->
+        <!-- Used for UI icons in the application (e.g., robot, user, send button) -->
         <script src="https://kit.fontawesome.com/5a56375a95.js" crossorigin="anonymous"></script>
     </head>
+
+    <!-- Body with app-layout class for app-specific styling -->
     <body class="app-layout">
+        <!-- Nav Component: Application navigation -->
         <Nav />
 
+        <!-- Main Content Area with app-specific classes -->
         <main class="main app">
+            <!-- Slot: Page-specific app content injected here -->
             <slot />
         </main>
 
+        <!-- Footer Component -->
         <Footer />
     </body>
 </html>
