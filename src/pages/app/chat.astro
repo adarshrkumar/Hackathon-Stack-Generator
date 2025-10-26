@@ -125,14 +125,14 @@ import App from '../../layouts/App.astro';
 <!-- Client-Side TypeScript -->
 <script>
     /**
-     * CLIENT-SIDE CHAT LOGIC
+     * CLIENT-SIDE CHAT LOGIC WITH SELECTION PROMPTS
      *
-     * This script handles all client-side chat functionality including:
+     * This script handles:
+     * - Multi-step selection prompts for tech stack preferences
      * - Message sending and receiving
      * - UI updates (adding messages, loading indicators)
      * - Thread management
      * - Error handling
-     * - Input validation and formatting
      * - Markdown rendering for AI responses
      */
 
@@ -145,7 +145,111 @@ import App from '../../layouts/App.astro';
     });
 
     /**
-     * State Variables
+     * SELECTION PROMPTS LOGIC
+     */
+
+    // Selection questions configuration
+    const selectionQuestions = [
+        {
+            title: "What front-end framework do you prefer?",
+            hint: "Choose one option",
+            category: "frontend",
+            multiSelect: false,
+            options: [
+                { value: "React", label: "React", icon: "fa-brands fa-react" },
+                { value: "Vue.js", label: "Vue.js", icon: "fa-brands fa-vuejs" },
+                { value: "Angular", label: "Angular", icon: "fa-brands fa-angular" },
+                { value: "Svelte", label: "Svelte", icon: "fa-solid fa-fire" },
+                { value: "Next.js", label: "Next.js (React)", icon: "fa-solid fa-n" },
+                { value: "Nuxt", label: "Nuxt (Vue)", icon: "fa-solid fa-n" },
+                { value: "Other", label: "Other / Not Sure", icon: "fa-solid fa-question" }
+            ]
+        },
+        {
+            title: "What backend technology do you prefer?",
+            hint: "Choose one option",
+            category: "backend",
+            multiSelect: false,
+            options: [
+                { value: "Node.js", label: "Node.js / Express", icon: "fa-brands fa-node-js" },
+                { value: "Python", label: "Python (Django/Flask/FastAPI)", icon: "fa-brands fa-python" },
+                { value: "Java", label: "Java (Spring Boot)", icon: "fa-brands fa-java" },
+                { value: "Go", label: "Go", icon: "fa-solid fa-code" },
+                { value: "PHP", label: "PHP (Laravel)", icon: "fa-brands fa-php" },
+                { value: "Ruby", label: "Ruby on Rails", icon: "fa-solid fa-gem" },
+                { value: "Other", label: "Other / Not Sure", icon: "fa-solid fa-question" }
+            ]
+        },
+        {
+            title: "How do you want to handle styling?",
+            hint: "Choose one option",
+            category: "styling",
+            multiSelect: false,
+            options: [
+                { value: "Tailwind CSS", label: "Tailwind CSS", icon: "fa-solid fa-wind" },
+                { value: "SCSS/SASS", label: "SCSS/SASS", icon: "fa-brands fa-sass" },
+                { value: "CSS Modules", label: "CSS Modules", icon: "fa-solid fa-file-code" },
+                { value: "Styled Components", label: "Styled Components (CSS-in-JS)", icon: "fa-solid fa-paint-brush" },
+                { value: "Bootstrap", label: "Bootstrap", icon: "fa-brands fa-bootstrap" },
+                { value: "Material-UI", label: "Material-UI / MUI", icon: "fa-solid fa-palette" },
+                { value: "Other", label: "Other / Not Sure", icon: "fa-solid fa-question" }
+            ]
+        },
+        {
+            title: "What database do you need?",
+            hint: "Choose one option",
+            category: "database",
+            multiSelect: false,
+            options: [
+                { value: "PostgreSQL", label: "PostgreSQL", icon: "fa-solid fa-database" },
+                { value: "MongoDB", label: "MongoDB", icon: "fa-solid fa-leaf" },
+                { value: "MySQL", label: "MySQL", icon: "fa-solid fa-database" },
+                { value: "Redis", label: "Redis", icon: "fa-solid fa-bolt" },
+                { value: "DynamoDB", label: "DynamoDB (AWS)", icon: "fa-brands fa-aws" },
+                { value: "Firebase", label: "Firebase / Firestore", icon: "fa-solid fa-fire" },
+                { value: "Other", label: "Other / Not Sure", icon: "fa-solid fa-question" }
+            ]
+        },
+        {
+            title: "How do you want to handle user authentication?",
+            hint: "Choose one option",
+            category: "auth",
+            multiSelect: false,
+            options: [
+                { value: "Auth0", label: "Auth0", icon: "fa-solid fa-shield-halved" },
+                { value: "Firebase Auth", label: "Firebase Auth", icon: "fa-solid fa-fire" },
+                { value: "AWS Cognito", label: "AWS Cognito", icon: "fa-brands fa-aws" },
+                { value: "Clerk", label: "Clerk", icon: "fa-solid fa-user-lock" },
+                { value: "Supabase Auth", label: "Supabase Auth", icon: "fa-solid fa-shield" },
+                { value: "Custom JWT", label: "Custom JWT", icon: "fa-solid fa-key" },
+                { value: "Other", label: "Other / Not Sure", icon: "fa-solid fa-question" }
+            ]
+        },
+        {
+            title: "Any additional services you need?",
+            hint: "Select all that apply (optional)",
+            category: "additional",
+            multiSelect: true,
+            options: [
+                { value: "CDN", label: "CDN / Edge Computing", icon: "fa-solid fa-globe" },
+                { value: "Analytics", label: "Analytics", icon: "fa-solid fa-chart-line" },
+                { value: "Email", label: "Email Service", icon: "fa-solid fa-envelope" },
+                { value: "Storage", label: "File Storage", icon: "fa-solid fa-cloud-arrow-up" },
+                { value: "Payment", label: "Payment Processing", icon: "fa-solid fa-credit-card" },
+                { value: "Search", label: "Search Engine", icon: "fa-solid fa-magnifying-glass" },
+                { value: "Monitoring", label: "Monitoring / APM", icon: "fa-solid fa-heart-pulse" },
+                { value: "CI/CD", label: "CI/CD Pipeline", icon: "fa-solid fa-rotate" }
+            ]
+        }
+    ];
+
+    // Selection state
+    let currentQuestionIndex = 0;
+    const userSelections: Record<string, string | string[]> = {};
+    let selectionPhaseComplete = false;
+
+    /**
+     * Chat State Variables
      */
 
     // Current conversation thread ID (null for new conversations)
@@ -158,23 +262,230 @@ import App from '../../layouts/App.astro';
      * DOM Element References
      */
 
-    // Chat messages container (for adding messages and scrolling)
+    // Selection elements
+    const selectionContainer = document.getElementById('selectionContainer')!;
+    const selectionOptions = document.getElementById('selectionOptions')!;
+    const questionTitle = document.getElementById('questionTitle')!;
+    const questionHint = document.getElementById('questionHint')!;
+    const backBtn = document.getElementById('backBtn')!;
+    const skipBtn = document.getElementById('skipBtn')!;
+    const stepIndicators = document.querySelectorAll('.step-indicator');
+
+    // Chat elements
+    const chatHeader = document.getElementById('chatHeader')!;
+    const chatWrapper = document.getElementById('chatWrapper')!;
     const chatMessages = document.getElementById('chatMessages')!;
-
-    // Message input textarea
     const messageInput = document.getElementById('messageInput') as HTMLTextAreaElement;
-
-    // Send button
     const sendButton = document.getElementById('sendButton') as HTMLButtonElement;
-
-    // Error banner (for displaying errors)
     const errorBanner = document.getElementById('errorBanner')!;
-
-    // Thread info display (shows current thread title/ID)
     const threadInfo = document.getElementById('threadInfo')!;
-
-    // New chat button (starts a fresh conversation)
     const newChatBtn = document.getElementById('newChatBtn')!;
+
+    /**
+     * SELECTION PROMPT FUNCTIONS
+     */
+
+    /**
+     * Render current selection question
+     */
+    function renderQuestion() {
+        const question = selectionQuestions[currentQuestionIndex];
+        questionTitle.textContent = question.title;
+        questionHint.textContent = question.hint;
+
+        // Clear previous options
+        selectionOptions.innerHTML = '';
+
+        // Render options
+        question.options.forEach(option => {
+            const inputType = question.multiSelect ? 'checkbox' : 'radio';
+            const optionEl = document.createElement('label');
+            optionEl.className = 'selection-option';
+
+            optionEl.innerHTML = `
+                <input type="${inputType}" name="${question.category}" value="${option.value}">
+                <div class="option-content">
+                    <i class="${option.icon}"></i>
+                    <span>${option.label}</span>
+                </div>
+            `;
+
+            selectionOptions.appendChild(optionEl);
+        });
+
+        // Update progress indicators
+        stepIndicators.forEach((indicator, index) => {
+            if (index < currentQuestionIndex) {
+                indicator.classList.add('completed');
+                indicator.classList.remove('active');
+            } else if (index === currentQuestionIndex) {
+                indicator.classList.add('active');
+                indicator.classList.remove('completed');
+            } else {
+                indicator.classList.remove('active', 'completed');
+            }
+        });
+
+        // Update back button visibility
+        backBtn.style.display = currentQuestionIndex > 0 ? 'inline-flex' : 'none';
+
+        // Update skip button text for last question
+        skipBtn.innerHTML = currentQuestionIndex === selectionQuestions.length - 1
+            ? 'Finish & Chat <i class="fa-solid fa-check"></i>'
+            : 'Skip <i class="fa-solid fa-forward"></i>';
+    }
+
+    /**
+     * Handle option selection
+     */
+    function handleOptionSelect(event: Event) {
+        const target = event.target as HTMLElement;
+        const input = target.querySelector('input') || target.closest('label')?.querySelector('input');
+
+        if (input) {
+            const question = selectionQuestions[currentQuestionIndex];
+
+            if (!question.multiSelect) {
+                // For radio buttons, auto-advance after selection
+                setTimeout(() => {
+                    saveCurrentSelection();
+                    nextQuestion();
+                }, 300);
+            }
+        }
+    }
+
+    /**
+     * Save current question's selection
+     */
+    function saveCurrentSelection() {
+        const question = selectionQuestions[currentQuestionIndex];
+
+        if (question.multiSelect) {
+            const checked = selectionOptions.querySelectorAll('input:checked') as NodeListOf<HTMLInputElement>;
+            const values = Array.from(checked).map(input => input.value);
+            if (values.length > 0) {
+                userSelections[question.category] = values;
+            }
+        } else {
+            const checked = selectionOptions.querySelector('input:checked') as HTMLInputElement;
+            if (checked) {
+                userSelections[question.category] = checked.value;
+            }
+        }
+    }
+
+    /**
+     * Go to next question or finish
+     */
+    function nextQuestion() {
+        saveCurrentSelection();
+
+        if (currentQuestionIndex < selectionQuestions.length - 1) {
+            currentQuestionIndex++;
+            renderQuestion();
+        } else {
+            finishSelections();
+        }
+    }
+
+    /**
+     * Go to previous question
+     */
+    function previousQuestion() {
+        if (currentQuestionIndex > 0) {
+            currentQuestionIndex--;
+            renderQuestion();
+        }
+    }
+
+    /**
+     * Finish selections and show chat
+     */
+    async function finishSelections() {
+        selectionPhaseComplete = true;
+
+        // Hide selection container
+        selectionContainer.style.display = 'none';
+
+        // Show chat interface
+        chatHeader.style.display = 'block';
+        chatWrapper.style.display = 'flex';
+
+        // Build initial AI prompt based on selections
+        const initialPrompt = buildSelectionPrompt(userSelections);
+
+        // Add welcome message with selection summary
+        const selectionSummary = buildSelectionSummary(userSelections);
+        chatMessages.innerHTML = `
+            <div class="message assistant">
+                <div class="message-icon">
+                    <i class="fa-solid fa-robot"></i>
+                </div>
+                <div class="message-content">
+                    <p><strong>Great! Here's what you're looking for:</strong></p>
+                    ${selectionSummary}
+                    <p style="margin-top: 1rem;"><strong>Let me analyze your selections and provide personalized recommendations...</strong></p>
+                </div>
+            </div>
+        `;
+
+        // Auto-send the initial prompt to get AI recommendations
+        messageInput.value = initialPrompt;
+        await sendMessage();
+    }
+
+    /**
+     * Build AI prompt from selections
+     */
+    function buildSelectionPrompt(selections: Record<string, string | string[]>): string {
+        let prompt = "Based on my technology preferences:\n\n";
+
+        if (selections.frontend) prompt += `- Frontend: ${selections.frontend}\n`;
+        if (selections.backend) prompt += `- Backend: ${selections.backend}\n`;
+        if (selections.styling) prompt += `- Styling: ${selections.styling}\n`;
+        if (selections.database) prompt += `- Database: ${selections.database}\n`;
+        if (selections.auth) prompt += `- Authentication: ${selections.auth}\n`;
+        if (selections.additional && Array.isArray(selections.additional)) {
+            prompt += `- Additional: ${selections.additional.join(', ')}\n`;
+        }
+
+        prompt += "\nPlease provide:\n";
+        prompt += "1. Why these technologies work well together\n";
+        prompt += "2. Specific service/provider recommendations from your knowledge\n";
+        prompt += "3. Best practices for integration\n";
+        prompt += "4. Any concerns or alternatives\n";
+        prompt += "5. Estimated complexity and cost considerations";
+
+        return prompt;
+    }
+
+    /**
+     * Build selection summary HTML
+     */
+    function buildSelectionSummary(selections: Record<string, string | string[]>): string {
+        let html = '<ul style="list-style: none; padding-left: 0;">';
+
+        if (selections.frontend) html += `<li>✓ Frontend: <strong>${selections.frontend}</strong></li>`;
+        if (selections.backend) html += `<li>✓ Backend: <strong>${selections.backend}</strong></li>`;
+        if (selections.styling) html += `<li>✓ Styling: <strong>${selections.styling}</strong></li>`;
+        if (selections.database) html += `<li>✓ Database: <strong>${selections.database}</strong></li>`;
+        if (selections.auth) html += `<li>✓ Auth: <strong>${selections.auth}</strong></li>`;
+        if (selections.additional && Array.isArray(selections.additional) && selections.additional.length > 0) {
+            html += `<li>✓ Additional: <strong>${selections.additional.join(', ')}</strong></li>`;
+        }
+
+        html += '</ul>';
+        return html;
+    }
+
+    // Selection event listeners
+    backBtn.addEventListener('click', previousQuestion);
+    skipBtn.addEventListener('click', nextQuestion);
+    selectionOptions.addEventListener('click', handleOptionSelect);
+
+    // Initialize first question
+    renderQuestion();
 
     /**
      * Auto-Resize Textarea
