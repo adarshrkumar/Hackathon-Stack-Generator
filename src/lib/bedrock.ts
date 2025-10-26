@@ -144,27 +144,51 @@ export async function invokeBedrockLlama(
 }
 
 /**
- * Clean Llama formatting tokens from the generated response
- * Extracts only the assistant's response, removing conversation replay
+ * Clean Llama Response
+ *
+ * Removes Llama-specific formatting tokens and extracts the actual assistant response.
+ * Llama models sometimes include special tokens or replay conversation history,
+ * so this function cleans the response to return only the new generated content.
+ *
+ * @param text - Raw response text from the Llama model
+ * @returns Cleaned response text without formatting tokens
  */
 function cleanLlamaResponse(text: string): string {
-    // Remove Llama special tokens
+    /**
+     * Step 1: Remove Llama Special Tokens
+     *
+     * Llama models use special control tokens for conversation formatting:
+     * - <|begin_of_text|>: Marks the start of text
+     * - <|start_header_id|>: Marks the start of a role identifier
+     * - <|end_header_id|>: Marks the end of a role identifier
+     * - <|eot_id|>: End of turn marker
+     *
+     * These tokens are internal formatting and should not be shown to users
+     */
     let cleaned = text
-        .replace(/<\|begin_of_text\|>/g, '')
-        .replace(/<\|start_header_id\|>/g, '')
-        .replace(/<\|end_header_id\|>/g, '')
-        .replace(/<\|eot_id\|>/g, '');
+        .replace(/<\|begin_of_text\|>/g, '')      // Remove text beginning marker
+        .replace(/<\|start_header_id\|>/g, '')    // Remove header start marker
+        .replace(/<\|end_header_id\|>/g, '')      // Remove header end marker
+        .replace(/<\|eot_id\|>/g, '');            // Remove end of turn marker
 
-    // Split by common conversation markers to find just the assistant's response
-    // The model sometimes replays the conversation, so we need to extract the last part
+    /**
+     * Step 2: Define Conversation Replay Detection Markers
+     *
+     * Sometimes the model includes conversation history in its response.
+     * These regex patterns detect if the response contains replayed conversation.
+     */
     const conversationMarkers = [
-        /Your last message was/i,
-        /\buser\b\s*\n/i,
-        /\bassistant\b\s*\n/i,
-        /\bsystem\b\s*\n/i
+        /Your last message was/i,  // Explicit conversation reference
+        /\buser\b\s*\n/i,          // User role marker followed by newline
+        /\bassistant\b\s*\n/i,     // Assistant role marker followed by newline
+        /\bsystem\b\s*\n/i         // System role marker followed by newline
     ];
 
-    // Check if the response contains conversation replay
+    /**
+     * Step 3: Check for Conversation Replay
+     *
+     * Test if any of the conversation markers are present in the cleaned text
+     */
     let hasReplay = false;
     for (const marker of conversationMarkers) {
         if (marker.test(cleaned)) {
@@ -173,13 +197,22 @@ function cleanLlamaResponse(text: string): string {
         }
     }
 
-    // If there's conversation replay, try to extract just the final response
+    /**
+     * Step 4: Extract Final Response if Replay Detected
+     *
+     * If conversation replay is detected, extract only the final assistant response
+     * by splitting on double newlines and taking the last substantial segment
+     */
     if (hasReplay) {
-        // Split on double newlines or conversation markers
+        // Split the response into segments separated by double newlines
         const parts = cleaned.split(/\n\n+/);
-        // Take the last substantial part (more than 20 characters)
+
+        // Iterate backwards through parts to find the last substantial response
+        // (more than 20 characters and doesn't contain conversation markers)
         for (let i = parts.length - 1; i >= 0; i--) {
             const part = parts[i].trim();
+
+            // Check if this part is substantial and doesn't contain markers
             if (part.length > 20 && !conversationMarkers.some(m => m.test(part))) {
                 cleaned = part;
                 break;
@@ -187,6 +220,7 @@ function cleanLlamaResponse(text: string): string {
         }
     }
 
+    // Return the cleaned response with leading/trailing whitespace removed
     return cleaned.trim();
 }
 
