@@ -423,8 +423,16 @@ export const POST: APIRoute = async ({ request }) => {
             );
         }
 
-        // --- Prepare response ---
+        /**
+         * PREPARE SUCCESS RESPONSE
+         *
+         * Construct and return the successful API response containing:
+         * - The AI-generated text
+         * - The conversation title
+         * - The thread ID (for subsequent requests)
+         */
         const totalDuration = Date.now() - startTime;
+
         console.log(`🎉 [${requestId}] Request completed successfully:`, {
             totalDuration: `${totalDuration}ms`,
             threadId: current_thread_id,
@@ -432,19 +440,31 @@ export const POST: APIRoute = async ({ request }) => {
             responseLength: generatedText.length
         });
 
+        // Return JSON response with the generated content
         return new Response(
             JSON.stringify({
-                generatedText: generatedText,
-                generatedTitle: convoTitle,
-                id: current_thread_id,
+                generatedText: generatedText,    // AI's response message
+                generatedTitle: convoTitle,       // Conversation title
+                id: current_thread_id,            // Thread ID for future requests
             }),
             {
-                status: 200,
+                status: 200,                      // HTTP 200 OK
                 headers: { 'Content-Type': 'application/json' },
             }
         );
+
     } catch (error) {
+        /**
+         * TOP-LEVEL ERROR HANDLER
+         *
+         * Catches any unhandled errors in the request processing pipeline.
+         * This includes:
+         * - JSON parsing errors (malformed request body)
+         * - Unexpected errors not caught by inner try-catch blocks
+         * - Runtime errors
+         */
         const totalDuration = Date.now() - startTime;
+
         console.error(`💥 [${requestId}] Fatal error in generate.ts after ${totalDuration}ms:`, error);
         console.error(`💥 [${requestId}] Error details:`, {
             errorName: error instanceof Error ? error.name : 'Unknown',
@@ -452,14 +472,27 @@ export const POST: APIRoute = async ({ request }) => {
             errorStack: error instanceof Error ? error.stack : 'No stack trace',
             errorType: typeof error
         });
+
+        // Return error response
         return new Response(
             JSON.stringify({ error: `Invalid request body or server error: ${error}` }),
             {
-                status: 400,
+                status: 400,                      // HTTP 400 Bad Request
                 headers: { 'Content-Type': 'application/json' },
             }
         );
     }
 };
 
+/**
+ * Disable Pre-rendering
+ *
+ * This route must NOT be pre-rendered during build time because:
+ * 1. It handles dynamic POST requests
+ * 2. It requires server-side AWS credentials
+ * 3. It performs real-time AI generation
+ *
+ * Setting prerender = false ensures this route runs on the server
+ * (via Vercel serverless function) rather than being statically generated.
+ */
 export const prerender = false;
