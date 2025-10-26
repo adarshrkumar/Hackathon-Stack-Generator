@@ -1,60 +1,105 @@
+/**
+ * Grid Component Styles
+ *
+ * Styling for the responsive grid layout (app/Grid.astro and app/GridItem.astro).
+ * Creates a responsive card grid that adapts to different screen sizes.
+ *
+ * Key Features:
+ * - Auto-fit responsive columns
+ * - Square aspect ratio cards
+ * - Image with info overlay
+ * - Cost badge in top-right corner
+ * - Flexbox card layout
+ *
+ * Used by: app/Grid.astro and app/GridItem.astro
+ */
+
+/* Import Sass math module for calculations */
 @use 'sass:math';
 
-$_min-width: 250px;
-$_spacing: 1rem;
+/* Local Variables */
+$_min-width: 250px;  /* Minimum column width before wrapping */
+$_spacing: 1rem;     /* Standard spacing for grid and cards */
 
+/* Grid Container */
 .grid {
+    /* CSS Grid Layout */
     display: grid;
+
+    /* Responsive Columns:
+       - auto-fit: Automatically create as many columns as fit
+       - repeat: Create repeating columns
+       - minmax($_min-width, 1fr): Each column is at least 250px, grows to fill available space */
     grid-template-columns: repeat(auto-fit, minmax($_min-width, 1fr));
+
+    /* Gap between grid items */
     gap: $_spacing;
 
+    /* Grid Item (Card) */
     &__item {
+        /* Square Aspect Ratio */
         aspect-ratio: 1;
 
+        /* Background Color */
         background-color: white;
 
+        /* Flexbox Layout for card content */
         display: flex;
-        flex-direction: column;
+        flex-direction: column;  /* Stack image and info vertically */
 
-        border: 1px solid rgba(0, 0, 0, 0.1);
+        /* Border and Rounded Corners */
+        border: 1px solid rgba(0, 0, 0, 0.1);  /* Light border */
         border-radius: 8px;
 
+        /* Positioning Context for absolute children (cost badge) */
         position: relative;
 
+        /* Item Image */
         &__img {
-            flex: 1;
+            flex: 1;  /* Grow to fill available space */
 
-            width: 100%;
+            width: 100%;  /* Full width */
 
+            /* Object Fit - cover entire area while maintaining aspect ratio */
             object-fit: cover;
 
+            /* Rounded Top Corners (inherit from parent) */
             border-top-left-radius: inherit;
             border-top-right-radius: inherit;
         }
 
+        /* Item Info Section */
         &__info {
+            /* Spacing */
             padding: $_spacing;
 
+            /* Flexbox Layout */
             display: flex;
-            flex-direction: column;
-            gap: $_spacing;
+            flex-direction: column;  /* Stack title and description */
+            gap: $_spacing;          /* Space between elements */
 
+            /* Remove default margins from child elements */
             & > * {
-                margin-block: 0;
+                margin-block: 0;  /* No top/bottom margin */
             }
         }
 
+        /* Cost Badge */
         &__cost {
+            /* Absolute Positioning - top-right corner */
             position: absolute;
             top: 0;
             right: 0;
 
-            padding: #{math.div($_spacing, 2)} $_spacing;
+            /* Spacing */
+            padding: #{math.div($_spacing, 2)} $_spacing;  /* Half spacing top/bottom, full spacing left/right */
 
+            /* Background - inherit from card (white) */
             background-color: inherit;
 
-            border-top-right-radius: inherit;
-            border-bottom-left-radius: inherit;
+            /* Rounded Corners */
+            border-top-right-radius: inherit;     /* Match card's top-right */
+            border-bottom-left-radius: inherit;   /* Round bottom-left for badge effect */
         }
     }
 }
