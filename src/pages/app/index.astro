@@ -1,10 +1,30 @@
 ---
+/**
+ * App Index Page
+ *
+ * Main application dashboard/home page (accessed via /app/).
+ * Displays a grid of sample items demonstrating the Grid/GridItem components.
+ *
+ * Features:
+ * - Responsive grid layout
+ * - 9 sample GridItem components
+ * - Placeholder images from Lorem Picsum
+ * - Cost display for each item
+ *
+ * Layout: Uses App.astro (Nav + Footer, no Hero)
+ */
+
+// Import application layout
 import App from '../../layouts/App.astro';
 
+// Import grid components
 import Grid from '../../components/app/Grid.astro';
 import GridItem from '../../components/app/GridItem.astro';
 ---
+
+<!-- App Dashboard Content -->
 <App>
+    <!-- Grid Container with Sample Items -->
     <Grid>
         <GridItem imgSrc="https://picsum.photos/600/400" title="Sample Item 1" cost="$1#.##">
             This is a description for Sample Item 1.

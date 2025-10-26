@@ -1,7 +1,29 @@
 ---
+/**
+ * About Page
+ *
+ * Provides information about the Stack Generator application, its mission,
+ * and how it helps different user types (startups, enterprises, developers, consultants).
+ *
+ * Sections:
+ * - About Intro: Project overview and value proposition
+ * - Mission Statement: Core purpose and goals (in FancyCard)
+ * - How We Help: Benefits for different user segments
+ * - What We Cover: Service categories and providers
+ * - Our Approach: Methodology and data sources
+ * - CTA: Call-to-action to start using the app
+ *
+ * Layout: Uses Layout.astro (Header + Hero + Footer)
+ */
+
+// Import marketing layout
 import Layout from '../layouts/Layout.astro';
+
+// Import FancyCard for styled content sections
 import FancyCard from '../components/FancyCard.astro';
 ---
+
+<!-- About Page Content -->
 <Layout title="About">
     <section class="about-intro">
         <h1>About Tech Stack ROI Calculator</h1>

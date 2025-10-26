@@ -1,8 +1,30 @@
 ---
+/**
+ * API Test Page
+ *
+ * Testing interface for the /api/message/generate endpoint.
+ * Allows developers to test AI message generation with custom inputs.
+ *
+ * Features:
+ * - Message input textarea
+ * - Optional thread ID input (for continuing conversations)
+ * - Send button to trigger API request
+ * - Response display showing thread ID, title, and generated text
+ * - Error handling and loading states
+ * - Keyboard shortcut: Ctrl/Cmd+Enter to send
+ *
+ * Purpose: Development and debugging tool for the AI chat API
+ *
+ * Layout: Uses App.astro (application layout)
+ */
+
+// Import application layout
 import Layout from '../../layouts/App.astro';
 ---
 
+<!-- API Test Interface -->
 <Layout title="API Test">
+    <!-- Test Container -->
     <div class="test-container">
         <h1>Message Generation API Test</h1>
 
