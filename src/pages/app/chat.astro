@@ -27,14 +27,56 @@ import App from '../../layouts/App.astro';
 
 <!-- Chat Page Content -->
 <App title="AI Chat">
-    <!-- Chat Header Section -->
-    <div class="chat-header">
+    <!-- Selection Prompts Section (shown first) -->
+    <div class="selection-prompts-container" id="selectionContainer">
+        <div class="selection-header">
+            <h1><i class="fa-solid fa-layer-group"></i> Build Your Tech Stack</h1>
+            <p class="subtitle">Answer a few questions to get personalized recommendations</p>
+        </div>
+
+        <!-- Progress Indicator -->
+        <div class="progress-steps">
+            <div class="step-indicator active" data-step="1">1</div>
+            <div class="step-connector"></div>
+            <div class="step-indicator" data-step="2">2</div>
+            <div class="step-connector"></div>
+            <div class="step-indicator" data-step="3">3</div>
+            <div class="step-connector"></div>
+            <div class="step-indicator" data-step="4">4</div>
+            <div class="step-connector"></div>
+            <div class="step-indicator" data-step="5">5</div>
+            <div class="step-connector"></div>
+            <div class="step-indicator" data-step="6">6</div>
+        </div>
+
+        <!-- Selection Question Container -->
+        <div class="selection-question" id="selectionQuestion">
+            <h2 id="questionTitle">What front-end framework do you prefer?</h2>
+            <p class="question-hint" id="questionHint">Choose one option</p>
+
+            <div class="selection-options" id="selectionOptions">
+                <!-- Options will be populated dynamically -->
+            </div>
+
+            <div class="selection-actions">
+                <button class="selection-btn back-btn" id="backBtn" style="display: none;">
+                    <i class="fa-solid fa-arrow-left"></i> Back
+                </button>
+                <button class="selection-btn skip-btn" id="skipBtn">
+                    Skip <i class="fa-solid fa-forward"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chat Header Section (hidden initially) -->
+    <div class="chat-header" id="chatHeader" style="display: none;">
         <h1><i class="fa-solid fa-comments"></i> AI Chat Assistant</h1>
         <p class="subtitle">Powered by AWS Bedrock & Llama 3.1</p>
     </div>
 
-    <!-- Main Chat Wrapper -->
-    <div class="chat-wrapper">
+    <!-- Main Chat Wrapper (hidden initially) -->
+    <div class="chat-wrapper" id="chatWrapper" style="display: none;">
         <!-- Chat Messages Container (scrollable) -->
         <div class="chat-messages" id="chatMessages">
             <!-- Initial Welcome Message -->
