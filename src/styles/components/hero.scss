@@ -1,17 +1,17 @@
 /**
- * Hero Component Styles
- *
- * Styling for the hero banner section (Hero.astro).
- * Full-width banner with background image and text overlay.
- *
- * Key Features:
- * - Full-bleed design (negative margins)
- * - Background image with dark overlay
- * - White text with shadow for readability
- * - Minimum height of 50% viewport
- *
- * Used by: Hero.astro (homepage only)
- */
+  * Hero Component Styles
+  *
+  * Styling for the hero banner section (Hero.astro).
+  * Full-width banner with background image and text overlay.
+  *
+  * Key Features:
+  * - Full-bleed design (negative margins)
+  * - Background image with dark overlay
+  * - White text with shadow for readability
+  * - Minimum height of 50% viewport
+  *
+  * Used by: Hero.astro (homepage only)
+  */
 
 /* Import variables */
 @use '../variables/globals.scss' as *;

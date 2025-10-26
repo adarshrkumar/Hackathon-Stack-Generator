@@ -1,19 +1,19 @@
 /**
- * Application Layout Styles
- *
- * CSS Grid layout for the application pages (/app/*).
- * Creates a two-column layout with a vertical navigation sidebar and main content area.
- *
- * Grid Structure:
- * ┌─────────┬──────────────┐
- * │   Nav   │     Main     │  ← navmain row
- * │ (auto)  │   (1fr)      │
- * ├─────────┴──────────────┤
- * │      Footer (auto)     │  ← footer row
- * └────────────────────────┘
- *
- * Used by: App.astro
- */
+  * Application Layout Styles
+  *
+  * CSS Grid layout for the application pages (/app/*).
+  * Creates a two-column layout with a vertical navigation sidebar and main content area.
+  *
+  * Grid Structure:
+  * ┌─────────┬──────────────┐
+  * │   Nav   │     Main     │  ← navmain row
+  * │ (auto)  │   (1fr)      │
+  * ├─────────┴──────────────┤
+  * │      Footer (auto)     │  ← footer row
+  * └────────────────────────┘
+  *
+  * Used by: App.astro
+  */
 
 /* App Layout Container */
 .app-layout {

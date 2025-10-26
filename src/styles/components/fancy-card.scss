@@ -1,17 +1,17 @@
 /**
- * FancyCard Component Styles
- *
- * Styling for the reusable FancyCard component (FancyCard.astro).
- * Creates styled content cards with a colored left border accent.
- *
- * Key Features:
- * - Light gray background
- * - Colored left accent bar (using ::before pseudo-element)
- * - Rounded corners
- * - Improved line height for readability
- *
- * Used by: FancyCard.astro (homepage, about, contact pages)
- */
+  * FancyCard Component Styles
+  *
+  * Styling for the reusable FancyCard component (FancyCard.astro).
+  * Creates styled content cards with a colored left border accent.
+  *
+  * Key Features:
+  * - Light gray background
+  * - Colored left accent bar (using ::before pseudo-element)
+  * - Rounded corners
+  * - Improved line height for readability
+  *
+  * Used by: FancyCard.astro (homepage, about, contact pages)
+  */
 
 /* Import global variables */
 @use '../variables/globals.scss' as *;

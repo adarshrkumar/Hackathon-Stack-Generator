@@ -1,18 +1,18 @@
 /**
- * App Navigation Styles
- *
- * Styling for the app navigation sidebar (app/Nav.astro).
- * Vertical icon-based navigation for application pages.
- *
- * Key Features:
- * - Sticky vertical sidebar
- * - Icon-based navigation buttons
- * - Logo at top
- * - Gradient "Open App" button
- * - Flexbox column layout
- *
- * Used by: app/Nav.astro (application pages)
- */
+  * App Navigation Styles
+  *
+  * Styling for the app navigation sidebar (app/Nav.astro).
+  * Vertical icon-based navigation for application pages.
+  *
+  * Key Features:
+  * - Sticky vertical sidebar
+  * - Icon-based navigation buttons
+  * - Logo at top
+  * - Gradient "Open App" button
+  * - Flexbox column layout
+  *
+  * Used by: app/Nav.astro (application pages)
+  */
 
 /* Import variables */
 @use '../../variables/globals.scss' as *;

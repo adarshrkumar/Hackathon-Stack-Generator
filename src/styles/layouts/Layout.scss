@@ -1,16 +1,16 @@
 /**
- * Marketing Layout Styles
- *
- * Base layout styles for the marketing pages (homepage, about, contact).
- * Establishes the global font family and flexbox layout structure.
- *
- * Layout Structure:
- * - Body: Flex container (column direction)
- * - Main: Flexible content area that grows to fill available space
- * - Footer: Fixed at bottom (via flex layout)
- *
- * Used by: Layout.astro
- */
+  * Marketing Layout Styles
+  *
+  * Base layout styles for the marketing pages (homepage, about, contact).
+  * Establishes the global font family and flexbox layout structure.
+  *
+  * Layout Structure:
+  * - Body: Flex container (column direction)
+  * - Main: Flexible content area that grows to fill available space
+  * - Footer: Fixed at bottom (via flex layout)
+  *
+  * Used by: Layout.astro
+  */
 
 /* Import global variables */
 @use '../variables/globals.scss' as *;

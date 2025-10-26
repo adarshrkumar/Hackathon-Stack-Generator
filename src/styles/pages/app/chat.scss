@@ -1,21 +1,43 @@
+/**
+  * Chat Page Styles
+  *
+  * Styling for the in-app chat page (chat.astro).
+  * Provides layout and visual styles for the chat header, message list,
+  * message bubbles, typing indicator, and input area.
+  *
+  * Key Features:
+  * - Responsive chat wrapper with a scrollable message area
+  * - Distinct user vs assistant message styles
+  * - Typing indicator and loading state
+  * - Accessible input area with disabled and error states
+  *
+  * Used by: src/pages/app/chat.astro
+  */
+
+/* Import global variables */
 @use '../../variables/globals.scss' as *;
 
+/* Chat Header */
 .chat-header {
+    /* Centered header with subtle divider */
     text-align: center;
     padding: 1.5rem 0;
     border-bottom: 2px solid #e0e0e0;
     margin-bottom: 1rem;
 
+    /* Page title */
     h1 {
         font-size: 2rem;
         color: #333;
         margin: 0 0 0.5rem 0;
 
+        /* Accent icon color */
         i {
             color: #FF9900;
         }
     }
 
+    /* Subtitle / helper text */
     .subtitle {
         color: #666;
         font-size: 0.9rem;
@@ -23,28 +45,31 @@
     }
 }
 
+/* Chat container - centers content and provides chrome */
 .chat-wrapper {
     width: 100%;
     max-width: 1200px;
     margin: 0 auto;
-    height: calc(100vh - 240px);
+    height: calc(100vh - 240px); /* Fit the viewport while leaving room for header/footer */
     display: flex;
     flex-direction: column;
-    overflow: hidden;
+    overflow: hidden; /* Clips overflowing children */
     background: white;
     border-radius: 12px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
+/* Messages list - scrollable column */
 .chat-messages {
-    flex: 1;
-    overflow-y: auto;
+    flex: 1;                 /* Fill remaining vertical space */
+    overflow-y: auto;       /* Scroll when content overflows */
     padding: 2rem;
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 1rem;              /* Vertical spacing between messages */
 }
 
+/* Welcome / empty state message */
 .welcome-message {
     text-align: center;
     padding: 2rem;
@@ -62,12 +87,14 @@
     }
 }
 
+/* Individual message bubble */
 .message {
     display: flex;
     gap: 0.75rem;
     max-width: 80%;
     animation: fadeIn 0.3s ease-in;
 
+    /* User message: right-aligned with orange bubble */
     &.user {
         align-self: flex-end;
         flex-direction: row-reverse;
@@ -75,7 +102,7 @@
         .message-content {
             background: #FF9900;
             color: white;
-            border-radius: 18px 18px 4px 18px;
+            border-radius: 18px 18px 4px 18px; /* Tail on bottom-left */
         }
 
         .message-icon {
@@ -83,13 +110,14 @@
         }
     }
 
+    /* Assistant message: left-aligned with light gray bubble */
     &.assistant {
         align-self: flex-start;
 
         .message-content {
             background: #f0f0f0;
             color: #333;
-            border-radius: 18px 18px 18px 4px;
+            border-radius: 18px 18px 18px 4px; /* Tail on bottom-right */
         }
 
         .message-icon {
@@ -97,12 +125,14 @@
         }
     }
 
+    /* Loading state tweaks */
     &.loading .message-content {
         background: #f0f0f0;
         padding: 1rem 1.5rem;
     }
 }
 
+/* Avatar / icon next to message */
 .message-icon {
     width: 36px;
     height: 36px;
@@ -115,13 +145,15 @@
     font-size: 0.9rem;
 }
 
+/* Message content area */
 .message-content {
     padding: 0.75rem 1.25rem;
-    line-height: 1.5;
-    word-wrap: break-word;
-    white-space: pre-wrap;
+    line-height: 1.5;           /* Improve readability */
+    word-wrap: break-word;      /* Break long words/URLs */
+    white-space: pre-wrap;      /* Preserve newlines */
 }
 
+/* Typing indicator - three bouncing dots */
 .typing-indicator {
     display: flex;
     gap: 4px;
@@ -144,6 +176,7 @@
     }
 }
 
+/* Typing dot animation */
 @keyframes typing {
     0%, 60%, 100% {
         transform: translateY(0);
@@ -153,6 +186,7 @@
     }
 }
 
+/* Fade-in animation for messages */
 @keyframes fadeIn {
     from {
         opacity: 0;
@@ -164,12 +198,14 @@
     }
 }
 
+/* Input area container */
 .chat-input-container {
     padding: 1.5rem;
-    border-top: 1px solid #e0e0e0;
+    border-top: 1px solid #e0e0e0; /* Separate input from messages */
     background: #fafafa;
 }
 
+/* Inline error banner - hidden by default */
 .error-banner {
     display: none;
     background: #ffebee;
@@ -184,6 +220,7 @@
     }
 }
 
+/* Input row and textarea styling */
 .input-wrapper {
     display: flex;
     gap: 0.75rem;
@@ -200,11 +237,13 @@
         max-height: 150px;
         transition: border-color 0.3s;
 
+        /* Focus styles for accessibility */
         &:focus {
             outline: none;
             border-color: #FF9900;
         }
 
+        /* Disabled state */
         &:disabled {
             background: #f5f5f5;
             cursor: not-allowed;
@@ -212,6 +251,7 @@
     }
 }
 
+/* Circular send button */
 .send-btn {
     width: 48px;
     height: 48px;
@@ -241,6 +281,7 @@
     }
 }
 
+/* Small meta row below input */
 .chat-info {
     display: flex;
     justify-content: space-between;
@@ -250,6 +291,7 @@
     color: #666;
 }
 
+/* New chat button styling */
 .new-chat-btn {
     background: transparent;
     border: 1px solid #ddd;

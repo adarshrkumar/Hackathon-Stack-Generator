@@ -1,18 +1,18 @@
 /**
- * Header Component Styles
- *
- * Styling for the marketing site header (Header.astro).
- * Features a sticky header with logo and navigation menu.
- *
- * Key Features:
- * - Sticky positioning at top of viewport
- * - Flexbox layout for responsive design
- * - Logo with hover animation
- * - Navigation buttons with hover effects
- * - Special "Open App" button with gradient background
- *
- * Used by: Header.astro (marketing pages)
- */
+  * Header Component Styles
+  *
+  * Styling for the marketing site header (Header.astro).
+  * Features a sticky header with logo and navigation menu.
+  *
+  * Key Features:
+  * - Sticky positioning at top of viewport
+  * - Flexbox layout for responsive design
+  * - Logo with hover animation
+  * - Navigation buttons with hover effects
+  * - Special "Open App" button with gradient background
+  *
+  * Used by: Header.astro (marketing pages)
+  */
 
 /* Import variables */
 @use '../variables/globals.scss' as *;
