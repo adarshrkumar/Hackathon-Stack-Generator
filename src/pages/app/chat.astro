@@ -153,19 +153,6 @@ import App from '../../layouts/App.astro';
     /**
      * DOM Element References
      */
-
-    // Selection elements
-    const selectionContainer = document.getElementById('selectionContainer')!;
-    const selectionOptions = document.getElementById('selectionOptions')!;
-    const questionTitle = document.getElementById('questionTitle')!;
-    const questionHint = document.getElementById('questionHint')!;
-    const backBtn = document.getElementById('backBtn')!;
-    const skipBtn = document.getElementById('skipBtn')!;
-    const stepIndicators = document.querySelectorAll('.step-indicator');
-
-    // Chat elements
-    const chatHeader = document.getElementById('chatHeader')!;
-    const chatWrapper = document.getElementById('chatWrapper')!;
     const chatMessages = document.getElementById('chatMessages')!;
     const messageInput = document.getElementById('messageInput') as HTMLTextAreaElement;
     const sendButton = document.getElementById('sendButton') as HTMLButtonElement;
@@ -174,164 +161,193 @@ import App from '../../layouts/App.astro';
     const newChatBtn = document.getElementById('newChatBtn')!;
 
     /**
-     * SELECTION PROMPT FUNCTIONS
+     * SELECTION PROMPT FUNCTIONS (Chat Style)
      */
 
     /**
-     * Render current selection question
+     * Add a selection question message
      */
-    function renderQuestion() {
-        const question = selectionQuestions[currentQuestionIndex];
-        questionTitle.textContent = question.title;
-        questionHint.textContent = question.hint;
+    function addSelectionQuestion() {
+        if (currentQuestionIndex >= selectionQuestions.length) {
+            finishSelections();
+            return;
+        }
 
-        // Clear previous options
-        selectionOptions.innerHTML = '';
+        const q = selectionQuestions[currentQuestionIndex];
 
-        // Render options
-        question.options.forEach(option => {
-            const inputType = question.multiSelect ? 'checkbox' : 'radio';
-            const optionEl = document.createElement('label');
-            optionEl.className = 'selection-option';
+        // Create question message
+        const messageEl = document.createElement('div');
+        messageEl.className = 'message assistant selection-message';
 
-            optionEl.innerHTML = `
-                <input type="${inputType}" name="${question.category}" value="${option.value}">
-                <div class="option-content">
-                    <i class="${option.icon}"></i>
-                    <span>${option.label}</span>
-                </div>
+        // Build options HTML
+        let optionsHTML = '<div class="selection-options-inline">';
+
+        q.options.forEach((option, index) => {
+            optionsHTML += `
+                <button class="option-btn" data-category="${q.category}" data-value="${option}" data-index="${index}">
+                    ${option}
+                </button>
             `;
-
-            selectionOptions.appendChild(optionEl);
         });
 
-        // Update progress indicators
-        stepIndicators.forEach((indicator, index) => {
-            if (index < currentQuestionIndex) {
-                indicator.classList.add('completed');
-                indicator.classList.remove('active');
-            } else if (index === currentQuestionIndex) {
-                indicator.classList.add('active');
-                indicator.classList.remove('completed');
-            } else {
-                indicator.classList.remove('active', 'completed');
-            }
-        });
-
-        // Update back button visibility
-        backBtn.style.display = currentQuestionIndex > 0 ? 'inline-flex' : 'none';
-
-        // Update skip button text for last question
-        skipBtn.innerHTML = currentQuestionIndex === selectionQuestions.length - 1
-            ? 'Finish & Chat <i class="fa-solid fa-check"></i>'
-            : 'Skip <i class="fa-solid fa-forward"></i>';
-    }
-
-    /**
-     * Handle option selection
-     */
-    function handleOptionSelect(event: Event) {
-        const target = event.target as HTMLElement;
-        const input = target.querySelector('input') || target.closest('label')?.querySelector('input');
-
-        if (input) {
-            const question = selectionQuestions[currentQuestionIndex];
-
-            if (!question.multiSelect) {
-                // For radio buttons, auto-advance after selection
-                setTimeout(() => {
-                    saveCurrentSelection();
-                    nextQuestion();
-                }, 300);
-            }
+        // Add skip button for last question if it's multi-select
+        if (q.multiSelect) {
+            optionsHTML += `
+                <button class="option-btn skip-btn-inline" data-action="done">
+                    Done / Skip
+                </button>
+            `;
         }
+
+        optionsHTML += '</div>';
+
+        messageEl.innerHTML = `
+            <div class="message-icon">
+                <i class="fa-solid fa-robot"></i>
+            </div>
+            <div class="message-content">
+                ${marked.parse(q.question)}
+                ${optionsHTML}
+                <p class="selection-hint">${q.multiSelect ? 'You can select multiple options' : 'Click an option to continue'}</p>
+            </div>
+        `;
+
+        chatMessages.appendChild(messageEl);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+
+        // Add click handlers to option buttons
+        const optionBtns = messageEl.querySelectorAll('.option-btn');
+        optionBtns.forEach(btn => {
+            btn.addEventListener('click', handleOptionClick);
+        });
+
+        // Disable input during selection
+        messageInput.disabled = true;
+        sendButton.disabled = true;
     }
 
     /**
-     * Save current question's selection
+     * Handle option button click
      */
-    function saveCurrentSelection() {
-        const question = selectionQuestions[currentQuestionIndex];
+    function handleOptionClick(event: Event) {
+        const button = event.target as HTMLButtonElement;
+        const category = button.dataset.category;
+        const value = button.dataset.value;
+        const action = button.dataset.action;
+        const q = selectionQuestions[currentQuestionIndex];
 
-        if (question.multiSelect) {
-            const checked = selectionOptions.querySelectorAll('input:checked') as NodeListOf<HTMLInputElement>;
-            const values = Array.from(checked).map(input => input.value);
+        if (action === 'done') {
+            // Finish multi-select question
+            proceedToNext();
+            return;
+        }
+
+        if (!category || !value) return;
+
+        // Toggle selection for multi-select
+        if (q.multiSelect) {
+            button.classList.toggle('selected');
+
+            // Update selections
+            const selectedBtns = document.querySelectorAll(`.option-btn[data-category="${category}"].selected`);
+            const values = Array.from(selectedBtns).map(btn => (btn as HTMLButtonElement).dataset.value!);
+
             if (values.length > 0) {
-                userSelections[question.category] = values;
+                userSelections[category] = values;
+            } else {
+                delete userSelections[category];
             }
         } else {
-            const checked = selectionOptions.querySelector('input:checked') as HTMLInputElement;
-            if (checked) {
-                userSelections[question.category] = checked.value;
-            }
+            // Single select - save and proceed
+            userSelections[category] = value;
+
+            // Highlight selected option
+            button.classList.add('selected');
+
+            // Show user's choice as a message
+            addMessage('user', value);
+
+            // Disable all option buttons
+            const allBtns = document.querySelectorAll('.selection-options-inline .option-btn');
+            allBtns.forEach(btn => {
+                (btn as HTMLButtonElement).disabled = true;
+            });
+
+            // Move to next question after short delay
+            setTimeout(() => {
+                proceedToNext();
+            }, 500);
         }
     }
 
     /**
-     * Go to next question or finish
+     * Proceed to next question
      */
-    function nextQuestion() {
-        saveCurrentSelection();
+    function proceedToNext() {
+        currentQuestionIndex++;
 
-        if (currentQuestionIndex < selectionQuestions.length - 1) {
-            currentQuestionIndex++;
-            renderQuestion();
+        if (currentQuestionIndex < selectionQuestions.length) {
+            // Show next question
+            setTimeout(() => {
+                addSelectionQuestion();
+            }, 300);
         } else {
+            // All questions answered
             finishSelections();
         }
     }
 
     /**
-     * Go to previous question
-     */
-    function previousQuestion() {
-        if (currentQuestionIndex > 0) {
-            currentQuestionIndex--;
-            renderQuestion();
-        }
-    }
-
-    /**
-     * Finish selections and show chat
+     * Finish selections and generate AI prompt
      */
     async function finishSelections() {
-        selectionPhaseComplete = true;
+        selectionInProgress = false;
 
-        // Hide selection container
-        selectionContainer.style.display = 'none';
+        // Re-enable input
+        messageInput.disabled = false;
+        sendButton.disabled = false;
 
-        // Show chat interface
-        chatHeader.style.display = 'block';
-        chatWrapper.style.display = 'flex';
+        // Build summary message
+        let summary = "Perfect! Here's your tech stack:\n\n";
+        if (userSelections.frontend) summary += `**Frontend:** ${userSelections.frontend}\n`;
+        if (userSelections.backend) summary += `**Backend:** ${userSelections.backend}\n`;
+        if (userSelections.styling) summary += `**Styling:** ${userSelections.styling}\n`;
+        if (userSelections.database) summary += `**Database:** ${userSelections.database}\n`;
+        if (userSelections.auth) summary += `**Auth:** ${userSelections.auth}\n`;
+        if (userSelections.additional && Array.isArray(userSelections.additional) && userSelections.additional.length > 0) {
+            summary += `**Additional:** ${userSelections.additional.join(', ')}\n`;
+        }
 
-        // Build initial AI prompt based on selections
-        const initialPrompt = buildSelectionPrompt(userSelections);
+        summary += "\nLet me provide detailed recommendations...";
 
-        // Add welcome message with selection summary
-        const selectionSummary = buildSelectionSummary(userSelections);
-        chatMessages.innerHTML = `
-            <div class="message assistant">
-                <div class="message-icon">
-                    <i class="fa-solid fa-robot"></i>
-                </div>
-                <div class="message-content">
-                    <p><strong>Great! Here's what you're looking for:</strong></p>
-                    ${selectionSummary}
-                    <p style="margin-top: 1rem;"><strong>Let me analyze your selections and provide personalized recommendations...</strong></p>
-                </div>
+        // Add summary as assistant message
+        const summaryEl = document.createElement('div');
+        summaryEl.className = 'message assistant';
+        summaryEl.innerHTML = `
+            <div class="message-icon">
+                <i class="fa-solid fa-robot"></i>
+            </div>
+            <div class="message-content">
+                ${marked.parse(summary)}
             </div>
         `;
+        chatMessages.appendChild(summaryEl);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
 
-        // Auto-send the initial prompt to get AI recommendations
-        messageInput.value = initialPrompt;
+        // Build detailed AI prompt
+        const aiPrompt = buildDetailedPrompt(userSelections);
+
+        // Auto-send to AI
+        messageInput.value = aiPrompt;
         await sendMessage();
+        messageInput.value = '';
     }
 
     /**
-     * Build AI prompt from selections
+     * Build detailed prompt for AI
      */
-    function buildSelectionPrompt(selections: Record<string, string | string[]>): string {
-        let prompt = "Based on my technology preferences:\n\n";
+    function buildDetailedPrompt(selections: Record<string, string | string[]>): string {
+        let prompt = "Based on these technology preferences:\n\n";
 
         if (selections.frontend) prompt += `- Frontend: ${selections.frontend}\n`;
         if (selections.backend) prompt += `- Backend: ${selections.backend}\n`;
@@ -339,45 +355,45 @@ import App from '../../layouts/App.astro';
         if (selections.database) prompt += `- Database: ${selections.database}\n`;
         if (selections.auth) prompt += `- Authentication: ${selections.auth}\n`;
         if (selections.additional && Array.isArray(selections.additional)) {
-            prompt += `- Additional: ${selections.additional.join(', ')}\n`;
+            prompt += `- Additional Services: ${selections.additional.join(', ')}\n`;
         }
 
-        prompt += "\nPlease provide:\n";
+        prompt += "\nProvide:\n";
         prompt += "1. Why these technologies work well together\n";
-        prompt += "2. Specific service/provider recommendations from your knowledge\n";
-        prompt += "3. Best practices for integration\n";
-        prompt += "4. Any concerns or alternatives\n";
-        prompt += "5. Estimated complexity and cost considerations";
+        prompt += "2. Specific cloud providers/services from your knowledge base\n";
+        prompt += "3. Integration best practices\n";
+        prompt += "4. Potential challenges and solutions\n";
+        prompt += "5. Estimated costs and complexity";
 
         return prompt;
     }
 
     /**
-     * Build selection summary HTML
+     * Initialize selection flow
      */
-    function buildSelectionSummary(selections: Record<string, string | string[]>): string {
-        let html = '<ul style="list-style: none; padding-left: 0;">';
+    function initializeChat() {
+        // Add welcome message
+        const welcomeEl = document.createElement('div');
+        welcomeEl.className = 'message assistant';
+        welcomeEl.innerHTML = `
+            <div class="message-icon">
+                <i class="fa-solid fa-robot"></i>
+            </div>
+            <div class="message-content">
+                <p><strong>Welcome to Stack Generator!</strong></p>
+                <p>I'll help you build the perfect tech stack for your project. Let's start with a few questions...</p>
+            </div>
+        `;
+        chatMessages.appendChild(welcomeEl);
 
-        if (selections.frontend) html += `<li>✓ Frontend: <strong>${selections.frontend}</strong></li>`;
-        if (selections.backend) html += `<li>✓ Backend: <strong>${selections.backend}</strong></li>`;
-        if (selections.styling) html += `<li>✓ Styling: <strong>${selections.styling}</strong></li>`;
-        if (selections.database) html += `<li>✓ Database: <strong>${selections.database}</strong></li>`;
-        if (selections.auth) html += `<li>✓ Auth: <strong>${selections.auth}</strong></li>`;
-        if (selections.additional && Array.isArray(selections.additional) && selections.additional.length > 0) {
-            html += `<li>✓ Additional: <strong>${selections.additional.join(', ')}</strong></li>`;
-        }
-
-        html += '</ul>';
-        return html;
+        // Start first question
+        setTimeout(() => {
+            addSelectionQuestion();
+        }, 500);
     }
 
-    // Selection event listeners
-    backBtn.addEventListener('click', previousQuestion);
-    skipBtn.addEventListener('click', nextQuestion);
-    selectionOptions.addEventListener('click', handleOptionSelect);
-
-    // Initialize first question
-    renderQuestion();
+    // Start the selection flow
+    initializeChat();
 
     /**
      * Auto-Resize Textarea
