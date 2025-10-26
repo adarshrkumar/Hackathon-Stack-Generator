@@ -1,5 +1,21 @@
+/**
+  * Contact Page Styles
+  *
+  * Styling for the Contact page (contact.astro).
+  * Contains layout for contact methods, social links, and FAQ preview.
+  *
+  * Key Features:
+  * - Grid layouts for methods and social cards
+  * - Accessible call-to-action links
+  * - Consistent card hover interactions
+  *
+  * Used by: src/pages/contact.astro
+  */
+
+/* Import global variables */
 @use '../variables/globals.scss' as *;
 
+/* Top-level section spacing */
 section {
     margin: 3rem 0;
 
@@ -10,6 +26,7 @@ section {
     }
 }
 
+/* Intro block with lead paragraph */
 .contact-intro {
     text-align: center;
     max-width: 800px;
@@ -28,10 +45,12 @@ section {
     }
 }
 
+/* Contact methods section */
 .contact-methods {
     margin: 4rem 0;
 }
 
+/* Grid of contact method cards */
 .methods-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));

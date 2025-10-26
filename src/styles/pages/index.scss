@@ -1,5 +1,20 @@
+/**
+  * Home Page Styles
+  *
+  * Styling for the marketing home page (index.astro).
+  * Includes feature cards, how-it-works section, and CTA styling.
+  *
+  * Key Features:
+  * - Responsive feature grid and steps layout
+  * - Reusable card and CTA styles shared across pages
+  *
+  * Used by: src/pages/index.astro
+  */
+
+/* Import global variables */
 @use '../variables/globals.scss' as *;
 
+/* Page section spacing */
 section {
     margin: 3rem 0;
 
@@ -10,6 +25,7 @@ section {
     }
 }
 
+/* Features grid - responsive cards */
 .features-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -17,6 +33,7 @@ section {
     margin-top: 2rem;
 }
 
+/* Individual feature card */
 .feature-card {
     padding: 2rem;
     border: 1px solid #e0e0e0;
