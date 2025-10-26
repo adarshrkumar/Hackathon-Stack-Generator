@@ -35,7 +35,10 @@ import config from '../../../lib/config';
 import { nanoid } from 'nanoid';
 
 // Import Bedrock AI functions
-import { invokeBedrockLlama, generateConversationTitle } from '../../../lib/bedrock';
+import { invokeBedrockLlama, generateConversationTitle, parseToolCall } from '../../../lib/bedrock';
+
+// Import math tools
+import { getAllToolDefinitions, executeTool } from '../../../lib/mathTools';
 
 // Import type definitions
 import type { Message } from '../../../lib/types';
