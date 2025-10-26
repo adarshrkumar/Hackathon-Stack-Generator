@@ -1,13 +1,30 @@
+/**
+ * Footer Component Styles
+ *
+ * Styling for the global footer component (Footer.astro).
+ * Simple centered footer with top border and shadow.
+ *
+ * Used by: Both Layout.astro and App.astro
+ */
+
+/* Import color variables */
 @use '../variables/colors.scss' as *;
 
+/* Local spacing variable for footer */
 $_spacing: 1rem;
 
+/* Footer Container */
 .footer {
+    /* Spacing */
     padding: $_spacing;
 
+    /* Top Border */
     border-top: $global-border;
 
+    /* Center Text */
     text-align: center;
 
+    /* Top Shadow (negative offset creates upward shadow) */
+    /* Provides subtle separation from content above */
     box-shadow: 0 #{-1*$global-shadow-size} #{$global-shadow-size*2} $global-shadow-color;
 }
