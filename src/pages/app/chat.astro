@@ -144,8 +144,12 @@ import App from '../../layouts/App.astro';
      * Chat State Variables
      */
 
+    // LocalStorage key for thread ID persistence
+    const THREAD_ID_KEY = 'stack-generator-thread-id';
+
     // Current conversation thread ID (null for new conversations)
-    let currentThreadId: string | null = null;
+    // Load from localStorage if available to persist across page reloads
+    let currentThreadId: string | null = localStorage.getItem(THREAD_ID_KEY);
 
     // In-memory message history (for reference, not sent to API)
     let messageHistory: Array<{ role: 'user' | 'assistant', content: string }> = [];
@@ -529,10 +533,12 @@ import App from '../../layouts/App.astro';
              * Update Thread Info
              *
              * Store the thread ID for future messages
+             * Save to localStorage for persistence across page reloads
              * Display the conversation title in the UI
              */
             if (data.id) {
                 currentThreadId = data.id;
+                localStorage.setItem(THREAD_ID_KEY, data.id);
                 threadInfo.textContent = `Thread: ${data.generatedTitle || data.id.substring(0, 8)}`;
             }
 
