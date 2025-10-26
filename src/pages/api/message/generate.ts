@@ -204,20 +204,35 @@ export const POST: APIRoute = async ({ request }) => {
             console.log(`🆕 [${requestId}] New thread, starting with system message only`);
         }
 
-        // --- Append new user message ---
+        /**
+         * ADD USER MESSAGE TO HISTORY
+         *
+         * Append the current user's message to the conversation history.
+         * This will be sent to the AI model along with the rest of the history.
+         */
         console.log(`➕ [${requestId}] Adding user message to conversation history`);
         convoHistory.push({ role: 'user', content: user_prompt });
+
+        // Log updated conversation stats
         console.log(`📊 [${requestId}] Updated conversation history:`, {
             totalMessages: convoHistory.length,
             userMessageLength: user_prompt.length
         });
 
-        // --- Send request to AWS Bedrock ---
+        /**
+         * AI TEXT GENERATION WITH AWS BEDROCK
+         *
+         * This section handles the core AI interaction:
+         * 1. Send the conversation history to AWS Bedrock
+         * 2. Invoke the Llama model to generate a response
+         * 3. Handle any errors that occur during generation
+         */
         console.log(`🧠 [${requestId}] Starting AI text generation with AWS Bedrock`);
         const aiStartTime = Date.now();
         let generatedText = '';
 
         try {
+            // Log request details for debugging
             console.log(`📤 [${requestId}] Sending to Bedrock:`, {
                 model: config.model,
                 messageCount: convoHistory.length,
@@ -225,8 +240,17 @@ export const POST: APIRoute = async ({ request }) => {
                 lastMessageRole: convoHistory[convoHistory.length - 1]?.role,
             });
 
+            /**
+             * Invoke Bedrock Llama
+             *
+             * Call the Bedrock API with:
+             * - convoHistory: Complete conversation context
+             * - config.model: The Llama model ID
+             * - 2048: Max tokens to generate
+             */
             generatedText = await invokeBedrockLlama(convoHistory as Message[], config.model, 2048);
 
+            // Calculate and log performance metrics
             const aiEndTime = Date.now();
             const aiDuration = aiEndTime - aiStartTime;
 
@@ -236,14 +260,22 @@ export const POST: APIRoute = async ({ request }) => {
                 generatedTextPreview: generatedText.substring(0, 200) + (generatedText.length > 200 ? '...' : ''),
             });
         } catch (error) {
+            /**
+             * AI Generation Error Handling
+             *
+             * If Bedrock fails to generate a response, log detailed error
+             * information and return an error response to the client
+             */
             const aiEndTime = Date.now();
             const aiDuration = aiEndTime - aiStartTime;
+
             console.error(`❌ [${requestId}] AI generation failed after ${aiDuration}ms:`, error);
             console.error(`❌ [${requestId}] AI error details:`, {
                 errorName: error instanceof Error ? error.name : 'Unknown',
                 errorMessage: error instanceof Error ? error.message : String(error),
                 errorStack: error instanceof Error ? error.stack : 'No stack trace'
             });
+
             return new Response(
                 JSON.stringify({ error: `Failed to generate AI response: ${error}` }),
                 {
@@ -253,7 +285,12 @@ export const POST: APIRoute = async ({ request }) => {
             );
         }
 
-        // --- Append AI response to history ---
+        /**
+         * ADD AI RESPONSE TO HISTORY
+         *
+         * Append the AI-generated response to the conversation history.
+         * This maintains the complete conversation context for future messages.
+         */
         console.log(`➕ [${requestId}] Adding AI response to conversation history`);
         convoHistory.push({ role: 'assistant', content: generatedText });
 
