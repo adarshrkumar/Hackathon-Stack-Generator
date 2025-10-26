@@ -1,27 +1,27 @@
 ---
 /**
- * FancyCard Component
- *
- * A reusable card component with customizable styling options.
- * Provides a styled container with configurable padding, width, and alignment.
- *
- * Props:
- * - padding (string): Custom padding value (default: "1.5rem")
- * - maxWidth (string): Maximum width of the card (optional)
- * - centered (boolean): Whether to center the card horizontally (default: false)
- *
- * Features:
- * - Flexible styling through props
- * - Slots for custom content
- * - Responsive design via SCSS
- * - Auto-centering option
- *
- * Usage:
- * <FancyCard padding="2rem" maxWidth="600px" centered={true}>
- *   <h2>Card Title</h2>
- *   <p>Card content...</p>
- * </FancyCard>
- */
+  * FancyCard Component
+  *
+  * A reusable card component with customizable styling options.
+  * Provides a styled container with configurable padding, width, and alignment.
+  *
+  * Props:
+  * - padding (string): Custom padding value (default: "1.5rem")
+  * - maxWidth (string): Maximum width of the card (optional)
+  * - centered (boolean): Whether to center the card horizontally (default: false)
+  *
+  * Features:
+  * - Flexible styling through props
+  * - Slots for custom content
+  * - Responsive design via SCSS
+  * - Auto-centering option
+  *
+  * Usage:
+  * <FancyCard padding="2rem" maxWidth="600px" centered={true}>
+  *   <h2>Card Title</h2>
+  *   <p>Card content...</p>
+  * </FancyCard>
+  */
 
 // Extract props with default values
 const { padding = "1.5rem", maxWidth, centered = false } = Astro.props;
