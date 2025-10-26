@@ -1,6 +1,5 @@
 ---
 import Nav from '../components/app/Nav.astro';
-import Hero from '../components/Hero.astro';
 import Footer from '../components/Footer.astro';
 
 import '../styles/reset.scss';
@@ -35,7 +34,6 @@ if (pageIsHome) {
         <Nav />
 
         <main>
-            {pageIsHome ? <Hero /> : ''}
             <slot />
         </main>
 

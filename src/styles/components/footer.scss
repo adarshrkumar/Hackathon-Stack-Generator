@@ -1,6 +1,13 @@
+@use '../variables/colors.scss' as *;
+
 $_spacing: 1rem;
 
 .footer {
     padding: $_spacing;
+
+    border-top: $global-border;
+
     text-align: center;
+
+    box-shadow: 0 #{-1*$global-shadow-size} #{$global-shadow-size*2} $global-shadow-color;
 }
