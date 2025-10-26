@@ -294,24 +294,49 @@ export const POST: APIRoute = async ({ request }) => {
         console.log(`➕ [${requestId}] Adding AI response to conversation history`);
         convoHistory.push({ role: 'assistant', content: generatedText });
 
-        // --- Generate conversation title ---
+        /**
+         * CONVERSATION TITLE GENERATION
+         *
+         * Generate a descriptive title for the conversation (for new threads only).
+         * Existing threads already have a title from their first message.
+         */
         let convoTitle = existingThread?.title || '';
+
         if (!convoTitle) {
+            /**
+             * Generate New Title
+             *
+             * For new conversations, generate a concise title based on
+             * the first exchange. This helps users identify conversations
+             * in the thread list.
+             */
             console.log(`🏷️ [${requestId}] Generating conversation title`);
             const titleStartTime = Date.now();
+
             try {
+                // Generate title using AI (typically 3-7 words)
                 convoTitle = await generateConversationTitle(convoHistory, config.model);
+
+                // Log title generation performance
                 const titleEndTime = Date.now();
                 const titleDuration = titleEndTime - titleStartTime;
+
                 console.log(`✅ [${requestId}] Title generated successfully:`, {
                     title: convoTitle,
                     duration: `${titleDuration}ms`
                 });
             } catch (error) {
+                /**
+                 * Title Generation Fallback
+                 *
+                 * If title generation fails, use a default title
+                 * This ensures the thread can still be saved
+                 */
                 console.error(`❌ [${requestId}] Error generating title:`, error);
                 convoTitle = 'Untitled Conversation';
             }
         } else {
+            // Use existing title for continuing conversations
             console.log(`🏷️ [${requestId}] Using existing title:`, convoTitle);
         }
 
