@@ -1,6 +1,5 @@
 ---
 import App from '../../layouts/App.astro';
-import '../../styles/pages/app/chat.scss';
 ---
 
 <App title="AI Chat">
@@ -40,6 +39,10 @@ import '../../styles/pages/app/chat.scss';
         </div>
     </div>
 </App>
+
+<style lang="scss">
+    @use '../../styles/pages/app/chat' as *;
+</style>
 
 <script>
     let currentThreadId: string | null = null;
