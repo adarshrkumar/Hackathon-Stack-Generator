@@ -64,18 +64,20 @@ const client = new BedrockRuntimeClient({
   * @param messages - Array of conversation messages (system, user, assistant)
   * @param modelId - Bedrock model identifier (defaults to config.model)
   * @param maxTokens - Maximum number of tokens to generate (default: 2048)
+  * @param tools - Optional array of tool definitions available to the model
   * @returns The generated text response from the AI model
   * @throws Error if Bedrock invocation fails
   */
 export async function invokeBedrockLlama(
     messages: Message[],
     modelId: string = config.model,
-    maxTokens: number = 2048
+    maxTokens: number = 2048,
+    tools?: ToolDefinition[]
 ): Promise<string> {
     try {
         // Format the messages array into Llama's expected prompt format
         // Llama models require special tokens like <|begin_of_text|>, <|start_header_id|>, etc.
-        const prompt = formatMessagesForLlama(messages);
+        const prompt = formatMessagesForLlama(messages, tools);
 
         /**
           * Request Body Configuration
@@ -242,9 +244,10 @@ function cleanLlamaResponse(text: string): string {
   * Assistant response here<|eot_id|>
   *
   * @param messages - Array of conversation messages to format
+  * @param tools - Optional array of tool definitions available to the model
   * @returns Properly formatted prompt string for Llama models
   */
-function formatMessagesForLlama(messages: Message[]): string {
+function formatMessagesForLlama(messages: Message[], tools?: ToolDefinition[]): string {
     // Initialize empty prompt string
     let prompt = '';
 
@@ -256,8 +259,26 @@ function formatMessagesForLlama(messages: Message[]): string {
               *
               * System messages start with <|begin_of_text|> to mark conversation start
               * and include the system role header to establish AI behavior/context
+              *
+              * If tools are provided, append tool definitions to the system message
               */
-            prompt += `<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\n${message.content}<|eot_id|>`;
+            let systemContent = message.content;
+
+            if (tools && tools.length > 0) {
+                systemContent += '\n\n=== AVAILABLE TOOLS ===\n';
+                systemContent += 'You have access to the following tools. To use a tool, respond with a JSON object in this exact format:\n';
+                systemContent += '{"tool_use": {"name": "tool_name", "input": {"param1": value1, "param2": value2}}}\n\n';
+
+                for (const tool of tools) {
+                    systemContent += `Tool: ${tool.name}\n`;
+                    systemContent += `Description: ${tool.description}\n`;
+                    systemContent += `Input Schema: ${JSON.stringify(tool.input_schema, null, 2)}\n\n`;
+                }
+
+                systemContent += 'IMPORTANT: Only use tools when necessary for calculations or tasks you cannot perform directly. When using a tool, respond ONLY with the JSON object, nothing else. After receiving the tool result, provide your final answer to the user.\n';
+            }
+
+            prompt += `<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\n${systemContent}<|eot_id|>`;
 
         } else if (message.role === 'user') {
             /**
@@ -348,4 +369,51 @@ export async function generateConversationTitle(
       * and trim any extra whitespace for a clean title string
       */
     return title.replace(/^["']|["']$/g, '').trim();
+}
+
+/**
+  * Parse Tool Call from Response
+  *
+  * Detects if the AI response contains a tool call and extracts the tool information.
+  * Tool calls are expected in JSON format: {"tool_use": {"name": "tool_name", "input": {...}}}
+  *
+  * @param response - The AI's response text
+  * @returns Object containing whether a tool was called, the tool name, input, and remaining text
+  */
+export function parseToolCall(response: string): {
+    isToolCall: boolean;
+    toolName?: string;
+    toolInput?: any;
+    remainingText?: string;
+} {
+    try {
+        // Try to find JSON object in the response
+        const jsonMatch = response.match(/\{[\s\S]*"tool_use"[\s\S]*\}/);
+
+        if (!jsonMatch) {
+            return { isToolCall: false };
+        }
+
+        // Parse the JSON
+        const parsed = JSON.parse(jsonMatch[0]);
+
+        if (parsed.tool_use && parsed.tool_use.name) {
+            // Extract text before and after the tool call
+            const beforeTool = response.substring(0, jsonMatch.index || 0).trim();
+            const afterTool = response.substring((jsonMatch.index || 0) + jsonMatch[0].length).trim();
+            const remainingText = (beforeTool + ' ' + afterTool).trim();
+
+            return {
+                isToolCall: true,
+                toolName: parsed.tool_use.name,
+                toolInput: parsed.tool_use.input,
+                remainingText: remainingText || undefined
+            };
+        }
+
+        return { isToolCall: false };
+    } catch (error) {
+        // If JSON parsing fails, it's not a valid tool call
+        return { isToolCall: false };
+    }
 }
