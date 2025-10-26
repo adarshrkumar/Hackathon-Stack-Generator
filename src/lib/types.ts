@@ -1,19 +1,19 @@
 /**
- * Type Definitions for the Stack Generator Application
- *
- * This file contains TypeScript interfaces and types used throughout the application
- * for type safety and better IDE support.
- */
+  * Type Definitions for the Stack Generator Application
+  *
+  * This file contains TypeScript interfaces and types used throughout the application
+  * for type safety and better IDE support.
+  */
 
 /**
- * Message Interface
- *
- * Represents a single message in a conversation thread.
- * Messages follow the standard chat format used by AI models:
- * - system: Instructions/context for the AI model
- * - user: Messages from the end user
- * - assistant: Responses from the AI model
- */
+  * Message Interface
+  *
+  * Represents a single message in a conversation thread.
+  * Messages follow the standard chat format used by AI models:
+  * - system: Instructions/context for the AI model
+  * - user: Messages from the end user
+  * - assistant: Responses from the AI model
+  */
 export interface Message {
     // The role of the message sender (system, user, or assistant)
     role: 'system' | 'user' | 'assistant';
@@ -23,12 +23,12 @@ export interface Message {
 }
 
 /**
- * Bedrock Response Interface
- *
- * Represents the response structure returned by AWS Bedrock Runtime API
- * when invoking a language model. This interface models the JSON response
- * from the Bedrock service.
- */
+  * Bedrock Response Interface
+  *
+  * Represents the response structure returned by AWS Bedrock Runtime API
+  * when invoking a language model. This interface models the JSON response
+  * from the Bedrock service.
+  */
 export interface BedrockResponse {
     // The generated text from the AI model
     generation: string;
