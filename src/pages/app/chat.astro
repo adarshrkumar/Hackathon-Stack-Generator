@@ -432,7 +432,7 @@ import App from '../../layouts/App.astro';
      * New Chat Button Handler
      *
      * Prompts the user to confirm starting a new conversation,
-     * then resets the chat state and UI
+     * then resets the chat state, localStorage, and UI
      */
     newChatBtn.addEventListener('click', () => {
         if (confirm('Start a new conversation?')) {
@@ -440,19 +440,29 @@ import App from '../../layouts/App.astro';
             currentThreadId = null;
             messageHistory = [];
 
-            // Reset UI to initial welcome message
-            chatMessages.innerHTML = `
-                <div class="welcome-message">
-                    <i class="fa-solid fa-robot"></i>
-                    <p>Hello! I'm your AI assistant. Ask me anything!</p>
-                </div>
-            `;
+            // Clear thread ID from localStorage
+            localStorage.removeItem(THREAD_ID_KEY);
+
+            // Reset selection state
+            currentQuestionIndex = 0;
+            Object.keys(userSelections).forEach(key => delete userSelections[key]);
+            selectionInProgress = true;
+
+            // Clear chat messages
+            chatMessages.innerHTML = '';
+
+            // Re-enable input
+            messageInput.disabled = false;
+            sendButton.disabled = false;
 
             // Update thread info
             threadInfo.textContent = 'New conversation';
 
             // Clear any errors
             hideError();
+
+            // Restart the selection flow
+            initializeChat();
         }
     });
 
