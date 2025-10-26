@@ -169,9 +169,9 @@ export const mathToolDefinition: ToolDefinition = {
  *
  * @param toolName - Name of the tool to execute
  * @param toolInput - Input parameters for the tool
- * @returns Tool execution result
+ * @returns Tool execution result or Promise<MathToolResult> for async operations
  */
-export function executeTool(toolName: string, toolInput: any): MathToolResult {
+export function executeTool(toolName: string, toolInput: any): MathToolResult | Promise<MathToolResult> {
     console.log(`🔧 Executing tool: ${toolName} with input:`, toolInput);
 
     if (toolName === 'calculate') {
@@ -179,6 +179,30 @@ export function executeTool(toolName: string, toolInput: any): MathToolResult {
         const result = calculate(operation, a, b);
         console.log(`✅ Tool execution result:`, result);
         return result;
+    }
+
+    if (toolName === 'update_thread_cost') {
+        // Import dynamically to avoid circular dependencies
+        return (async () => {
+            try {
+                const { updateThreadCost } = await import('./dynamodb');
+                const { threadId, costIncrement } = toolInput;
+
+                const updatedCost = await updateThreadCost(threadId, costIncrement);
+
+                return {
+                    success: true,
+                    result: updatedCost,
+                    operation: 'update_thread_cost'
+                };
+            } catch (error) {
+                return {
+                    success: false,
+                    error: error instanceof Error ? error.message : String(error),
+                    operation: 'update_thread_cost'
+                };
+            }
+        })();
     }
 
     return {
