@@ -75,6 +75,7 @@ The application integrates with AWS Bedrock for AI conversations:
 - **Prompt Format**: Llama-specific chat format with special tokens (`<|begin_of_text|>`, `<|start_header_id|>`, etc.)
 
 **Key files**:
+
 - `src/lib/bedrock.ts` - Contains `invokeBedrockLlama()` and `generateConversationTitle()`
 - `src/lib/config.ts` - Model configuration and system prompts
 - `src/pages/api/message/generate.ts` - API endpoint handling conversation flow
@@ -85,6 +86,7 @@ AWS credentials must be configured via environment variables for Bedrock and Dyn
 ### API Architecture
 
 **POST `/api/message/generate`**:
+
 - Accepts: `{ text: string, id?: string }` (user message and optional thread ID)
 - Returns: `{ generatedText: string, generatedTitle: string, id: string }`
 - Flow:
@@ -101,6 +103,7 @@ AWS credentials must be configured via environment variables for Bedrock and Dyn
 **Database**: Amazon DynamoDB for persistent thread storage
 
 **Key files**:
+
 - `src/lib/dynamodb.ts` - DynamoDB client and CRUD operations
   - `createThread()` - Creates new conversation thread
   - `getThread()` - Retrieves thread by ID
@@ -109,6 +112,7 @@ AWS credentials must be configured via environment variables for Bedrock and Dyn
   - `deleteThread()` - Deletes a thread
 
 **Table Schema**:
+
 - Table name: `stack-generator-threads` (configurable via `DYNAMODB_TABLE_NAME`)
 - Partition key: `id` (String)
 - Attributes: `userId`, `title`, `messages[]`, `createdAt`, `updatedAt`
@@ -148,5 +152,5 @@ AWS credentials must be configured via environment variables for Bedrock and Dyn
 2. **Configure environment variables**: Copy `.env.example` to `.env` and add:
    - AWS credentials (`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_REGION`)
    - DynamoDB table name (`DYNAMODB_TABLE_NAME`)
-3. **Set up DynamoDB table**: Follow instructions in `DYNAMODB_SETUP.md`
+3. **Set up DynamoDB table**: Follow instructions online
 4. **Start development server**: `npm run dev`
