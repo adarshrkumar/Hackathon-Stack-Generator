@@ -1,87 +1,125 @@
+/**
+ * App Navigation Styles
+ *
+ * Styling for the app navigation sidebar (app/Nav.astro).
+ * Vertical icon-based navigation for application pages.
+ *
+ * Key Features:
+ * - Sticky vertical sidebar
+ * - Icon-based navigation buttons
+ * - Logo at top
+ * - Gradient "Open App" button
+ * - Flexbox column layout
+ *
+ * Used by: app/Nav.astro (application pages)
+ */
+
+/* Import variables */
 @use '../../variables/globals.scss' as *;
 @use '../../variables/colors.scss' as *;
 
+/* App Navigation Container */
 .nav.app {
+    /* Sticky Positioning - stays on left when scrolling */
     position: sticky;
     left: 0;
-    z-index: 1000;
+    z-index: 1000;  /* Above other content */
 
+    /* Spacing */
     padding: 1rem;
 
+    /* Flexbox Column Layout */
     display: flex;
-    flex-direction: column;
-    flex-wrap: wrap;
-    gap: 2rem;
+    flex-direction: column;  /* Stack items vertically */
+    flex-wrap: wrap;         /* Allow wrapping if needed */
+    gap: 2rem;               /* Space between sections */
 
-    align-items: center;
-    
+    /* Alignment */
+    align-items: center;  /* Center items horizontally */
+
+    /* Styling */
     background: white;
-    
+
+    /* Right Border */
     border-right: $global-border;
 
+    /* Right Shadow for depth */
     box-shadow: $global-shadow-size 0 #{$global-shadow-size*2} $global-shadow-color;
 }
 
+/* Navigation Elements */
 .nav {
+    /* Logo Styles */
     &__logo {
+        /* Logo link and image as block elements */
         &__link, &__img {
             display: block;
         }
 
+        /* Logo Image Styling */
         &__img {
-            width: 3.5rem;
-            aspect-ratio: 1;
-            border-radius: 8px;
-            border: 1px solid #e0e0e0;
-            transition: transform 0.2s;
+            width: 3.5rem;              /* Fixed width */
+            aspect-ratio: 1;            /* Square shape */
+            border-radius: 8px;         /* Rounded corners */
+            border: 1px solid #e0e0e0;  /* Light border */
+            transition: transform 0.2s; /* Smooth hover animation */
 
+            /* Hover Effect - slight scale up */
             &:hover {
                 transform: scale(1.05);
             }
         }
     }
 
+    /* Navigation Links List */
     &__links {
-        list-style: none;
+        list-style: none;  /* Remove bullets */
         margin: 0;
         padding: 0;
 
+        /* Inherit parent's flex properties for vertical stacking */
         display: inherit;
-        flex-direction: inherit;
-        gap: 0.5rem;
-        align-items: center;
+        flex-direction: inherit;  /* Column direction */
+        gap: 0.5rem;             /* Space between nav items */
+        align-items: center;      /* Center icons */
     }
 
+    /* Navigation Button */
     &__btn {
         padding: 0;
 
+        /* Link Styling */
         a {
-            display: block;
-            padding: 0.75rem 1.5rem;
-            color: #333;
-            text-decoration: none;
-            font-weight: 500;
-            transition: all 0.2s;
-            border-radius: 6px;
+            display: block;           /* Block for full padding area */
+            padding: 0.75rem 1.5rem;  /* Comfortable click area */
+            color: #333;              /* Dark text */
+            text-decoration: none;    /* Remove underline */
+            font-weight: 500;         /* Medium weight */
+            transition: all 0.2s;     /* Smooth transitions */
+            border-radius: 6px;       /* Rounded corners */
 
+            /* Hover Effect */
             &:hover {
-                color: #ff6b35;
-                background: #f8f9fa;
+                color: #ff6b35;       /* Orange accent */
+                background: #f8f9fa;  /* Light gray background */
             }
         }
     }
 
-    // Special styling for "Open App" button
+    /* Special "Open App" Button Styling */
+    /* Enhanced styling for the primary CTA button */
     &__btn.app a {
+        /* Gradient Background */
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
-        font-weight: 600;
-        padding: 0.5rem 1rem;
+        font-weight: 600;         /* Bold text */
+        padding: 0.5rem 1rem;     /* Compact padding for sidebar */
 
+        /* Hover Effect - lift and glow */
         &:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-            background: linear-gradient(135deg, #7b8ff0 0%, #8b5ab8 100%);
+            transform: translateY(-2px);  /* Lift slightly */
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);  /* Glowing shadow */
+            background: linear-gradient(135deg, #7b8ff0 0%, #8b5ab8 100%);  /* Lighter gradient */
         }
     }
 }
