@@ -290,27 +290,61 @@ function formatMessagesForLlama(messages: Message[]): string {
 }
 
 /**
- * Generate a concise title for a conversation
+ * Generate Conversation Title
+ *
+ * Generates a concise, descriptive title for a conversation based on the first
+ * few messages. This is useful for creating thread titles in the chat interface.
+ *
+ * The function:
+ * 1. Creates a specialized prompt asking for title generation
+ * 2. Includes the first few messages as context
+ * 3. Requests a 3-7 word title from the model
+ * 4. Cleans up the response (removes quotes, whitespace)
+ *
+ * @param messages - The conversation messages to generate a title from
+ * @param modelId - The Bedrock model to use (defaults to config.model)
+ * @returns A concise conversation title (3-7 words)
  */
 export async function generateConversationTitle(
     messages: Message[],
     modelId: string = config.model
 ): Promise<string> {
-    // Create a specific prompt for title generation
+    /**
+     * Construct Title Generation Prompt
+     *
+     * Create a specific message array for title generation that:
+     * - Uses a system message to instruct the model on title generation
+     * - Includes first 4 non-system messages for context
+     * - Explicitly requests a concise title in the final user message
+     */
     const titleMessages: Message[] = [
         {
             role: 'system',
+            // Specialized system prompt for title generation task
             content: 'You are a helpful assistant that generates concise, descriptive titles for conversations. Generate a title that is 3-7 words long and captures the main topic. Return only the title, nothing else.',
         },
-        ...messages.filter(m => m.role !== 'system').slice(0, 4), // Include first few messages for context
+        // Include first few messages (up to 4) for context, excluding system messages
+        ...messages.filter(m => m.role !== 'system').slice(0, 4),
         {
             role: 'user',
+            // Explicit instruction to generate title only
             content: 'Generate a concise title (3-7 words) for this conversation. Return only the title.',
         },
     ];
 
+    /**
+     * Generate Title
+     *
+     * Invoke Bedrock with a low token limit (100) since we only need
+     * a short title, not a full conversation response
+     */
     const title = await invokeBedrockLlama(titleMessages, modelId, 100);
 
-    // Clean up the title (remove quotes, extra whitespace, etc.)
+    /**
+     * Clean Up Title
+     *
+     * Remove surrounding quotes (single or double) that the model might include
+     * and trim any extra whitespace for a clean title string
+     */
     return title.replace(/^["']|["']$/g, '').trim();
 }

@@ -1,38 +1,118 @@
+/**
+ * AWS DynamoDB Integration Module
+ *
+ * This module handles all database operations for storing and retrieving
+ * conversation threads in Amazon DynamoDB. It provides CRUD operations
+ * for thread management with support for multi-user scenarios.
+ *
+ * Key Features:
+ * - Thread creation and retrieval
+ * - Message history storage and updates
+ * - User ownership verification
+ * - Multi-user support via Global Secondary Index (GSI)
+ *
+ * Database Schema:
+ * - Partition Key: id (thread identifier)
+ * - Attributes: userId, title, messages[], createdAt, updatedAt
+ * - Optional GSI: userId-index for querying user's threads
+ */
+
+// Import DynamoDB client and document client
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+
+// Import DynamoDB Document Client and command types
+// Document Client provides a simplified interface for working with DynamoDB items as JSON
 import {
-    DynamoDBDocumentClient,
-    PutCommand,
-    GetCommand,
-    UpdateCommand,
-    QueryCommand,
-    DeleteCommand,
+    DynamoDBDocumentClient,  // Wrapper for easier JSON handling
+    PutCommand,              // Create new items
+    GetCommand,              // Retrieve items by key
+    UpdateCommand,           // Update existing items
+    QueryCommand,            // Query with conditions (requires indexes)
+    DeleteCommand,           // Delete items
 } from '@aws-sdk/lib-dynamodb';
+
+// Import Message type definition
 import type { Message } from './types';
 
-// Initialize DynamoDB client
+/**
+ * DynamoDB Client Initialization
+ *
+ * The base DynamoDB client for connecting to AWS DynamoDB service.
+ * Configured with AWS credentials from environment variables.
+ */
 const client = new DynamoDBClient({
+    // AWS region for DynamoDB service (defaults to us-east-1)
     region: import.meta.env.AWS_REGION || 'us-east-1',
+
+    // AWS credentials for authentication
     credentials: {
         accessKeyId: import.meta.env.AWS_ACCESS_KEY_ID || '',
         secretAccessKey: import.meta.env.AWS_SECRET_ACCESS_KEY || '',
     },
 });
 
-// Create DynamoDB Document client for easier JSON handling
+/**
+ * DynamoDB Document Client
+ *
+ * The Document Client wraps the base DynamoDB client and provides
+ * automatic marshalling/unmarshalling of JavaScript objects to DynamoDB format.
+ * This allows us to work with native JavaScript types instead of DynamoDB's
+ * AttributeValue format.
+ */
 const docClient = DynamoDBDocumentClient.from(client);
 
-// Table name from environment or default
+/**
+ * DynamoDB Table Name
+ *
+ * The name of the DynamoDB table storing conversation threads.
+ * Can be configured via DYNAMODB_TABLE_NAME environment variable.
+ * Defaults to 'threads' if not specified.
+ */
 const TABLE_NAME = import.meta.env.DYNAMODB_TABLE_NAME || 'threads';
 
 /**
- * Thread data structure stored in DynamoDB
+ * Thread Interface
+ *
+ * Represents a conversation thread stored in DynamoDB.
+ * Each thread contains the conversation history, metadata, and ownership information.
  */
 export interface Thread {
-    id: string; // Partition key
-    userId?: string; // Optional user ID for multi-user support
+    /**
+     * Unique thread identifier
+     * This is the partition key in DynamoDB and must be unique across all threads
+     */
+    id: string;
+
+    /**
+     * Optional user identifier
+     * Used for multi-user support to track thread ownership
+     * Can be used with a GSI (Global Secondary Index) to query all threads for a user
+     */
+    userId?: string;
+
+    /**
+     * Thread title
+     * A concise, descriptive title generated from the conversation content
+     */
     title: string;
+
+    /**
+     * Conversation messages
+     * Array of all messages in the thread (system, user, assistant)
+     * Stored as a list attribute in DynamoDB
+     */
     messages: Message[];
+
+    /**
+     * Creation timestamp
+     * ISO 8601 formatted string indicating when the thread was created
+     */
     createdAt: string;
+
+    /**
+     * Last update timestamp
+     * ISO 8601 formatted string indicating when the thread was last modified
+     */
     updatedAt: string;
 }
 
