@@ -1,5 +1,25 @@
+/**
+ * Color Variables
+ *
+ * SCSS color variables using modern OKLCH color space.
+ * OKLCH provides perceptually uniform colors and better color manipulation.
+ *
+ * Format: oklch(lightness chroma hue)
+ * - Lightness: 0 (black) to 1 (white)
+ * - Chroma: 0 (grayscale) to ~0.4 (vivid)
+ * - Hue: 0-360 degrees
+ *
+ * Usage: @use './variables/colors.scss' as *;
+ */
+
+/* Header Background Color */
+/* Very light gray (95% lightness, no chroma = neutral gray) */
 $header-color: oklch(0.95 0 0);
 
+/* Global Border Style */
+/* 1px solid border with light gray color (85% lightness) */
 $global-border: 1px solid oklch(0.85 0 0);
-$global-shadow-size: 2px;
-$global-shadow-color: rgba(0, 0, 0, 0.05);
+
+/* Global Shadow Properties */
+$global-shadow-size: 2px;                 /* Shadow blur radius */
+$global-shadow-color: rgba(0, 0, 0, 0.05); /* Subtle black shadow with 5% opacity */
