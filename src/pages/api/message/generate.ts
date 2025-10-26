@@ -1,17 +1,13 @@
 import type { APIRoute } from 'astro';
-
-//@ts-ignore
 import config from '../../../lib/config';
-
 import { nanoid } from 'nanoid';
+import { invokeBedrockLlama, generateConversationTitle } from '../../../lib/bedrock';
+import type { Message } from '../../../lib/types';
 
-// @ts-ignore
-import anything from '../../../lib/types';
-
-export const POST: APIRoute = async ({ request, locals }) => {
+export const POST: APIRoute = async ({ request }) => {
     const requestId = nanoid();
     const startTime = Date.now();
-    
+
     try {
         const { text: user_prompt, id: thread_id } = await request.json();
         
@@ -68,7 +64,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
             try {
                 // TODO: Get all threads from db
                 // @ts-ignore
-                const threads = await db.select().from(threadsTable).where(eq(threadsTable.id, current_thread_id));
+                const threads: any = [] // await db.select().from(threadsTable).where(eq(threadsTable.id, current_thread_id));
 
                 if (threads.length > 0) {
                     userData = threads[0];
@@ -113,11 +109,49 @@ export const POST: APIRoute = async ({ request, locals }) => {
             userMessageLength: user_prompt.length
         });
 
-        // TODO: Send request to AWS Bedrock
-
+        // --- Send request to AWS Bedrock ---
+        console.log(`🧠 [${requestId}] Starting AI text generation with AWS Bedrock`);
+        const aiStartTime = Date.now();
         let generatedText = '';
 
+        try {
+            console.log(`📤 [${requestId}] Sending to Bedrock:`, {
+                model: config.model,
+                messageCount: convoHistory.length,
+                firstMessageRole: convoHistory[0]?.role,
+                lastMessageRole: convoHistory[convoHistory.length - 1]?.role,
+            });
+
+            generatedText = await invokeBedrockLlama(convoHistory as Message[], config.model, 2048);
+
+            const aiEndTime = Date.now();
+            const aiDuration = aiEndTime - aiStartTime;
+
+            console.log(`✅ [${requestId}] AI generation completed:`, {
+                duration: `${aiDuration}ms`,
+                generatedTextLength: generatedText.length,
+                generatedTextPreview: generatedText.substring(0, 200) + (generatedText.length > 200 ? '...' : ''),
+            });
+        } catch (error) {
+            const aiEndTime = Date.now();
+            const aiDuration = aiEndTime - aiStartTime;
+            console.error(`❌ [${requestId}] AI generation failed after ${aiDuration}ms:`, error);
+            console.error(`❌ [${requestId}] AI error details:`, {
+                errorName: error instanceof Error ? error.name : 'Unknown',
+                errorMessage: error instanceof Error ? error.message : String(error),
+                errorStack: error instanceof Error ? error.stack : 'No stack trace'
+            });
+            return new Response(
+                JSON.stringify({ error: `Failed to generate AI response: ${error}` }),
+                {
+                    status: 500,
+                    headers: { 'Content-Type': 'application/json' },
+                }
+            );
+        }
+
         // --- Append AI response to history ---
+        console.log(`➕ [${requestId}] Adding AI response to conversation history`);
         convoHistory.push({ role: 'assistant', content: generatedText });
 
         // --- Generate conversation title ---
@@ -126,7 +160,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
             console.log(`🏷️ [${requestId}] Generating conversation title`);
             const titleStartTime = Date.now();
             try {
-                convoTitle = await generateTitle(convoHistory);
+                convoTitle = await generateConversationTitle(convoHistory as Message[], config.model);
                 const titleEndTime = Date.now();
                 const titleDuration = titleEndTime - titleStartTime;
                 console.log(`✅ [${requestId}] Title generated successfully:`, {
@@ -168,31 +202,19 @@ export const POST: APIRoute = async ({ request, locals }) => {
             );
         }
 
-        // --- Extract and format response ---
-        const extractStartTime = Date.now();
-        const htmlText = '';
-        const obj = {};
-        const extractEndTime = Date.now();
-        const extractDuration = extractEndTime - extractStartTime;
-        
+        // --- Prepare response ---
         const totalDuration = Date.now() - startTime;
         console.log(`🎉 [${requestId}] Request completed successfully:`, {
             totalDuration: `${totalDuration}ms`,
             threadId: current_thread_id,
             finalTitle: convoTitle,
-            responseSize: JSON.stringify({
-                ...obj,
-                generatedText: htmlText,
-                generatedTitle: true,
-                id: current_thread_id,
-            }).length
+            responseLength: generatedText.length
         });
 
         return new Response(
             JSON.stringify({
-                ...obj,
-                generatedText: htmlText,
-                generatedTitle: true,
+                generatedText: generatedText,
+                generatedTitle: convoTitle,
                 id: current_thread_id,
             }),
             {
@@ -218,30 +240,5 @@ export const POST: APIRoute = async ({ request, locals }) => {
         );
     }
 };
-
-async function generateTitle(convoHistory: any[]) {
-    const titleRequestId = nanoid();
-    const model = config.model;
-    
-    try {
-        const titleStartTime = Date.now();
-        // TODO: Send request to AWS Bedrock for title generation
-        
-        const generatedText = 'Generated Conversation Title'; // Placeholder
-        
-        const titleEndTime = Date.now();
-        const titleDuration = titleEndTime - titleStartTime;
-        
-        console.log(`✅ [${titleRequestId}] Title generation completed:`, {
-            duration: `${titleDuration}ms`,
-            generatedTitle: generatedText,
-            titleLength: generatedText.length
-        });
-        
-        return generatedText;
-    } catch (error) {
-        throw error;
-    }
-}
 
 export const prerender = false;
