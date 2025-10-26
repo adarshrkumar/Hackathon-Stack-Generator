@@ -225,26 +225,65 @@ function cleanLlamaResponse(text: string): string {
 }
 
 /**
- * Format messages array into Llama prompt format
- * Llama uses special tokens for conversation formatting
+ * Format Messages for Llama Prompt
+ *
+ * Converts an array of Message objects into Llama's expected prompt format.
+ * Llama models require specific special tokens to delineate different parts
+ * of the conversation (system instructions, user messages, assistant responses).
+ *
+ * Llama Prompt Format Structure:
+ * <|begin_of_text|><|start_header_id|>system<|end_header_id|>
+ *
+ * System instructions here<|eot_id|><|start_header_id|>user<|end_header_id|>
+ *
+ * User message here<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+ *
+ * Assistant response here<|eot_id|>
+ *
+ * @param messages - Array of conversation messages to format
+ * @returns Properly formatted prompt string for Llama models
  */
 function formatMessagesForLlama(messages: Message[]): string {
+    // Initialize empty prompt string
     let prompt = '';
 
+    // Iterate through each message and format according to its role
     for (const message of messages) {
         if (message.role === 'system') {
-            // System message format for Llama
+            /**
+             * System Message Format
+             *
+             * System messages start with <|begin_of_text|> to mark conversation start
+             * and include the system role header to establish AI behavior/context
+             */
             prompt += `<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\n${message.content}<|eot_id|>`;
+
         } else if (message.role === 'user') {
-            // User message format
+            /**
+             * User Message Format
+             *
+             * User messages include the user role header and the user's input
+             */
             prompt += `<|start_header_id|>user<|end_header_id|>\n\n${message.content}<|eot_id|>`;
+
         } else if (message.role === 'assistant') {
-            // Assistant message format
+            /**
+             * Assistant Message Format
+             *
+             * Previous assistant messages in the conversation history
+             * This maintains conversation context for multi-turn dialogues
+             */
             prompt += `<|start_header_id|>assistant<|end_header_id|>\n\n${message.content}<|eot_id|>`;
         }
     }
 
-    // Add the assistant header to prompt for a response
+    /**
+     * Prompt for New Response
+     *
+     * Add the assistant header at the end to signal the model
+     * to generate a new assistant response. The model will complete
+     * this started assistant turn with its response.
+     */
     prompt += `<|start_header_id|>assistant<|end_header_id|>\n\n`;
 
     return prompt;
