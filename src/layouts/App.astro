@@ -3,7 +3,8 @@ import Nav from '../components/app/Nav.astro';
 import Footer from '../components/Footer.astro';
 
 import '../styles/reset.scss';
-import '../styles/globals.scss';
+import '../styles/layouts/Layout.scss';
+import '../styles/layouts/App.scss';
 
 const { title } = Astro.props;
 
@@ -29,11 +30,12 @@ if (pageIsHome) {
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+        <script src="https://kit.fontawesome.com/5a56375a95.js" crossorigin="anonymous"></script>
     </head>
-    <body>
+    <body class="app-layout">
         <Nav />
 
-        <main>
+        <main class="main app">
             <slot />
         </main>
 

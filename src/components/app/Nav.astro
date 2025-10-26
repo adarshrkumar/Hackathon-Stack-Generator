@@ -1,19 +1,33 @@
 ---
 
 ---
-<header class="header">
-    <a href="/" class="header__logo__link">
-        <img class="header__logo__img" src="/assets/logo.png" alt="Our logo" srcset="">
+<nav class="nav app">
+    <a href="/" class="nav__logo__link">
+        <img class="nav__logo__img" src="/assets/logo.png" alt="Our logo" srcset="">
     </a>
-    <nav class="nav">
-        <ul class="nav__links">
-            <li class="nav__btn"><a href="/" class="nav__link">Home</a></li>
-            <li class="nav__btn"><a href="/about" class="nav__link">About</a></li>
-            <li class="nav__btn"><a href="/contact" class="nav__link">Contact</a></li>
-            <li class="nav__btn app"><a href="/app" class="nav__link">Go Back Home</a></li>
-        </ul>
-    </nav>
-</header>
+    <ul class="nav__links">
+        <li class="nav__btn">
+            <a href="/" class="nav__link">
+                <i class="fa-regular fa-user"></i>
+            </a>
+        </li>
+        <li class="nav__btn">
+            <a href="/app/chat" class="nav__link">
+                <i class="fa-regular fa-comment"></i>
+            </a>
+        </li>
+        <li class="nav__btn">
+            <a href="/contact" class="nav__link">
+                <i class="fa-regular fa-user"></i>
+            </a>
+        </li>
+        <li class="nav__btn app">
+            <a href="/app" class="nav__link">
+                <i class="fa-regular fa-home"></i>
+            </a>
+        </li>
+    </ul>
+</nav>
 <style lang="scss">
-    @use '../../styles/components/header.scss' as *;
+    @use '../../styles/components/app/nav.scss' as *;
 </style>

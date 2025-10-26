@@ -1,0 +1,21 @@
+.app-layout {
+    display: grid;
+
+    grid-template-columns: [nav-start] auto [nav-end main-start] 1fr [main-end];
+    grid-template-rows: [navmain-start] 1fr [navmain-end footer-start] auto [footer-end];
+}
+
+.nav {
+    grid-column: nav-start / nav-end;
+    grid-row: navmain-start / navmain-end;
+}
+
+.main.app {
+    grid-column: main-start / main-end;
+    grid-row: navmain-start / navmain-end;
+}
+
+.footer {
+    grid-column: nav-start / main-end;
+    grid-row: footer-start / footer-end;
+}

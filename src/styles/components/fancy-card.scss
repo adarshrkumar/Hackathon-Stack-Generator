@@ -7,7 +7,7 @@
     
     border-radius: 8px;
     overflow: hidden;
-    
+
     line-height: 1.6;
 
     &::before {
@@ -17,7 +17,8 @@
         left: 0;
         height: 100%;
         width: 4px;
-        border-radius: inherit 0 0 inherit;
+        border-top-left-radius: inherit;
+        border-bottom-left-radius: inherit;
         background-color: #ff7e5f;
     }
 }

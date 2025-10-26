@@ -1,0 +1,13 @@
+---
+const { imgSrc, title, cost } = Astro.props;
+---
+<div class="grid__item">
+    <img src={imgSrc ?? ''} alt="" class="grid__item__img">
+    <div class="grid__item__info">
+        <h3 class="grid__item__title">{title ?? ''}</h3>
+        <p class="grid__item__description">
+            <slot />
+        </p>
+    </div>
+    <span class="grid__item__cost">{cost}</span>
+</div>

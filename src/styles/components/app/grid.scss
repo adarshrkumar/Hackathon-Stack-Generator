@@ -1,0 +1,60 @@
+@use 'sass:math';
+
+$_min-width: 250px;
+$_spacing: 1rem;
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax($_min-width, 1fr));
+    gap: $_spacing;
+
+    &__item {
+        aspect-ratio: 1;
+
+        background-color: white;
+
+        display: flex;
+        flex-direction: column;
+
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+
+        position: relative;
+
+        &__img {
+            flex: 1;
+
+            width: 100%;
+
+            object-fit: cover;
+
+            border-top-left-radius: inherit;
+            border-top-right-radius: inherit;
+        }
+
+        &__info {
+            padding: $_spacing;
+
+            display: flex;
+            flex-direction: column;
+            gap: $_spacing;
+
+            & > * {
+                margin-block: 0;
+            }
+        }
+
+        &__cost {
+            position: absolute;
+            top: 0;
+            right: 0;
+
+            padding: #{math.div($_spacing, 2)} $_spacing;
+
+            background-color: inherit;
+
+            border-top-right-radius: inherit;
+            border-bottom-left-radius: inherit;
+        }
+    }
+}
