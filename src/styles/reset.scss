@@ -55,11 +55,11 @@ h1, h2, h3, h4, h5, h6, p, ol, ul {
 
 /* List Reset */
 ol, ul {
-  list-style: none;  /* Remove default bullets/numbers for custom styling */
+    list-style: none;  /* Remove default bullets/numbers for custom styling */
 }
 
 /* Responsive Image Defaults */
 img {
-  max-width: 100%;  /* Prevent images from overflowing containers */
-  height: auto;     /* Maintain aspect ratio when width is constrained */
+    max-width: 100%;  /* Prevent images from overflowing containers */
+    height: auto;     /* Maintain aspect ratio when width is constrained */
 }
