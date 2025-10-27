@@ -7,6 +7,8 @@
   * Usage: @use './variables/globals.scss' as *;
   */
 
+@use '../variables/colors.scss' as *;
+
 /* Main Padding Variable */
 /* Standard padding for main content areas and sections */
 $main-padding: 2rem;

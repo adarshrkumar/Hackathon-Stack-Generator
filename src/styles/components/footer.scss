@@ -7,8 +7,8 @@
   * Used by: Both Layout.astro and App.astro
   */
 
-/* Import color variables */
-@use '../variables/colors.scss' as *;
+/* Import global variables */
+@use '../variables/globals.scss' as *;
 
 /* Local spacing variable for footer */
 $_spacing: 1rem;
