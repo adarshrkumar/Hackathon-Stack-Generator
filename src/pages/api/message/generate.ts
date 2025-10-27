@@ -1,123 +1,193 @@
-/**
-  * Message Generation API Route
-  *
-  * This API endpoint handles AI message generation requests for the Stack Generator application.
-  * It manages the complete conversation flow including:
-  * - Thread creation and retrieval
-  * - Conversation history management
-  * - AI response generation via AWS Bedrock
-  * - Conversation title generation
-  * - Persistent storage in DynamoDB
-  *
-  * Endpoint: POST /api/message/generate
-  *
-  * Request Body:
-  * {
-  *   text: string,     // User's message
-  *   id?: string       // Optional thread ID (creates new thread if omitted)
-  * }
-  *
-  * Response:
-  * {
-  *   generatedText: string,  // AI-generated response
-  *   generatedTitle: string, // Conversation title
-  *   id: string              // Thread ID
-  * }
-  */
-
-// Import Astro API route type
 import type { APIRoute } from 'astro';
 
-// Import application configuration
-import config from '../../../lib/config';
+import { generateText, type LanguageModel } from 'ai';
 
-// Import nanoid for generating unique thread IDs
+// import { openai } from '@ai-sdk/openai';
+import { anthropic } from '@ai-sdk/anthropic';
+// import { google } from '@ai-sdk/google';
+// import { xai } from '@ai-sdk/xai';
+// import { vercel } from '@ai-sdk/vercel';
+
+import config from '../../../lib/config';
+// import { providers } from '../../../lib/models';
+
 import { nanoid } from 'nanoid';
 
-// Import Bedrock AI functions
-import { invokeBedrockLlama, generateConversationTitle, parseToolCall } from '../../../lib/bedrock';
+import { db } from '../../../db/initialize';
+import { eq } from 'drizzle-orm';
+import type { InferSelectModel, InferInsertModel } from 'drizzle-orm';
 
-// Import math tools
-import { getAllToolDefinitions, executeTool } from '../../../lib/mathTools';
+import { threadsTable } from '../../../db/schema';
+import extract from '../../../lib/extractPartsofMessage';
+import { isValidEmail } from '../../../lib/validation';
+import { getAllToolDefinitions } from '../../../lib/mathTools';
 
-// Import type definitions
-import type { Message } from '../../../lib/types';
+// const provider_maps = {
+//     openai: [
+//         'openai',
+//         'chatgpt',
+//         'gpt',
+//         'copilot',
+//         'mscopilot',
+//         'microsoftcopilot',
+//         'ghcopilot',
+//         'githubcopilot',
+//     ],
+//     anthropic: [
+//         'anthropic',
+//         'claude',
+//     ],
+//     google: [
+//         'google',
+//         'gemini',
+//     ],
+//     xai: [
+//         'xai',
+//         'x',
+//         'grok',
+//     ],
+//     vercel: [
+//         'vercel',
+//         'v0',
+//     ],
+// };
 
-// Import DynamoDB functions and Thread type
-import {
-    createThread,
-    getThread,
-    updateThread,
-    getAllCompanyInfo,
-    getAllWebServices,
-    formatContextData,
-    type Thread
-} from '../../../lib/dynamodb';
+const providerFunctions = {
+    // openai: openai,
+    anthropic: anthropic,
+    // google: google,
+    // xai: xai,
+    // vercel: vercel,
+};
 
-/**
-  * POST Request Handler
-  *
-  * Handles POST requests to generate AI responses and manage conversation threads.
-  */
-export const POST: APIRoute = async ({ request }) => {
-    // Generate a unique ID for request tracking and logging
+// type ProviderKey = keyof typeof providerFunctions;
+type Thread = InferSelectModel<typeof threadsTable>;
+type ThreadInsert = InferInsertModel<typeof threadsTable>;
+
+export const POST: APIRoute = async ({ request, locals }) => {
     const requestId = nanoid();
-
-    // Record start time for performance monitoring
     const startTime = Date.now();
+    
+    console.log(`🚀 [${requestId}] Starting message generation request`);
+    console.log(`📊 [${requestId}] Request metadata:`, {
+        timestamp: new Date().toISOString(),
+        userAgent: request.headers.get('user-agent'),
+        contentType: request.headers.get('content-type'),
+        origin: request.headers.get('origin'),
+        referer: request.headers.get('referer')
+    });
 
     try {
-        /**
-          * Parse Request Body
-          *
-          * Extract the user's message (text) and optional thread ID (id)
-          * from the JSON request body
-          */
-        const { text: user_prompt, id: thread_id } = await request.json();
-
-        /**
-          * Thread ID Management
-          *
-          * Initialize thread ID variable to track the current conversation thread
-          */
+        console.log(`📥 [${requestId}] Parsing request body`);
+        const { text: userPrompt, id: thread_id, isPublic = false } = await request.json();
+        
+        console.log(`📝 [${requestId}] Request payload:`, {
+            userPromptLength: userPrompt?.length || 0,
+            userPromptPreview: userPrompt?.substring(0, 100) + (userPrompt?.length > 100 ? '...' : ''),
+            threadId: thread_id || 'none',
+            model: config.model || 'default',
+            isPublic,
+        });
+        
+        // TODO: Use category and mode for context-specific prompts
         let current_thread_id: string | undefined = thread_id;
+        const auth = locals?.auth;
+        if (!auth) {
+            console.error(`❌ [${requestId}] Authentication required but not provided`);
+            return new Response(
+                JSON.stringify({ status: 'error', error: 'Authentication required' }),
+                {
+                    status: 401,
+                    headers: { 'Content-Type': 'application/json' },
+                }
+            );
+        }
+        
+        console.log(`🔐 [${requestId}] Authentication found, extracting user info`);
+        const { userId, sessionClaims } = auth();
+        const user_email = userId ? ((sessionClaims?.email as string) || null) : null;
+        
+        console.log(`👤 [${requestId}] User info:`, {
+            userId: userId || 'none',
+            userEmail: user_email || 'none',
+            hasSessionClaims: !!sessionClaims,
+            sessionClaimsKeys: Object.keys(sessionClaims || {})
+        });
 
-        /**
-          * New Thread Flag
-          *
-          * Track whether this is a new conversation (true) or continuing
-          * an existing one (false). This determines whether we create or update
-          * the thread in DynamoDB.
-          */
+        // Validate email
+        console.log(`✅ [${requestId}] Validating user email`);
+        if (!isValidEmail(user_email)) {
+            console.error(`❌ [${requestId}] Invalid email format:`, user_email);
+            return new Response(
+                JSON.stringify({ status: 'error', error: 'Invalid email' }),
+                {
+                    status: 400,
+                    headers: { 'Content-Type': 'application/json' },
+                }
+            );
+        }
+        console.log(`✅ [${requestId}] Email validation passed`);
+
+        // Create a new thread if none provided
         let isNewThread = false;
-
-        /**
-          * Thread ID Generation (if needed)
-          *
-          * If no thread ID was provided in the request, this is a new conversation.
-          * Generate a unique ID using nanoid for the new thread.
-          */
+        
         if (!current_thread_id) {
+            console.log(`🆕 [${requestId}] No thread ID provided, creating new thread`);
             try {
-                // Generate a unique thread identifier
+                
+                // Check thread limit for user
+                if (user_email) {
+                    console.log(`🔍 [${requestId}] Checking thread limit for user:`, user_email);
+                    const userThreads = await db.select().from(threadsTable).where(eq(threadsTable.email, user_email));
+                    console.log(`📊 [${requestId}] User thread count:`, userThreads.length, '/', config.maxThreadsPerUser);
+                    
+                    if (userThreads.length >= config.maxThreadsPerUser) {
+                        console.error(`❌ [${requestId}] Thread limit exceeded for user:`, user_email);
+                        return new Response(
+                            JSON.stringify({ 
+                                status: 'error', 
+                                error: `You have reached the maximum limit of ${config.maxThreadsPerUser} threads. Please delete some threads before creating new ones.` 
+                            }),
+                            {
+                                status: 400,
+                                headers: { 'Content-Type': 'application/json' },
+                            }
+                        );
+                    }
+                }
+                
+                console.log(`🆔 [${requestId}] Generating new thread ID`);
                 const newThreadId = nanoid();
-
-                // Validate that nanoid successfully generated an ID
                 if (!newThreadId) {
                     console.error(`❌ [${requestId}] Failed to generate thread ID`);
                     throw new Error('Failed to generate thread ID');
                 }
-
-                console.log(`🆕 [${requestId}] Creating new thread with ID: ${newThreadId}`);
-
-                // Set the current thread ID and mark as new thread
+                
+                const newThread = {
+                    id: newThreadId,
+                    title: '',
+                    thread: { messages: [] },
+                    email: user_email,
+                    isPublic: isPublic,
+                    isDev: import.meta.env.NODE_ENV === 'development'
+                };
+                
+                console.log(`💾 [${requestId}] Inserting new thread into database:`, {
+                    threadId: newThreadId,
+                    isPublic,
+                    isDev: newThread.isDev
+                });
+                
+                const dbResponse = await db.insert(threadsTable).values(newThread);
                 current_thread_id = newThreadId;
                 isNewThread = true;
+                
+                console.log(`✅ [${requestId}] Thread created successfully:`, {
+                    threadId: newThreadId,
+                    dbResponse: !!dbResponse
+                });
             } catch (error) {
-                // Log thread generation error
                 console.error(`❌ [${requestId}] Error generating thread:`, error);
-
-                // Return error response
                 return new Response(
                     JSON.stringify({ error: `Failed to generate thread: ${error}` }),
                     {
@@ -126,260 +196,191 @@ export const POST: APIRoute = async ({ request }) => {
                     }
                 );
             }
+        } else {
+            console.log(`🔄 [${requestId}] Using existing thread ID:`, current_thread_id);
         }
 
-        /**
-          * FETCH CONTEXT DATA FROM DYNAMODB
-          *
-          * Retrieve company information and web services data from DynamoDB
-          * to provide context to the AI model for better responses.
-          */
-        console.log(`📚 [${requestId}] Fetching context data from DynamoDB`);
-        const contextStartTime = Date.now();
+        // --- Load System Prompt and Initialize Conversation History ---
+        console.log(`🎯 [${requestId}] Loading system prompt`);
 
-        let contextData = '';
-        try {
-            // Fetch both tables in parallel for better performance
-            const [companyInfo, webServices] = await Promise.all([
-                getAllCompanyInfo(),
-                getAllWebServices()
-            ]);
-
-            // Format the context data into a readable string
-            contextData = formatContextData(companyInfo, webServices);
-
-            const contextEndTime = Date.now();
-            const contextDuration = contextEndTime - contextStartTime;
-
-            console.log(`✅ [${requestId}] Context data fetched successfully:`, {
-                duration: `${contextDuration}ms`,
-                companyInfoCount: companyInfo.length,
-                webServicesCount: webServices.length,
-                contextLength: contextData.length
-            });
-        } catch (error) {
-            // If context fetching fails, log the error but continue with empty context
-            // This ensures the chat still works even if context tables are unavailable
-            console.error(`⚠️ [${requestId}] Error fetching context data (continuing without context):`, error);
-            contextData = '';
-        }
-
-        /**
-          * System Prompt Setup
-          *
-          * Get the system prompt from configuration and append the context data.
-          * The system prompt establishes the AI's behavior and persona for the entire conversation.
-          */
-        const baseSystemPrompt = config.systemPrompt;
-        const systemPrompt = baseSystemPrompt + contextData;
-
-        /**
-          * System Message Object
-          *
-          * Create the system message that will be prepended to every conversation.
-          * This is always the first message sent to the AI model.
-          */
+        const systemPrompt = config.systemPrompt;
+        console.log(`📝 [${requestId}] System prompt loaded:`, {
+            promptLength: systemPrompt.length,
+            promptPreview: systemPrompt.substring(0, 200) + '...'
+        });
+        
         const systemObj = {
-            role: 'system' as const,  // Type assertion for role
+            role: 'system',
             content: systemPrompt,
         }
+        
+        let convoHistory: any[] = [systemObj];
+        console.log(`🔄 [${requestId}] Initialized conversation history with system message`);
 
-        /**
-          * Conversation History Initialization
-          *
-          * Initialize the conversation history with the system message.
-          * For existing threads, we'll load previous messages from DynamoDB.
-          * For new threads, it starts with just the system message.
-          */
-        let convoHistory: Message[] = [systemObj as Message];
-
-        /**
-          * CONVERSATION HISTORY RETRIEVAL FROM DYNAMODB
-          *
-          * For existing threads, fetch the conversation history from DynamoDB
-          * to maintain context across multiple requests.
-          */
-        let existingThread: Thread | null = null;
-
-        if (current_thread_id && !isNewThread) {
+        // --- Conversation History Fetch from DB ---
+        console.log(`📚 [${requestId}] Fetching conversation history for thread:`, current_thread_id);
+        let userData: Thread | undefined = undefined;
+        if (current_thread_id) {
             try {
-                console.log(`🔍 [${requestId}] Fetching thread from DynamoDB: ${current_thread_id}`);
-
-                // Attempt to retrieve the thread from DynamoDB
-                existingThread = await getThread(current_thread_id);
-
-                if (existingThread) {
-                    // Thread found - log details
-                    console.log(`✅ [${requestId}] Thread found in DynamoDB:`, {
-                        threadId: existingThread.id,
-                        title: existingThread.title,
-                        messageCount: existingThread.messages.length
+                console.log(`🔍 [${requestId}] Querying database for thread data`);
+                const threads = await db.select().from(threadsTable).where(eq(threadsTable.id, current_thread_id));
+                console.log(`📊 [${requestId}] Database query result:`, {
+                    threadCount: threads.length,
+                    foundThread: threads.length > 0
+                });
+                
+                if (threads.length > 0) {
+                    userData = threads[0];
+                    console.log(`📋 [${requestId}] Thread data loaded:`, {
+                        threadId: userData.id,
+                        title: userData.title || 'untitled',
+                        email: userData.email || 'none',
+                        isPublic: userData.isPublic,
+                        hasThreadData: !!userData.thread,
+                        createdAt: userData.createdAt,
+                        updatedAt: userData.updatedAt
                     });
-
-                    /**
-                      * Load Existing History
-                      *
-                      * Prepend system message to the stored conversation history
-                      * (system message is added dynamically, not stored in DB)
-                      */
-                    convoHistory = [systemObj as Message, ...existingThread.messages];
+                    
+                    // Check thread ownership
+                    if (userData.email && userData.email !== user_email) {
+                        console.error(`❌ [${requestId}] Unauthorized access attempt:`, {
+                            threadOwner: userData.email,
+                            requestingUser: user_email
+                        });
+                        return new Response(
+                            JSON.stringify({ error: 'Unauthorized access to thread' }),
+                            {
+                                status: 403,
+                                headers: { 'Content-Type': 'application/json' },
+                            }
+                        );
+                    }
+                    
+                    if (
+                        userData.thread && 
+                        typeof userData.thread === 'object' && 
+                        'messages' in userData.thread &&
+                        Array.isArray((userData.thread as { messages: any[] }).messages)
+                    ) {
+                        convoHistory = [systemObj, ...(userData.thread as { messages: any[] }).messages];
+                        console.log(`💬 [${requestId}] Conversation history loaded with system message:`, {
+                            totalMessageCount: convoHistory.length,
+                            systemMessageIncluded: true,
+                            userMessagesCount: (userData.thread as { messages: any[] }).messages.length,
+                            lastMessageRole: convoHistory[convoHistory.length - 1]?.role || 'none'
+                        });
+                    } else {
+                        console.log(`⚠️ [${requestId}] No valid conversation history found in thread data, keeping system message only`);
+                    }
                 } else {
-                    /**
-                      * Thread Not Found
-                      *
-                      * If the thread ID doesn't exist in DynamoDB, treat this as
-                      * a new thread (might happen if the thread was deleted)
-                      */
-                    console.log(`⚠️ [${requestId}] Thread not found in DynamoDB, treating as new thread: ${current_thread_id}`);
-                    isNewThread = true;
+                    console.log(`⚠️ [${requestId}] Thread not found in database, using system message only:`, current_thread_id);
                 }
             } catch (error) {
-                // Log and return error if DynamoDB fetch fails
                 console.error(`❌ [${requestId}] Error fetching conversation history:`, error);
                 return new Response(
-                    JSON.stringify({ error: `Failed to fetch conversation history: ${error instanceof Error ? error.message : String(error)}` }),
+                    JSON.stringify({ error: `Failed to fetch conversation history: ${error}` }),
                     {
                         status: 500,
                         headers: { 'Content-Type': 'application/json' },
                     }
                 );
             }
-        } else if (isNewThread) {
-            // Log for new thread creation
-            console.log(`🆕 [${requestId}] New thread, starting with system message only`);
+        } else {
+            console.log(`🆕 [${requestId}] No thread ID provided, using system message only`);
         }
 
-        /**
-          * ADD USER MESSAGE TO HISTORY
-          *
-          * Append the current user's message to the conversation history.
-          * This will be sent to the AI model along with the rest of the history.
-          */
+        // --- Append new user message ---
         console.log(`➕ [${requestId}] Adding user message to conversation history`);
-        convoHistory.push({ role: 'user', content: user_prompt });
-
-        // Log updated conversation stats
+        convoHistory.push({ role: 'user', content: userPrompt });
         console.log(`📊 [${requestId}] Updated conversation history:`, {
             totalMessages: convoHistory.length,
-            userMessageLength: user_prompt.length
+            userMessageLength: userPrompt.length
         });
 
-        /**
-          * AI TEXT GENERATION WITH AWS BEDROCK (with Tool Support)
-          *
-          * This section handles the core AI interaction:
-          * 1. Get available tools
-          * 2. Send the conversation history to AWS Bedrock with tool definitions
-          * 3. Check if the AI wants to use a tool
-          * 4. Execute the tool if requested
-          * 5. Send the tool result back to the AI for final response
-          */
-        console.log(`🧠 [${requestId}] Starting AI text generation with AWS Bedrock`);
+        // --- Model/Provider selection ---
+        console.log(`🤖 [${requestId}] Selecting AI model and provider`);
+        let userModel = config.model;
+        let userProvider = config.provider;
+
+        console.log(`🔍 [${requestId}] Initial model/provider selection:`, {
+            selectedModel: userModel,
+            selectedProvider: userProvider
+        });
+
+        userProvider = config.provider;
+        let provider = providerFunctions[userProvider as keyof typeof providerFunctions] ? userProvider : config.providerFunction;
+
+        if (!provider) {
+            console.log(`⚠️ [${requestId}] Provider/model validation failed, using defaults`);
+            userModel = config.model;
+            provider = config.provider;
+        }
+
+        console.log(`✅ [${requestId}] Final model/provider selection:`, {
+            model: userModel,
+            provider: provider,
+            providerFunctionExists: !!providerFunctions[provider as keyof typeof providerFunctions]
+        });
+
+        let aiModel = providerFunctions[provider as keyof typeof providerFunctions](userModel) as LanguageModel;
+
+        const tools = config.tools || {};
+        
+        console.log(`🛠️ [${requestId}] AI generation setup:`, {
+            toolsCount: Object.keys(tools).length,
+            toolsList: Object.keys(tools),
+            systemPromptLength: systemPrompt.length,
+            systemPromptPreview: systemPrompt.substring(0, 200) + '...',
+            conversationHistoryLength: convoHistory.length,
+            systemMessageIncluded: convoHistory[0]?.role === 'system'
+        });
+        
+        // --- AI Generation ---
+        console.log(`🧠 [${requestId}] Starting AI text generation with pre-built conversation history`);
         const aiStartTime = Date.now();
-        let generatedText = '';
-
+        let generatedText: string;
         try {
-            // Get all available tool definitions
-            const availableTools = getAllToolDefinitions();
-            console.log(`🔧 [${requestId}] Available tools:`, availableTools.map(t => t.name));
-
-            // Log request details for debugging
-            console.log(`📤 [${requestId}] Sending to Bedrock:`, {
-                model: config.model,
+            console.log(`📤 [${requestId}] Sending to AI model:`, {
+                model: userModel,
+                provider: provider,
                 messageCount: convoHistory.length,
                 firstMessageRole: convoHistory[0]?.role,
                 lastMessageRole: convoHistory[convoHistory.length - 1]?.role,
-                toolsEnabled: availableTools.length > 0
+                toolsEnabled: Object.keys(tools).length > 0,
+                maxSteps: 25
             });
-
-            /**
-              * Invoke Bedrock Llama with Tools
-              *
-              * Call the Bedrock API with:
-              * - convoHistory: Complete conversation context
-              * - config.model: The Llama model ID
-              * - 2048: Max tokens to generate
-              * - availableTools: Tool definitions for function calling
-              */
-            generatedText = await invokeBedrockLlama(
-                convoHistory as Message[],
-                config.model,
-                2048,
-                availableTools
-            );
-
-            /**
-              * Tool Call Detection and Execution
-              *
-              * Check if the AI response contains a tool call.
-              * If so, execute the tool and get a final response.
-              */
-            const toolCallParse = parseToolCall(generatedText);
-
-            if (toolCallParse.isToolCall && toolCallParse.toolName && toolCallParse.toolInput) {
-                console.log(`🔧 [${requestId}] Tool call detected:`, {
-                    toolName: toolCallParse.toolName,
-                    toolInput: toolCallParse.toolInput
-                });
-
-                // Execute the tool
-                const toolResult = executeTool(toolCallParse.toolName, toolCallParse.toolInput);
-
-                console.log(`✅ [${requestId}] Tool execution result:`, toolResult);
-
-                // Add the tool call and result to conversation history
-                convoHistory.push({
-                    role: 'assistant',
-                    content: generatedText
-                });
-
-                convoHistory.push({
-                    role: 'user',
-                    content: `Tool "${toolCallParse.toolName}" execution result: ${JSON.stringify(toolResult)}\n\nPlease provide your final answer to the user based on this tool result.`
-                });
-
-                // Get the final response from the AI
-                console.log(`🧠 [${requestId}] Getting final response after tool execution`);
-                generatedText = await invokeBedrockLlama(
-                    convoHistory as Message[],
-                    config.model,
-                    2048,
-                    availableTools
-                );
-
-                console.log(`✅ [${requestId}] Final response after tool use:`, {
-                    responseLength: generatedText.length,
-                    responsePreview: generatedText.substring(0, 200) + (generatedText.length > 200 ? '...' : '')
-                });
-            }
-
-            // Calculate and log performance metrics
+            
+            const result = await generateText({
+                model: aiModel,
+                messages: convoHistory,
+                tools: tools,
+                maxSteps: 25,
+            });
+            generatedText = result.text;
+            
             const aiEndTime = Date.now();
             const aiDuration = aiEndTime - aiStartTime;
-
+            
             console.log(`✅ [${requestId}] AI generation completed:`, {
                 duration: `${aiDuration}ms`,
                 generatedTextLength: generatedText.length,
                 generatedTextPreview: generatedText.substring(0, 200) + (generatedText.length > 200 ? '...' : ''),
-                toolUsed: toolCallParse.isToolCall ? toolCallParse.toolName : 'none'
+                hasUsage: !!result.usage,
+                usageTokens: result.usage ? {
+                    promptTokens: result.usage.promptTokens,
+                    completionTokens: result.usage.completionTokens,
+                    totalTokens: result.usage.totalTokens
+                } : 'none'
             });
         } catch (error) {
-            /**
-              * AI Generation Error Handling
-              *
-              * If Bedrock fails to generate a response, log detailed error
-              * information and return an error response to the client
-              */
             const aiEndTime = Date.now();
             const aiDuration = aiEndTime - aiStartTime;
-
             console.error(`❌ [${requestId}] AI generation failed after ${aiDuration}ms:`, error);
             console.error(`❌ [${requestId}] AI error details:`, {
                 errorName: error instanceof Error ? error.name : 'Unknown',
                 errorMessage: error instanceof Error ? error.message : String(error),
                 errorStack: error instanceof Error ? error.stack : 'No stack trace'
             });
-
             return new Response(
                 JSON.stringify({ error: `Failed to generate AI response: ${error}` }),
                 {
@@ -389,137 +390,86 @@ export const POST: APIRoute = async ({ request }) => {
             );
         }
 
-        /**
-          * ADD AI RESPONSE TO HISTORY
-          *
-          * Append the AI-generated response to the conversation history.
-          * This maintains the complete conversation context for future messages.
-          */
+        // --- Append AI response to history ---
         console.log(`➕ [${requestId}] Adding AI response to conversation history`);
         convoHistory.push({ role: 'assistant', content: generatedText });
+        console.log(`📊 [${requestId}] Final conversation history:`, {
+            totalMessages: convoHistory.length,
+            aiResponseLength: generatedText.length
+        });
 
-        /**
-          * CONVERSATION TITLE GENERATION
-          *
-          * Generate a descriptive title for the conversation (for new threads only).
-          * Existing threads already have a title from their first message.
-          */
-        let convoTitle = existingThread?.title || '';
-
+        // --- Generate conversation title ---
+        let convoTitle = userData?.title;
         if (!convoTitle) {
-            /**
-              * Generate New Title
-              *
-              * For new conversations, generate a concise title based on
-              * the first exchange. This helps users identify conversations
-              * in the thread list.
-              */
             console.log(`🏷️ [${requestId}] Generating conversation title`);
             const titleStartTime = Date.now();
-
             try {
-                // Generate title using AI (typically 3-7 words)
-                convoTitle = await generateConversationTitle(convoHistory, config.model);
-
-                // Log title generation performance
+                convoTitle = await generateTitle(convoHistory, userModel, provider);
                 const titleEndTime = Date.now();
                 const titleDuration = titleEndTime - titleStartTime;
-
                 console.log(`✅ [${requestId}] Title generated successfully:`, {
                     title: convoTitle,
                     duration: `${titleDuration}ms`
                 });
             } catch (error) {
-                /**
-                  * Title Generation Fallback
-                  *
-                  * If title generation fails, use a default title
-                  * This ensures the thread can still be saved
-                  */
                 console.error(`❌ [${requestId}] Error generating title:`, error);
                 convoTitle = 'Untitled Conversation';
             }
         } else {
-            // Use existing title for continuing conversations
             console.log(`🏷️ [${requestId}] Using existing title:`, convoTitle);
         }
 
-        /**
-          * SAVE CONVERSATION TO DYNAMODB
-          *
-          * Persist the updated conversation history to DynamoDB.
-          * - For new threads: Create a new DynamoDB item
-          * - For existing threads: Update the existing item
-          */
-        console.log(`💾 [${requestId}] Saving conversation to DynamoDB`);
+        // --- Save updated history back to DB ---
+        console.log(`💾 [${requestId}] Saving conversation to database`);
         const saveStartTime = Date.now();
-
         try {
-            // Validate thread ID before attempting to save
-            if (!current_thread_id) {
-                throw new Error('Thread ID is null or undefined');
-            }
-
-            /**
-              * Prepare Messages for Storage
-              *
-              * Filter out the system message before storing.
-              * We don't store system messages in DynamoDB because:
-              * 1. They're static and can be added dynamically
-              * 2. Saves storage space
-              * 3. Allows updating system prompts without migrating data
-              */
-            const messagesToStore = convoHistory.filter(msg => msg.role !== 'system');
-
-            if (isNewThread) {
-                /**
-                  * Create New Thread
-                  *
-                  * For new conversations, create a new item in DynamoDB
-                  * with the thread ID, title, and initial messages
-                  */
-                console.log(`🆕 [${requestId}] Creating new thread in DynamoDB`);
-                await createThread({
+            if (current_thread_id && userData) {
+                console.log(`🔄 [${requestId}] Updating existing thread`);
+                await db
+                    .update(threadsTable)
+                    .set({
+                        title: convoTitle,
+                        thread: { messages: convoHistory },
+                        updatedAt: new Date(),
+                        isDev: import.meta.env.NODE_ENV === 'development' ? true : false,
+                    })
+                    .where(eq(threadsTable.id, current_thread_id));
+                console.log(`✅ [${requestId}] Thread updated successfully`);
+            } else if (current_thread_id && !userData && !isNewThread) {
+                console.log(`🆕 [${requestId}] Inserting new thread with provided ID`);
+                if (!current_thread_id) {
+                    throw new Error('Thread ID is null or undefined');
+                }
+                await db.insert(threadsTable).values({
                     id: current_thread_id,
-                    title: convoTitle,
-                    messages: messagesToStore,
-                    createdAt: new Date().toISOString(),
-                    updatedAt: new Date().toISOString(),
-                });
-            } else {
-                /**
-                  * Update Existing Thread
-                  *
-                  * For continuing conversations, update the existing DynamoDB item
-                  * with the new messages and updated timestamp
-                  */
-                console.log(`🔄 [${requestId}] Updating existing thread in DynamoDB`);
-                await updateThread(
-                    current_thread_id,
-                    messagesToStore,
-                    convoTitle
-                );
+                    title: convoTitle || '',
+                    thread: { messages: convoHistory },
+                    email: user_email,
+                    isPublic: isPublic,
+                    isDev: import.meta.env.NODE_ENV === 'development'
+                } as ThreadInsert);
+                console.log(`✅ [${requestId}] New thread inserted successfully`);
+            } else if (isNewThread) {
+                console.log(`🔄 [${requestId}] Updating newly created thread`);
+                await db
+                    .update(threadsTable)
+                    .set({
+                        title: convoTitle,
+                        thread: { messages: convoHistory },
+                        updatedAt: new Date(),
+                        isDev: import.meta.env.NODE_ENV === 'development' ? true : false,
+                    })
+                    .where(eq(threadsTable.id, current_thread_id));
+                console.log(`✅ [${requestId}] New thread updated successfully`);
             }
-
-            // Log save performance metrics
+            
             const saveEndTime = Date.now();
             const saveDuration = saveEndTime - saveStartTime;
-
-            console.log(`✅ [${requestId}] Conversation saved to DynamoDB:`, {
-                duration: `${saveDuration}ms`,
-                threadId: current_thread_id,
-                messageCount: messagesToStore.length
-            });
+            console.log(`💾 [${requestId}] Database save completed in ${saveDuration}ms`);
         } catch (error) {
-            /**
-              * Save Error Handling
-              *
-              * If we fail to save to DynamoDB, return an error response.
-              * Note: The AI response was generated successfully, but persistence failed.
-              */
-            console.error(`❌ [${requestId}] Error saving conversation:`, error);
+            console.error(`❌ [${requestId}] Error saving conversation to database:`, error);
             return new Response(
-                JSON.stringify({ error: `Failed to save conversation: ${error instanceof Error ? error.message : String(error)}` }),
+                JSON.stringify({ error: `Failed to save conversation: ${error}` }),
                 {
                     status: 500,
                     headers: { 'Content-Type': 'application/json' },
@@ -527,48 +477,50 @@ export const POST: APIRoute = async ({ request }) => {
             );
         }
 
-        /**
-          * PREPARE SUCCESS RESPONSE
-          *
-          * Construct and return the successful API response containing:
-          * - The AI-generated text
-          * - The conversation title
-          * - The thread ID (for subsequent requests)
-          */
-        const totalDuration = Date.now() - startTime;
+        // --- Extract and format response ---
+        console.log(`🔧 [${requestId}] Extracting and formatting response`);
+        const extractStartTime = Date.now();
+        const { obj, generatedText: htmlText } = await extract(generatedText);
+        const extractEndTime = Date.now();
+        const extractDuration = extractEndTime - extractStartTime;
+        
+        console.log(`✅ [${requestId}] Response extraction completed:`, {
+            duration: `${extractDuration}ms`,
+            extractedKeys: Object.keys(obj),
+            htmlTextLength: htmlText.length,
+            hasStudyGuide: !!obj.studyGuide,
+            hasReferenceSheet: !!obj.referenceSheet,
+            studyGuideLength: obj.studyGuide?.length || 0,
+            referenceSheetLength: obj.referenceSheet?.length || 0
+        });
 
+        const totalDuration = Date.now() - startTime;
         console.log(`🎉 [${requestId}] Request completed successfully:`, {
             totalDuration: `${totalDuration}ms`,
             threadId: current_thread_id,
             finalTitle: convoTitle,
-            responseLength: generatedText.length
+            responseSize: JSON.stringify({
+                ...obj,
+                generatedText: htmlText,
+                generatedTitle: true,
+                id: current_thread_id,
+            }).length
         });
 
-        // Return JSON response with the generated content
         return new Response(
             JSON.stringify({
-                generatedText: generatedText,    // AI's response message
-                generatedTitle: convoTitle,       // Conversation title
-                id: current_thread_id,            // Thread ID for future requests
+                ...obj,
+                generatedText: htmlText,
+                generatedTitle: true,
+                id: current_thread_id,
             }),
             {
-                status: 200,                      // HTTP 200 OK
+                status: 200,
                 headers: { 'Content-Type': 'application/json' },
             }
         );
-
     } catch (error) {
-        /**
-          * TOP-LEVEL ERROR HANDLER
-          *
-          * Catches any unhandled errors in the request processing pipeline.
-          * This includes:
-          * - JSON parsing errors (malformed request body)
-          * - Unexpected errors not caught by inner try-catch blocks
-          * - Runtime errors
-          */
         const totalDuration = Date.now() - startTime;
-
         console.error(`💥 [${requestId}] Fatal error in generate.ts after ${totalDuration}ms:`, error);
         console.error(`💥 [${requestId}] Error details:`, {
             errorName: error instanceof Error ? error.name : 'Unknown',
@@ -576,27 +528,62 @@ export const POST: APIRoute = async ({ request }) => {
             errorStack: error instanceof Error ? error.stack : 'No stack trace',
             errorType: typeof error
         });
-
-        // Return error response
         return new Response(
             JSON.stringify({ error: `Invalid request body or server error: ${error}` }),
             {
-                status: 400,                      // HTTP 400 Bad Request
+                status: 400,
                 headers: { 'Content-Type': 'application/json' },
             }
         );
     }
 };
 
-/**
-  * Disable Pre-rendering
-  *
-  * This route must NOT be pre-rendered during build time because:
-  * 1. It handles dynamic POST requests
-  * 2. It requires server-side AWS credentials
-  * 3. It performs real-time AI generation
-  *
-  * Setting prerender = false ensures this route runs on the server
-  * (via Vercel serverless function) rather than being statically generated.
-  */
+async function generateTitle(convoHistory: any[], userModel: string, provider: ProviderKey) {
+    const titleRequestId = nanoid();
+    console.log(`🏷️ [${titleRequestId}] Starting title generation:`, {
+        conversationLength: convoHistory.length,
+        model: userModel,
+        provider: provider
+    });
+    
+    try {
+        const titleStartTime = Date.now();
+        const { text: generatedText } = await generateText({
+            model: providerFunctions[provider as keyof typeof providerFunctions](userModel) as LanguageModel,
+            messages: [
+                {
+                    role: 'system',
+                    content: 'You are a helpful assistant that generates concise, descriptive titles for conversations.',
+                },
+                ...convoHistory,
+                {
+                    role: 'user',
+                    content: 'Please generate a concise title for this conversation.',
+                },
+            ],
+        });
+        
+        const titleEndTime = Date.now();
+        const titleDuration = titleEndTime - titleStartTime;
+        
+        console.log(`✅ [${titleRequestId}] Title generation completed:`, {
+            duration: `${titleDuration}ms`,
+            generatedTitle: generatedText,
+            titleLength: generatedText.length
+        });
+        
+        return generatedText;
+    } catch (error) {
+        console.error(`❌ [${titleRequestId}] Error in generateTitle:`, error);
+        console.error(`❌ [${titleRequestId}] Title generation error details:`, {
+            errorName: error instanceof Error ? error.name : 'Unknown',
+            errorMessage: error instanceof Error ? error.message : String(error),
+            conversationLength: convoHistory.length,
+            model: userModel,
+            provider: provider
+        });
+        throw error;
+    }
+}
+
 export const prerender = false;
