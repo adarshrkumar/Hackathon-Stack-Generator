@@ -55,11 +55,11 @@
 
         /* Logo image styling */
         &__img {
-            width: 3.5rem;              /* Fixed width */
-            aspect-ratio: 1;            /* Square shape */
-            border-radius: 8px;         /* Rounded corners */
+            width: 3.5rem;                /* Fixed width */
+            aspect-ratio: 1;              /* Square shape */
+            border-radius: 8px;           /* Rounded corners */
             border: 1px solid #e0e0e0;  /* Light border */
-            transition: transform 0.2s; /* Smooth hover animation */
+            transition: transform 0.2s;   /* Smooth hover animation */
 
             /* Hover Effect - slight scale up */
             &:hover {
@@ -97,7 +97,7 @@
         a {
             display: block;                /* Block for full padding area */
             padding: 0.75rem 1.5rem;       /* Comfortable click area */
-            color: #333;                   /* Dark text */
+            color: #333;                 /* Dark text */
             text-decoration: none;         /* Remove underline */
             font-weight: 500;              /* Medium weight */
             transition: all 0.2s;          /* Smooth transitions */

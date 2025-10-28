@@ -36,8 +36,8 @@
     /* Left Accent Bar */
     /* Created using ::before pseudo-element */
     &::before {
-        content: '';                /* Required for pseudo-element */
-        position: absolute;         /* Position relative to .fancy-card */
+        content: '';               /* Required for pseudo-element */
+        position: absolute;        /* Position relative to .fancy-card */
         top: 0;
         left: 0;
         height: 100%;              /* Full height */

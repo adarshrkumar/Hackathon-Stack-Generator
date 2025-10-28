@@ -12,20 +12,18 @@
   * - Responsive image defaults
   */
 
-/* Box Sizing & Base Font Size */
-html {
-  box-sizing: border-box;  /* Use border-box for easier layout calculations */
-  font-size: 16px;         /* Base font size for rem calculations */
+  html {
+    /* Box Sizing & Base Font Size */
+    box-sizing: border-box;  /* Use border-box for easier layout calculations */
+    font-size: 16px;         /* Base font size for rem calculations */
+
+    /* Full Height Setup */
+    height: 100%;  /* Allow html to take full viewport height */
 }
 
 /* Inherit Box Sizing for All Elements */
 *, *:before, *:after {
-  box-sizing: inherit;  /* All elements inherit border-box model */
-}
-
-/* Full Height Setup */
-html {
-    height: 100%;  /* Allow html to take full viewport height */
+    box-sizing: inherit;  /* All elements inherit border-box model */
 }
 
 /* Body Normalization */
@@ -60,6 +58,7 @@ ol, ul {
 
 /* Responsive Image Defaults */
 img {
-    max-width: 100%;  /* Prevent images from overflowing containers */
-    height: auto;     /* Maintain aspect ratio when width is constrained */
+    max-width: 100%;      /* Prevent images from overflowing containers */
+    height: auto;         /* Maintain aspect ratio when width is constrained */
+    object-fit: contain;  /* Ensure images fit within their containers without cropping */
 }
