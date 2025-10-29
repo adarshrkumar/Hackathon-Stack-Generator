@@ -1,23 +1,23 @@
 import { tool } from 'ai';
 import { z } from 'zod';
 
-const lineReplacements = [
-    {
-        func: 'startsWith',
-        key: 'import ',
-    },
-    {
-        func: 'includes',
-        key: 'import('
-    }
-]
-
 const runJSCodeTool = tool({
     description: 'Run JavaScript code',
     inputSchema: z.object({
         code: z.string().describe('The JavaScript code to run'),
     }),
     execute: async ({ code }: { code: string }) => {
+            const lineReplacements = [
+                {
+                    func: 'startsWith',
+                    key: 'import ',
+                },
+                {
+                    func: 'includes',
+                    key: 'import('
+                }
+            ]
+
             let ranCode = (code.includes('\n') ? code.split('\n') : [code])
                 .map((line: string) => (
                     line.includes(';') ? line.split(';') : [line]
