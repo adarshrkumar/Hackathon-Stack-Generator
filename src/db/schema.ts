@@ -52,4 +52,4 @@ const companyInfoTable = pgTable('company_info', {
     updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });
 
-export { threadsTable };
+export { threadsTable, megaListTable, companyInfoTable };
