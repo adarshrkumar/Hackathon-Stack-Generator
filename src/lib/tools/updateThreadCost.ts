@@ -1,6 +1,11 @@
 import { tool } from 'ai';
 import { z } from 'zod';
 
+// execute imports
+import { db } from '../../db/initialize';
+import { threadsTable } from '../../db/schema';
+import { eq } from 'drizzle-orm';
+
 /**
  * Update Thread Cost Tool
  *
@@ -15,9 +20,6 @@ const updateThreadCostTool = tool({
     }),
     execute: async ({ threadId, costIncrement }: { threadId: string; costIncrement: number }) => {
             try {
-                const { db } = await import('../../db/initialize');
-                const { threadsTable } = await import('../../db/schema');
-                const { eq } = await import('drizzle-orm');
 
                 // Fetch current thread
                 const threads = await db
