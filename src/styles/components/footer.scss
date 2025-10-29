@@ -9,6 +9,8 @@
 
 /* Import global variables */
 @use '../variables/globals.scss' as *;
+@use '../variables/colors.scss' as *;
+
 
 /* Local spacing variable for footer */
 $_spacing: 1rem;
