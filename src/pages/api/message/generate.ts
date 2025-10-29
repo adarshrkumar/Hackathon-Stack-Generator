@@ -18,8 +18,8 @@ import { eq } from 'drizzle-orm';
 import type { InferSelectModel, InferInsertModel } from 'drizzle-orm';
 
 import { threadsTable } from '../../../db/schema';
-import extract from '../../../lib/extractPartsofMessage';
-import { isValidEmail } from '../../../lib/validation';
+// import extract from '../../../lib/extractPartsofMessage';
+// import { isValidEmail } from '../../../lib/validation';
 import { getAllToolDefinitions } from '../../../lib/mathTools';
 
 // const provider_maps = {
@@ -115,18 +115,18 @@ export const POST: APIRoute = async ({ request, locals }) => {
         });
 
         // Validate email
-        console.log(`✅ [${requestId}] Validating user email`);
-        if (!isValidEmail(user_email)) {
-            console.error(`❌ [${requestId}] Invalid email format:`, user_email);
-            return new Response(
-                JSON.stringify({ status: 'error', error: 'Invalid email' }),
-                {
-                    status: 400,
-                    headers: { 'Content-Type': 'application/json' },
-                }
-            );
-        }
-        console.log(`✅ [${requestId}] Email validation passed`);
+        // console.log(`✅ [${requestId}] Validating user email`);
+        // if (!isValidEmail(user_email)) {
+        //     console.error(`❌ [${requestId}] Invalid email format:`, user_email);
+        //     return new Response(
+        //         JSON.stringify({ status: 'error', error: 'Invalid email' }),
+        //         {
+        //             status: 400,
+        //             headers: { 'Content-Type': 'application/json' },
+        //         }
+        //     );
+        // }
+        // console.log(`✅ [${requestId}] Email validation passed`);
 
         // Create a new thread if none provided
         let isNewThread = false;
@@ -480,7 +480,9 @@ export const POST: APIRoute = async ({ request, locals }) => {
         // --- Extract and format response ---
         console.log(`🔧 [${requestId}] Extracting and formatting response`);
         const extractStartTime = Date.now();
-        const { obj, generatedText: htmlText } = await extract(generatedText);
+        const obj = {};
+        const htmlText = generatedText;
+        // const { obj, generatedText: htmlText } = await extract(generatedText);
         const extractEndTime = Date.now();
         const extractDuration = extractEndTime - extractStartTime;
         
@@ -488,10 +490,10 @@ export const POST: APIRoute = async ({ request, locals }) => {
             duration: `${extractDuration}ms`,
             extractedKeys: Object.keys(obj),
             htmlTextLength: htmlText.length,
-            hasStudyGuide: !!obj.studyGuide,
-            hasReferenceSheet: !!obj.referenceSheet,
-            studyGuideLength: obj.studyGuide?.length || 0,
-            referenceSheetLength: obj.referenceSheet?.length || 0
+            // hasStudyGuide: !!obj?.studyGuide,
+            // hasReferenceSheet: !!obj?.referenceSheet,
+            // studyGuideLength: obj?.studyGuide?.length || 0,
+            // referenceSheetLength: obj?.referenceSheet?.length || 0
         });
 
         const totalDuration = Date.now() - startTime;

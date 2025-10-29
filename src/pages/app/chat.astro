@@ -99,41 +99,77 @@ import '../../styles/pages/app/chat.scss';
      * SELECTION PROMPTS CONFIGURATION
      */
 
-    const selectionQuestions = [
+    // Initial question about project type
+    const projectTypeQuestion = {
+        question: "What would you like to build?",
+        category: "projectType",
+        options: [
+            { value: "web-app", label: "Web Application", description: "Full-featured web app with frontend and backend" },
+            { value: "mobile-app", label: "Mobile App", description: "Native or cross-platform mobile application" },
+            { value: "api-service", label: "API/Backend Service", description: "RESTful API or microservice" },
+            { value: "static-site", label: "Static Website", description: "Blog, portfolio, or marketing site" },
+            { value: "ecommerce", label: "E-Commerce Platform", description: "Online store with payment processing" },
+            { value: "dashboard", label: "Admin Dashboard", description: "Data visualization and management interface" },
+            { value: "other", label: "Other", description: "Tell me more about your project" }
+        ]
+    };
+
+    // All possible questions (will be filtered based on project type)
+    const allQuestions = [
         {
             question: "What **front-end framework** do you prefer?",
             category: "frontend",
-            options: ["React", "Vue.js", "Angular", "Svelte", "Next.js", "Other/Not Sure"]
+            options: ["React", "Vue.js", "Angular", "Svelte", "Next.js", "Other/Not Sure"],
+            relevantFor: ["web-app", "static-site", "ecommerce", "dashboard"]
+        },
+        {
+            question: "What **mobile framework** do you prefer?",
+            category: "mobile",
+            options: ["React Native", "Flutter", "Swift (iOS)", "Kotlin (Android)", "Ionic", "Other/Not Sure"],
+            relevantFor: ["mobile-app"]
         },
         {
             question: "What **backend technology** do you prefer?",
             category: "backend",
-            options: ["Node.js", "Python", "Java", "Go", "PHP", "Ruby", "Other/Not Sure"]
+            options: ["Node.js", "Python", "Java", "Go", "PHP", "Ruby", "Other/Not Sure"],
+            relevantFor: ["web-app", "mobile-app", "api-service", "ecommerce", "dashboard"]
         },
         {
             question: "How do you want to handle **styling**?",
             category: "styling",
-            options: ["Tailwind CSS", "SCSS/SASS", "CSS Modules", "Styled Components", "Bootstrap", "Material-UI", "Other/Not Sure"]
+            options: ["Tailwind CSS", "SCSS/SASS", "CSS Modules", "Styled Components", "Bootstrap", "Material-UI", "Other/Not Sure"],
+            relevantFor: ["web-app", "static-site", "ecommerce", "dashboard"]
         },
         {
             question: "What **database** do you need?",
             category: "database",
-            options: ["PostgreSQL", "MongoDB", "MySQL", "Redis", "DynamoDB", "Firebase", "Other/Not Sure"]
+            options: ["PostgreSQL", "MongoDB", "MySQL", "Redis", "DynamoDB", "Firebase", "SQLite", "Other/Not Sure"],
+            relevantFor: ["web-app", "mobile-app", "api-service", "ecommerce", "dashboard"]
         },
         {
             question: "How do you want to handle **user authentication**?",
             category: "auth",
-            options: ["Auth0", "Firebase Auth", "AWS Cognito", "Clerk", "Supabase", "Custom JWT", "Other/Not Sure"]
+            options: ["Auth0", "Firebase Auth", "AWS Cognito", "Clerk", "Supabase", "Custom JWT", "Other/Not Sure"],
+            relevantFor: ["web-app", "mobile-app", "ecommerce", "dashboard"]
+        },
+        {
+            question: "Which **payment provider** do you prefer?",
+            category: "payment",
+            options: ["Stripe", "PayPal", "Square", "Braintree", "Other/Not Sure"],
+            relevantFor: ["ecommerce"]
         },
         {
             question: "Any **additional services** you need? (select multiple or skip)",
             category: "additional",
             multiSelect: true,
-            options: ["CDN", "Analytics", "Email Service", "File Storage", "Payment Processing", "Search", "Monitoring", "CI/CD"]
+            options: ["CDN", "Analytics", "Email Service", "File Storage", "Payment Processing", "Search", "Monitoring", "CI/CD"],
+            relevantFor: ["web-app", "mobile-app", "api-service", "static-site", "ecommerce", "dashboard"]
         }
     ];
 
-    let currentQuestionIndex = 0;
+    let currentQuestionIndex = -1; // Start at -1 to show project type question first
+    let selectedProjectType: string | null = null;
+    let filteredQuestions: typeof allQuestions = [];
     const userSelections: Record<string, string | string[]> = {};
     let selectionInProgress = true;
 
@@ -166,15 +202,35 @@ import '../../styles/pages/app/chat.scss';
      */
 
     /**
+     * Filter questions based on selected project type
+     */
+    function filterQuestionsForProjectType(projectType: string) {
+        if (projectType === 'other') {
+            // For "other", enable free-form conversation
+            return [];
+        }
+
+        // Filter questions that are relevant for this project type
+        return allQuestions.filter(q => q.relevantFor.includes(projectType));
+    }
+
+    /**
      * Add a selection question message
      */
     function addSelectionQuestion() {
-        if (currentQuestionIndex >= selectionQuestions.length) {
+        // Show project type question first
+        if (currentQuestionIndex === -1) {
+            addProjectTypeQuestion();
+            return;
+        }
+
+        // After project type is selected, show filtered questions
+        if (currentQuestionIndex >= filteredQuestions.length) {
             finishSelections();
             return;
         }
 
-        const q = selectionQuestions[currentQuestionIndex];
+        const q = filteredQuestions[currentQuestionIndex];
 
         // Create question message
         const messageEl = document.createElement('div');
@@ -228,6 +284,119 @@ import '../../styles/pages/app/chat.scss';
     }
 
     /**
+     * Add project type selection question
+     */
+    function addProjectTypeQuestion() {
+        const messageEl = document.createElement('div');
+        messageEl.className = 'message assistant selection-message';
+
+        // Build options HTML with descriptions
+        let optionsHTML = '<div class="selection-options-grid">';
+
+        projectTypeQuestion.options.forEach((option, index) => {
+            optionsHTML += `
+                <button class="option-btn project-type-btn" data-category="${projectTypeQuestion.category}" data-value="${option.value}" data-index="${index}">
+                    <strong>${option.label}</strong>
+                    <span class="option-description">${option.description}</span>
+                </button>
+            `;
+        });
+
+        optionsHTML += '</div>';
+
+        messageEl.innerHTML = `
+            <div class="message-icon">
+                <i class="fa-solid fa-robot"></i>
+            </div>
+            <div class="message-content">
+                <h3>${projectTypeQuestion.question}</h3>
+                ${optionsHTML}
+                <p class="selection-hint">Choose the option that best describes your project</p>
+            </div>
+        `;
+
+        chatMessages.appendChild(messageEl);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+
+        // Add click handlers to option buttons
+        const optionBtns = messageEl.querySelectorAll('.option-btn');
+        optionBtns.forEach(btn => {
+            btn.addEventListener('click', handleProjectTypeSelection);
+        });
+
+        // Disable input during selection
+        messageInput.disabled = true;
+        sendButton.disabled = true;
+    }
+
+    /**
+     * Handle project type selection
+     */
+    function handleProjectTypeSelection(event: Event) {
+        const button = event.target as HTMLElement;
+        const buttonEl = button.closest('.option-btn') as HTMLButtonElement;
+        if (!buttonEl) return;
+
+        const category = buttonEl.dataset.category;
+        const value = buttonEl.dataset.value;
+
+        if (!category || !value) return;
+
+        // Save project type
+        selectedProjectType = value;
+        userSelections[category] = value;
+
+        // Highlight selected option
+        buttonEl.classList.add('selected');
+
+        // Show user's choice as a message
+        const selectedOption = projectTypeQuestion.options.find(opt => opt.value === value);
+        if (selectedOption) {
+            addMessage('user', selectedOption.label);
+        }
+
+        // Disable all option buttons
+        const allBtns = document.querySelectorAll('.selection-options-grid .option-btn');
+        allBtns.forEach(btn => {
+            (btn as HTMLButtonElement).disabled = true;
+        });
+
+        // Filter questions based on project type
+        filteredQuestions = filterQuestionsForProjectType(value);
+
+        // If "other" is selected, skip to free-form conversation
+        if (value === 'other') {
+            setTimeout(() => {
+                const followUpEl = document.createElement('div');
+                followUpEl.className = 'message assistant';
+                followUpEl.innerHTML = `
+                    <div class="message-icon">
+                        <i class="fa-solid fa-robot"></i>
+                    </div>
+                    <div class="message-content">
+                        <p>Great! Please tell me more about what you'd like to build, and I'll help you design the perfect tech stack.</p>
+                    </div>
+                `;
+                chatMessages.appendChild(followUpEl);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+
+                // Enable free-form input
+                selectionInProgress = false;
+                messageInput.disabled = false;
+                sendButton.disabled = false;
+                messageInput.focus();
+            }, 500);
+            return;
+        }
+
+        // Move to first filtered question
+        currentQuestionIndex = 0;
+        setTimeout(() => {
+            addSelectionQuestion();
+        }, 500);
+    }
+
+    /**
      * Handle option button click
      */
     function handleOptionClick(event: Event) {
@@ -235,7 +404,7 @@ import '../../styles/pages/app/chat.scss';
         const category = button.dataset.category;
         const value = button.dataset.value;
         const action = button.dataset.action;
-        const q = selectionQuestions[currentQuestionIndex];
+        const q = filteredQuestions[currentQuestionIndex];
 
         if (action === 'done') {
             // Finish multi-select question
@@ -287,7 +456,7 @@ import '../../styles/pages/app/chat.scss';
     function proceedToNext() {
         currentQuestionIndex++;
 
-        if (currentQuestionIndex < selectionQuestions.length) {
+        if (currentQuestionIndex < filteredQuestions.length) {
             // Show next question
             setTimeout(() => {
                 addSelectionQuestion();
@@ -310,11 +479,18 @@ import '../../styles/pages/app/chat.scss';
 
         // Build summary message
         let summary = "Perfect! Here's your tech stack:\n\n";
+
+        if (userSelections.projectType) {
+            const projectTypeLabel = projectTypeQuestion.options.find(opt => opt.value === userSelections.projectType)?.label;
+            summary += `**Project Type:** ${projectTypeLabel}\n`;
+        }
         if (userSelections.frontend) summary += `**Frontend:** ${userSelections.frontend}\n`;
+        if (userSelections.mobile) summary += `**Mobile Framework:** ${userSelections.mobile}\n`;
         if (userSelections.backend) summary += `**Backend:** ${userSelections.backend}\n`;
         if (userSelections.styling) summary += `**Styling:** ${userSelections.styling}\n`;
         if (userSelections.database) summary += `**Database:** ${userSelections.database}\n`;
         if (userSelections.auth) summary += `**Auth:** ${userSelections.auth}\n`;
+        if (userSelections.payment) summary += `**Payment:** ${userSelections.payment}\n`;
         if (userSelections.additional && Array.isArray(userSelections.additional) && userSelections.additional.length > 0) {
             summary += `**Additional:** ${userSelections.additional.join(', ')}\n`;
         }
@@ -348,23 +524,34 @@ import '../../styles/pages/app/chat.scss';
      * Build detailed prompt for AI
      */
     function buildDetailedPrompt(selections: Record<string, string | string[]>): string {
-        let prompt = "Based on these technology preferences:\n\n";
+        let prompt = "";
+
+        // Add project type context
+        if (selections.projectType) {
+            const projectTypeLabel = projectTypeQuestion.options.find(opt => opt.value === selections.projectType)?.label;
+            prompt += `I want to build a **${projectTypeLabel}**.\n\n`;
+        }
+
+        prompt += "Based on these technology preferences:\n\n";
 
         if (selections.frontend) prompt += `- Frontend: ${selections.frontend}\n`;
+        if (selections.mobile) prompt += `- Mobile Framework: ${selections.mobile}\n`;
         if (selections.backend) prompt += `- Backend: ${selections.backend}\n`;
         if (selections.styling) prompt += `- Styling: ${selections.styling}\n`;
         if (selections.database) prompt += `- Database: ${selections.database}\n`;
         if (selections.auth) prompt += `- Authentication: ${selections.auth}\n`;
+        if (selections.payment) prompt += `- Payment: ${selections.payment}\n`;
         if (selections.additional && Array.isArray(selections.additional)) {
             prompt += `- Additional Services: ${selections.additional.join(', ')}\n`;
         }
 
         prompt += "\nProvide:\n";
-        prompt += "1. Why these technologies work well together\n";
+        prompt += "1. Why these technologies work well together for this type of project\n";
         prompt += "2. Specific cloud providers/services from your knowledge base\n";
         prompt += "3. Integration best practices\n";
         prompt += "4. Potential challenges and solutions\n";
-        prompt += "5. Estimated costs and complexity";
+        prompt += "5. Estimated costs and complexity\n";
+        prompt += "6. Recommended project structure and architecture";
 
         return prompt;
     }
@@ -382,12 +569,12 @@ import '../../styles/pages/app/chat.scss';
             </div>
             <div class="message-content">
                 <p><strong>Welcome to Stack Generator!</strong></p>
-                <p>I'll help you build the perfect tech stack for your project. Let's start with a few questions...</p>
+                <p>I'll help you design the perfect tech stack for your project. First, let me understand what you want to build...</p>
             </div>
         `;
         chatMessages.appendChild(welcomeEl);
 
-        // Start first question
+        // Start project type question
         setTimeout(() => {
             addSelectionQuestion();
         }, 500);
@@ -441,7 +628,9 @@ import '../../styles/pages/app/chat.scss';
             localStorage.removeItem(THREAD_ID_KEY);
 
             // Reset selection state
-            currentQuestionIndex = 0;
+            currentQuestionIndex = -1;  // Start at -1 to show project type question
+            selectedProjectType = null;
+            filteredQuestions = [];
             Object.keys(userSelections).forEach(key => delete userSelections[key]);
             selectionInProgress = true;
 

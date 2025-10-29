@@ -1,27 +1,27 @@
 {
-  "name": "aws-project",
-  "type": "module",
-  "version": "0.0.1",
-  "scripts": {
-    "dev": "astro dev",
-    "build": "astro build",
-    "preview": "astro preview",
-    "astro": "astro"
-  },
-  "dependencies": {
-    "@ai-sdk/anthropic": "^2.0.38",
-    "@astrojs/vercel": "^9.0.0",
-    "@aws-sdk/client-bedrock-runtime": "^3.917.0",
-    "@vercel/postgres": "^0.10.0",
-    "ai": "^5.0.81",
-    "astro": "^5.15.1",
-    "drizzle-orm": "^0.44.7",
-    "exa-js": "^1.10.2",
-    "marked": "^16.4.1",
-    "nanoid": "^5.1.6"
-  },
-  "devDependencies": {
-    "drizzle-kit": "^0.31.5",
-    "sass": "^1.93.2"
-  }
+    "name": "tech-stack-generator",
+    "type": "module",
+    "version": "0.0.1",
+    "scripts": {
+        "dev": "astro dev",
+        "build": "astro build",
+        "preview": "astro preview",
+        "astro": "astro"
+    },
+    "dependencies": {
+        "@ai-sdk/anthropic": "^2.0.38",
+        "@astrojs/vercel": "^9.0.0",
+        "@aws-sdk/client-bedrock-runtime": "^3.917.0",
+        "@vercel/postgres": "^0.10.0",
+        "ai": "^5.0.81",
+        "astro": "^5.15.1",
+        "drizzle-orm": "^0.44.7",
+        "exa-js": "^1.10.2",
+        "marked": "^16.4.1",
+        "nanoid": "^5.1.6"
+    },
+    "devDependencies": {
+        "drizzle-kit": "^0.31.6",
+        "sass": "^1.93.2"
+    }
 }

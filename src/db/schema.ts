@@ -33,4 +33,23 @@ const threadsTable = pgTable('threads', {
     updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });
 
+const megaListTable = pgTable('mega_list', {
+    name: text('name').primaryKey(),
+    type: text('type').notNull().default(''),
+    subtype: text('subtype'),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
+
+const companyInfoTable = pgTable('company_info', {
+    name: text('product_name').primaryKey(),
+    provider: text('provider').notNull().default(''),
+    subcategory: text('sub_category').notNull().default(''),
+    description: text('description').notNull().default(''),
+    keyfeature: text('key_feature').notNull().default(''),
+    documentation: text('documentation').notNull().default(''),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
+
 export { threadsTable };
