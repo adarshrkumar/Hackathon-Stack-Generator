@@ -32,14 +32,14 @@ const updateThreadCostTool = tool({
                     throw new Error(`Thread ${threadId} not found`);
                 }
 
-                const currentCost = threads[0].cost || 0;
+                const currentCost = Number(threads[0].cost || 0);
                 const newCost = currentCost + costIncrement;
 
                 // Update the cost
                 await db
                     .update(threadsTable)
                     .set({
-                        cost: newCost,
+                        cost: newCost.toString(),
                         updatedAt: new Date()
                     })
                     .where(eq(threadsTable.id, threadId));
