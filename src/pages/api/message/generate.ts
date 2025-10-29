@@ -20,7 +20,6 @@ import type { InferSelectModel, InferInsertModel } from 'drizzle-orm';
 import { threadsTable } from '../../../db/schema';
 // import extract from '../../../lib/extractPartsofMessage';
 // import { isValidEmail } from '../../../lib/validation';
-import { getAllToolDefinitions } from '../../../lib/mathTools';
 
 // const provider_maps = {
 //     openai: [
