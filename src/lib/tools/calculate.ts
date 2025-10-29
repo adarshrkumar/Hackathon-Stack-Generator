@@ -9,7 +9,7 @@ import { z } from 'zod';
  */
 const calculateTool = tool({
     description: 'Performs mathematical calculations. Use this tool when you need to compute accurate arithmetic results. Supports operations: add, subtract, multiply, divide, power, sqrt, modulo, abs, ceil, floor, round.',
-    parameters: z.object({
+    inputSchema: z.object({
             operation: z.enum([
                 'add', 'subtract', 'multiply', 'divide',
                 'power', 'sqrt', 'modulo', 'abs',
@@ -18,7 +18,7 @@ const calculateTool = tool({
             a: z.number().describe('The first operand (or the only operand for unary operations like sqrt, abs, ceil, floor, round)'),
             b: z.number().optional().describe('The second operand (required for binary operations like add, subtract, multiply, divide, power, modulo)')
         }),
-        execute: async ({ operation, a, b }) => {
+        execute: async ({ operation, a, b }: { operation: string; a: number; b?: number }) => {
             try {
                 let result: number;
                 let op = operation.toLowerCase();
