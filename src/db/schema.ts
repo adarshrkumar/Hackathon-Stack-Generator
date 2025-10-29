@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, jsonb, boolean } from 'drizzle-orm/pg-core';
+import { pgTable, text, timestamp, jsonb, boolean, integer } from 'drizzle-orm/pg-core';
 
 /**
  * Threads Table Schema
@@ -18,7 +18,7 @@ const threadsTable = pgTable('threads', {
     thread: jsonb('thread').notNull().$type<{ messages: Array<{ role: string; content: string }> }>(),
 
     // User email for ownership tracking
-    email: text('email'),
+    cost: integer('cost_dollars').notNull().default(0),
 
     // Whether the thread is publicly accessible
     isPublic: boolean('is_public').notNull().default(false),
