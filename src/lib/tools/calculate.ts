@@ -7,10 +7,9 @@ import { z } from 'zod';
  * Performs mathematical calculations with various operations.
  * Supports: add, subtract, multiply, divide, power, sqrt, modulo, abs, ceil, floor, round
  */
-const calculateTool = {
-    ...tool({
-        description: 'Performs mathematical calculations. Use this tool when you need to compute accurate arithmetic results. Supports operations: add, subtract, multiply, divide, power, sqrt, modulo, abs, ceil, floor, round.',
-        parameters: z.object({
+const calculateTool = tool({
+    description: 'Performs mathematical calculations. Use this tool when you need to compute accurate arithmetic results. Supports operations: add, subtract, multiply, divide, power, sqrt, modulo, abs, ceil, floor, round.',
+    parameters: z.object({
             operation: z.enum([
                 'add', 'subtract', 'multiply', 'divide',
                 'power', 'sqrt', 'modulo', 'abs',
