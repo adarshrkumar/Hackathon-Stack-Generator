@@ -10,6 +10,9 @@ const threadsTable = pgTable('threads', {
     // Unique thread identifier (primary key)
     id: text('id').primaryKey(),
 
+    // User email (owner of the thread)
+    email: text('email'),
+
     // Thread title (generated from conversation)
     title: text('title').notNull().default(''),
 
