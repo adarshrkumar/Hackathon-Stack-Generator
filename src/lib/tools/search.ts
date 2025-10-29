@@ -2,6 +2,8 @@ import { tool } from 'ai';
 import { z } from 'zod';
 import Exa from 'exa-js';
 
+import 'dotenv/config'
+
 const exa = new Exa(process.env.EXA_SEARCH_API_KEY);
 
 const searchTool = tool({
@@ -12,7 +14,7 @@ const searchTool = tool({
     execute: async ({ query }: { query: string }) => {
             const searchResult = await exa.getContents(
                 [query], {
-                    apiKey: import.meta.env.EXA_SEARCH_API_KEY || '',
+                    apiKey: process.env.EXASEARCH_API_KEY || import.meta.env.EXA_SEARCH_API_KEY || '',
                     text: true
                 }
               );
