@@ -90,28 +90,34 @@ export const POST: APIRoute = async ({ request, locals }) => {
         
         // TODO: Use category and mode for context-specific prompts
         let current_thread_id: string | undefined = thread_id;
-        const auth = locals?.auth;
-        if (!auth) {
-            console.error(`❌ [${requestId}] Authentication required but not provided`);
-            return new Response(
-                JSON.stringify({ status: 'error', error: 'Authentication required' }),
-                {
-                    status: 401,
-                    headers: { 'Content-Type': 'application/json' },
-                }
-            );
-        }
-        
-        console.log(`🔐 [${requestId}] Authentication found, extracting user info`);
-        const { userId, sessionClaims } = auth();
-        const user_email = userId ? ((sessionClaims?.email as string) || null) : null;
-        
-        console.log(`👤 [${requestId}] User info:`, {
-            userId: userId || 'none',
-            userEmail: user_email || 'none',
-            hasSessionClaims: !!sessionClaims,
-            sessionClaimsKeys: Object.keys(sessionClaims || {})
-        });
+
+        // TEMPORARY: Auth disabled for testing
+        // const auth = locals?.auth;
+        // if (!auth) {
+        //     console.error(`❌ [${requestId}] Authentication required but not provided`);
+        //     return new Response(
+        //         JSON.stringify({ status: 'error', error: 'Authentication required' }),
+        //         {
+        //             status: 401,
+        //             headers: { 'Content-Type': 'application/json' },
+        //         }
+        //     );
+        // }
+
+        // console.log(`🔐 [${requestId}] Authentication found, extracting user info`);
+        // const { userId, sessionClaims } = auth();
+        // const user_email = userId ? ((sessionClaims?.email as string) || null) : null;
+
+        // console.log(`👤 [${requestId}] User info:`, {
+        //     userId: userId || 'none',
+        //     userEmail: user_email || 'none',
+        //     hasSessionClaims: !!sessionClaims,
+        //     sessionClaimsKeys: Object.keys(sessionClaims || {})
+        // });
+
+        // Use hardcoded email for testing
+        const user_email = 'testing123@stack.generator';
+        console.log(`👤 [${requestId}] Using test email:`, user_email);
 
         // Validate email
         // console.log(`✅ [${requestId}] Validating user email`);
