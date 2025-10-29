@@ -12,13 +12,12 @@ const lineReplacements = [
     }
 ]
 
-const runJSCodeTool = {
-    ...tool({
-        description: 'Run JavaScript code',
-        parameters: z.object({
-            code: z.string().describe('The JavaScript code to run'),
-        }),
-        execute: async ({ code }) => {
+const runJSCodeTool = tool({
+    description: 'Run JavaScript code',
+    parameters: z.object({
+        code: z.string().describe('The JavaScript code to run'),
+    }),
+    execute: async ({ code }) => {
             let ranCode = (code.includes('\n') ? code.split('\n') : [code])
                 .map((line: string) => (
                     line.includes(';') ? line.split(';') : [line]
@@ -34,7 +33,6 @@ const runJSCodeTool = {
                 ))
                 .filter((line: string | null) => line)
 
-            const max = ranCode.length
             const last = ranCode[ranCode.length - 1]
             if (last && !last.includes('return')) {
                 ranCode[ranCode.length - 1] = 'return ' + last
@@ -50,8 +48,6 @@ const runJSCodeTool = {
     
             return { message: 'JavaScript code executed', result };
         },
-    }),
-    ready: true,
-};
+});
 
 export default runJSCodeTool;
