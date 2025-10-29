@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is the **Stack Generator** web application built for the SCU AWS Hackathon Project. It's an Astro-based application using server-side rendering (SSR) with AWS Bedrock integration for AI-powered conversations. The app uses SCSS for styling with a modular architecture and is deployed on Vercel.
+This is the **Stack Generator** web application built for the SCU AWS Hackathon Project. It's an Astro-based application using server-side rendering (SSR) with Anthropic Claude AI integration (via Vercel AI SDK) for AI-powered tech stack recommendations. The app uses PostgreSQL with Drizzle ORM for data persistence, SCSS for styling, and is deployed on Vercel.
 
 ## Development Commands
 
@@ -26,20 +26,24 @@ Run all commands from the project root:
 
 - **src/pages/** - File-based routing with two sections:
   - Marketing pages: `index.astro`, `about.astro`, `contact.astro`
-  - App pages: `app/index.astro`, `app/chat.astro`, `app/test.astro`
+  - App pages: `app/index.astro`, `app/chat.astro`
 - **src/pages/api/** - API routes for backend functionality
-  - `api/message/generate.ts` - Main AI chat endpoint (uses AWS Bedrock)
+  - `api/message/generate.ts` - Main AI chat endpoint (uses Anthropic Claude via Vercel AI SDK)
 - **src/lib/** - Shared utilities and services
-  - `bedrock.ts` - AWS Bedrock client and Llama model integration
-  - `dynamodb.ts` - DynamoDB client and thread CRUD operations
-  - `config.ts` - Application configuration (model, region, system prompts)
-  - `types.ts` - TypeScript interfaces (Message, BedrockResponse)
+  - `config.ts` - Application configuration (model, system prompts, tools)
+  - `prompt.ts` - System prompt for Stack Generator AI
+  - `types.ts` - TypeScript interfaces (Tool, Category, Mode, etc.)
+  - `tools.ts` - AI tools loader (dynamically imports all tools from `tools/`)
+  - `tools/*.ts` - Individual AI tool implementations
+- **src/db/** - Database layer
+  - `schema.ts` - Drizzle ORM schema (threads, mega_list, company_info tables)
+  - `initialize.ts` - Database client initialization
 - **src/layouts/** - Page layouts (dual layout system)
   - `Layout.astro` - Marketing site layout (Header + Hero + Footer)
   - `App.astro` - Application layout (Nav + Footer, no Hero)
 - **src/components/** - Reusable Astro components
   - Global: `Header.astro`, `Footer.astro`, `Hero.astro`, `FancyCard.astro`
-  - App-specific: `app/Nav.astro`, `app/Grid.astro`, `app/GridItem.astro`
+  - App-specific: `app/Nav.astro`
 - **src/styles/** - SCSS stylesheets organized by type:
   - `reset.scss` - CSS reset
   - `variables/` - SCSS variables (`globals.scss`, `colors.scss`)
@@ -56,6 +60,7 @@ The project has two distinct layouts for different sections:
    - Includes: Header, Hero (homepage only), Footer
    - Title format: "Stack Generator" or "{title} | Stack Generator"
    - Imports: `reset.scss`, `Layout.scss`
+   - Typography: Montserrat (Google Fonts)
 
 2. **App Layout (`App.astro`)**:
    - Used for: `/app/*` pages (app interface)
@@ -64,93 +69,178 @@ The project has two distinct layouts for different sections:
    - Imports: `reset.scss`, `Layout.scss`, `App.scss`
    - Includes Font Awesome icons via CDN
    - Body has `class="app-layout"`, main has `class="main app"`
+   - Typography: Montserrat (Google Fonts)
 
-### AWS Bedrock Integration
+### AI Integration (Anthropic Claude via Vercel AI SDK)
 
-The application integrates with AWS Bedrock for AI conversations:
+The application uses Anthropic's Claude AI for generating tech stack recommendations:
 
-- **Model**: Meta Llama 3.1 70B Instruct (`meta.llama3-1-70b-instruct-v1:0`)
-- **Region**: us-east-1
-- **Client**: `@aws-sdk/client-bedrock-runtime` (BedrockRuntimeClient)
-- **Prompt Format**: Llama-specific chat format with special tokens (`<|begin_of_text|>`, `<|start_header_id|>`, etc.)
+- **Model**: Claude Sonnet 4.5 (`claude-sonnet-4.5`)
+- **SDK**: Vercel AI SDK (`ai` package v5.0.81) with Anthropic provider (`@ai-sdk/anthropic` v2.0.38)
+- **System Prompt**: Defined in `src/lib/prompt.ts` - guides AI to provide tech stack recommendations
+- **Tools**: AI has access to custom tools (search, calculate) for enhanced functionality
 
 **Key files**:
 
-- `src/lib/bedrock.ts` - Contains `invokeBedrockLlama()` and `generateConversationTitle()`
-- `src/lib/config.ts` - Model configuration and system prompts
+- `src/lib/config.ts` - Model configuration, system prompt, and tools
+- `src/lib/prompt.ts` - System prompt for Stack Generator assistant
+- `src/lib/tools.ts` - Dynamic tool loader
+- `src/lib/tools/search.ts` - Web search using Exa API
+- `src/lib/tools/calculate.ts` - Mathematical calculations
 - `src/pages/api/message/generate.ts` - API endpoint handling conversation flow
 
 **Environment Requirements**:
-AWS credentials must be configured via environment variables for Bedrock and DynamoDB access (see `.env` file).
+
+- `ANTHROPIC_API_KEY` - Anthropic API key for Claude access
+- `EXA_SEARCH_API_KEY` - Exa API key for web search functionality
+- Database credentials (see Database section below)
 
 ### API Architecture
 
 **POST `/api/message/generate`**:
 
-- Accepts: `{ text: string, id?: string }` (user message and optional thread ID)
-- Returns: `{ generatedText: string, generatedTitle: string, id: string }`
+- Accepts: `{ text: string, id?: string, isPublic?: boolean }` (user message, optional thread ID, public flag)
+- Returns: `{ generatedText: string, generatedTitle: boolean, id: string, ...extractedData }`
 - Flow:
-  1. Generates or retrieves thread ID using `nanoid`
-  2. Fetches conversation history from DynamoDB (if thread exists)
-  3. Formats messages for Llama prompt format
-  4. Invokes AWS Bedrock with conversation history
-  5. Generates conversation title on first message
-  6. Saves conversation to DynamoDB (creates new or updates existing thread)
-  7. Returns AI response with thread ID and title
+  1. Authenticates user via `locals.auth()` (requires authentication)
+  2. Generates or retrieves thread ID using `nanoid`
+  3. Enforces thread limit per user (max 5 threads, configurable in `config.ts`)
+  4. Fetches conversation history from PostgreSQL (if thread exists)
+  5. Verifies thread ownership (prevents unauthorized access)
+  6. Builds conversation with system message + history + new user message
+  7. Invokes Claude AI using `generateText()` with tools and max 25 steps
+  8. Generates conversation title on first message using separate AI call
+  9. Saves conversation to PostgreSQL (creates new or updates existing thread)
+  10. Returns AI response with thread ID and title
 
-### DynamoDB Integration
+**Key Features**:
 
-**Database**: Amazon DynamoDB for persistent thread storage
+- Extensive logging with request IDs for debugging
+- Thread ownership verification
+- Per-user thread limits
+- Public/private thread support
+- Development mode tracking (`isDev` flag)
+
+### Database (PostgreSQL with Drizzle ORM)
+
+**Database**: PostgreSQL (hosted on Vercel Postgres)
+
+**ORM**: Drizzle ORM v0.44.7 with drizzle-kit v0.31.6
 
 **Key files**:
 
-- `src/lib/dynamodb.ts` - DynamoDB client and CRUD operations
-  - `createThread()` - Creates new conversation thread
-  - `getThread()` - Retrieves thread by ID
-  - `updateThread()` - Updates thread with new messages
-  - `getUserThreads()` - Gets all threads for a user (requires GSI)
-  - `deleteThread()` - Deletes a thread
+- `src/db/schema.ts` - Database schema definitions
+- `src/db/initialize.ts` - Database client initialization
+- `drizzle.config.ts` - Drizzle configuration for migrations
 
-**Table Schema**:
+**Database Schema**:
 
-- Table name: `stack-generator-threads` (configurable via `DYNAMODB_TABLE_NAME`)
-- Partition key: `id` (String)
-- Attributes: `userId`, `title`, `messages[]`, `createdAt`, `updatedAt`
-- Optional GSI: `userId-index` for multi-user support
+1. **threads** table:
+   - `id` (text, primary key) - Thread identifier
+   - `title` (text) - Conversation title
+   - `thread` (jsonb) - Message history: `{ messages: [{ role, content }] }`
+   - `cost` (numeric) - Cost tracking in dollars
+   - `email` (text) - User email (for ownership)
+   - `isPublic` (boolean) - Public accessibility flag
+   - `isDev` (boolean) - Development/test flag
+   - `createdAt` (timestamp) - Creation timestamp
+   - `updatedAt` (timestamp) - Last update timestamp
 
-**Setup**: See `DYNAMODB_SETUP.md` for detailed setup instructions including AWS Console, CLI, and Terraform options.
+2. **mega_list** table:
+   - `name` (text, primary key)
+   - `type` (text) - Technology type
+   - `subtype` (text) - Technology subtype
+   - Timestamps
+
+3. **company_info** table:
+   - `name` (text, primary key) - Product name
+   - `provider` (text)
+   - `subcategory` (text)
+   - `description` (text)
+   - `keyfeature` (text)
+   - `documentation` (text)
+   - Timestamps
+
+**Environment Variables**:
+
+- `POSTGRES_URL` - PostgreSQL connection string (pooled)
+- `DATABASE_URL` - Alternative connection string
+- `DATABASE_URL_UNPOOLED` - Direct connection (without pgbouncer)
+- Individual parameters: `PGHOST`, `PGUSER`, `PGDATABASE`, `PGPASSWORD`
+
+### AI Tools System
+
+The application has an extensible AI tools system located in `src/lib/tools/`:
+
+**Tool Loading**:
+
+- `src/lib/tools.ts` dynamically imports all tools from `tools/*.ts` (except files starting with `_`)
+- Tools use Vercel AI SDK's `tool()` function with Zod schemas
+- Tools are automatically registered and available to the AI
+
+**Available Tools**:
+
+1. **search** (`tools/search.ts`):
+   - Web search using Exa API
+   - Input: `query` (string)
+   - Returns: Search results with content
+
+2. **calculate** (`tools/calculate.ts`):
+   - Mathematical calculations
+   - Operations: add, subtract, multiply, divide, power, sqrt, modulo, abs, ceil, floor, round
+   - Input: `operation`, `a`, optional `b`
+   - Returns: Calculation result
+
+3. **updateThreadCost** (`tools/updateThreadCost.ts`):
+   - Updates thread cost tracking (implementation not shown)
+
+**Adding New Tools**:
+
+1. Create a new file in `src/lib/tools/*.ts`
+2. Export a `tool()` using Vercel AI SDK format with Zod schema
+3. File will be automatically loaded by `tools.ts`
 
 ### Styling Architecture
 
 - SCSS with modular organization
 - Variables: `src/styles/variables/globals.scss` and `colors.scss`
 - Component-specific styles in matching file structure
-- Import pattern: `@use './variables/globals.scss' as *;`
 - Typography: Montserrat (Google Fonts) for both layouts
 - Icons: Font Awesome (via CDN) for app layout only
 
 ### Configuration Files
 
 - **astro.config.mjs** - SSR mode with Vercel adapter (`output: 'server'`)
+- **drizzle.config.ts** - Drizzle ORM configuration (PostgreSQL dialect, migrations in `src/db/migrations`)
 - **tsconfig.json** - TypeScript strict mode (extends `astro/tsconfigs/strict`)
-- **package.json** - Project name: "aws-project", version 0.0.1, uses ES modules
+- **package.json** - Project name: "tech-stack-generator", version 0.0.1, uses ES modules
 - **.gitignore** - Excludes `dist/`, `.astro/`, `.vercel/`, `node_modules/`, `.env*`
 
 ## Key Technologies
 
 - Astro v5.15.1 (SSR framework with Vercel adapter)
-- AWS Bedrock Runtime SDK v3.917.0 (AI model integration)
-- AWS DynamoDB SDK v3 (`@aws-sdk/client-dynamodb`, `@aws-sdk/lib-dynamodb`)
+- Anthropic Claude AI via Vercel AI SDK:
+  - `ai` v5.0.81 (Vercel AI SDK)
+  - `@ai-sdk/anthropic` v2.0.38
+- PostgreSQL with Drizzle ORM:
+  - `drizzle-orm` v0.44.7
+  - `@vercel/postgres` v0.10.0
+  - `drizzle-kit` v0.31.6 (dev)
+- Exa Search API (`exa-js` v1.10.2) for web search
 - SCSS/Sass v1.93.2 (styling)
 - TypeScript with strict configuration
 - nanoid v5.1.6 (unique ID generation)
+- marked v16.4.1 (Markdown parsing)
 - Deployment: Vercel
 
 ## Setup Instructions
 
 1. **Install dependencies**: `npm install`
-2. **Configure environment variables**: Copy `.env.example` to `.env` and add:
-   - AWS credentials (`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_REGION`)
-   - DynamoDB table name (`DYNAMODB_TABLE_NAME`)
-3. **Set up DynamoDB table**: Follow instructions online
-4. **Start development server**: `npm run dev`
+2. **Configure environment variables**: Create `.env` file with:
+   - `ANTHROPIC_API_KEY` - Anthropic API key
+   - `EXA_SEARCH_API_KEY` - Exa search API key
+   - `POSTGRES_URL` - PostgreSQL connection string (or individual `PGHOST`, `PGUSER`, `PGDATABASE`, `PGPASSWORD`)
+   - See `.env.needed` for template
+3. **Set up database**: Ensure PostgreSQL database is created and accessible
+4. **Run migrations** (if needed): Use drizzle-kit to run migrations
+5. **Start development server**: `npm run dev`
