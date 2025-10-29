@@ -11,8 +11,10 @@ const searchTool = tool({
     }),
     execute: async ({ query }: { query: string }) => {
             const searchResult = await exa.getContents(
-                [query],
-                { text: true }
+                [query], {
+                    apiKey: import.meta.env.EXA_SEARCH_API_KEY || '',
+                    text: true
+                }
               );
               
             const result = {

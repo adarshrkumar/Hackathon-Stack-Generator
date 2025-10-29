@@ -39,6 +39,7 @@ const getPageContentTool = tool({
             }
 
             const searchResult = await exa.getContents(urls, {
+                apiKey: import.meta.env.EXA_SEARCH_API_KEY || '',
                 text: includeText ? true : undefined,
             });
 
