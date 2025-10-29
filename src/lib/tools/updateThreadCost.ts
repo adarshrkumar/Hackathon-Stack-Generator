@@ -9,28 +9,51 @@ import { z } from 'zod';
  */
 const updateThreadCostTool = tool({
     description: 'Updates the total cost for a conversation thread in the database by adding the provided cost increment to the current cost value. Use this tool to track API usage costs.',
-    parameters: z.object({
+    inputSchema: z.object({
         threadId: z.string().describe('The unique identifier of the thread to update'),
         costIncrement: z.number().describe('The cost amount to add to the current thread cost (in dollars). This will be added to any existing cost value.')
     }),
-    execute: async ({ threadId, costIncrement }) => {
+    execute: async ({ threadId, costIncrement }: { threadId: string; costIncrement: number }) => {
             try {
-                // For now, just return success - you can implement actual DB logic later
-                // when you add a cost field to the schema
-                console.log(`📊 Thread cost update requested for ${threadId}: +$${costIncrement}`);
+                const { db } = await import('../../db/initialize');
+                const { threadsTable } = await import('../../db/schema');
+                const { eq } = await import('drizzle-orm');
+
+                // Fetch current thread
+                const threads = await db
+                    .select()
+                    .from(threadsTable)
+                    .where(eq(threadsTable.id, threadId))
+                    .limit(1);
+
+                if (threads.length === 0) {
+                    throw new Error(`Thread ${threadId} not found`);
+                }
+
+                const currentCost = threads[0].cost || 0;
+                const newCost = currentCost + costIncrement;
+
+                // Update the cost
+                await db
+                    .update(threadsTable)
+                    .set({
+                        cost: newCost,
+                        updatedAt: new Date()
+                    })
+                    .where(eq(threadsTable.id, threadId));
 
                 return {
-                    message: 'Thread cost tracked (feature pending DB schema update)',
+                    message: 'Thread cost updated successfully',
                     result: {
                         success: true,
                         threadId: threadId,
                         costIncrement: costIncrement,
-                        note: 'Cost tracking will be saved once cost field is added to database schema'
+                        totalCost: newCost
                     }
                 };
             } catch (error) {
                 return {
-                    message: 'Failed to track thread cost',
+                    message: 'Failed to update thread cost',
                     result: {
                         success: false,
                         error: error instanceof Error ? error.message : String(error)

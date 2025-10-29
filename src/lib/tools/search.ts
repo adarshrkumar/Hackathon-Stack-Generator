@@ -6,10 +6,10 @@ const exa = new Exa(process.env.EXA_SEARCH_API_KEY);
 
 const searchTool = tool({
     description: 'Search the web for information',
-    parameters: z.object({
+    inputSchema: z.object({
         query: z.string().describe('The query to search for'),
     }),
-    execute: async ({ query }) => {
+    execute: async ({ query }: { query: string }) => {
             const searchResult = await exa.getContents(
                 [query],
                 { text: true }

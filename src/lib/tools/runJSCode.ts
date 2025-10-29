@@ -14,10 +14,10 @@ const lineReplacements = [
 
 const runJSCodeTool = tool({
     description: 'Run JavaScript code',
-    parameters: z.object({
+    inputSchema: z.object({
         code: z.string().describe('The JavaScript code to run'),
     }),
-    execute: async ({ code }) => {
+    execute: async ({ code }: { code: string }) => {
             let ranCode = (code.includes('\n') ? code.split('\n') : [code])
                 .map((line: string) => (
                     line.includes(';') ? line.split(';') : [line]
