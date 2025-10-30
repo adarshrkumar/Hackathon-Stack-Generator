@@ -19,7 +19,7 @@ import type { InferSelectModel, InferInsertModel } from 'drizzle-orm';
 
 import { threadsTable } from '../../../db/schema';
 // import extract from '../../../lib/extractPartsofMessage';
-// import { isValidEmail } from '../../../lib/validation';
+import isValidEmail from '../../../lib/validateEmail';
 
 // const provider_maps = {
 //     openai: [
@@ -68,25 +68,12 @@ export const POST: APIRoute = async ({ request, locals }) => {
     const startTime = Date.now();
     
     console.log(`🚀 [${requestId}] Starting message generation request`);
-    console.log(`📊 [${requestId}] Request metadata:`, {
-        timestamp: new Date().toISOString(),
-        userAgent: request.headers.get('user-agent'),
-        contentType: request.headers.get('content-type'),
-        origin: request.headers.get('origin'),
-        referer: request.headers.get('referer')
-    });
 
     try {
         console.log(`📥 [${requestId}] Parsing request body`);
         const { text: userPrompt, id: thread_id, isPublic = false } = await request.json();
         
-        console.log(`📝 [${requestId}] Request payload:`, {
-            userPromptLength: userPrompt?.length || 0,
-            userPromptPreview: userPrompt?.substring(0, 100) + (userPrompt?.length > 100 ? '...' : ''),
-            threadId: thread_id || 'none',
-            model: config.model || 'default',
-            isPublic,
-        });
+        console.log(`📝 [${requestId}] Request payload.`);
         
         // TODO: Use category and mode for context-specific prompts
         let current_thread_id: string | undefined = thread_id;
@@ -108,30 +95,23 @@ export const POST: APIRoute = async ({ request, locals }) => {
         // const { userId, sessionClaims } = auth();
         // const user_email = userId ? ((sessionClaims?.email as string) || null) : null;
 
-        // console.log(`👤 [${requestId}] User info:`, {
-        //     userId: userId || 'none',
-        //     userEmail: user_email || 'none',
-        //     hasSessionClaims: !!sessionClaims,
-        //     sessionClaimsKeys: Object.keys(sessionClaims || {})
-        // });
-
         // Use hardcoded email for testing
-        const user_email = 'testing123@stack.generator';
+        const user_email = config.testingEmail;
         console.log(`👤 [${requestId}] Using test email:`, user_email);
 
         // Validate email
-        // console.log(`✅ [${requestId}] Validating user email`);
-        // if (!isValidEmail(user_email)) {
-        //     console.error(`❌ [${requestId}] Invalid email format:`, user_email);
-        //     return new Response(
-        //         JSON.stringify({ status: 'error', error: 'Invalid email' }),
-        //         {
-        //             status: 400,
-        //             headers: { 'Content-Type': 'application/json' },
-        //         }
-        //     );
-        // }
-        // console.log(`✅ [${requestId}] Email validation passed`);
+        console.log(`✅ [${requestId}] Validating user email`);
+        if (!isValidEmail(user_email)) {
+            console.error(`❌ [${requestId}] Invalid email format:`, user_email);
+            return new Response(
+                JSON.stringify({ status: 'error', error: 'Invalid email' }),
+                {
+                    status: 400,
+                    headers: { 'Content-Type': 'application/json' },
+                }
+            );
+        }
+        console.log(`✅ [${requestId}] Email validation passed`);
 
         // Create a new thread if none provided
         let isNewThread = false;
@@ -146,7 +126,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
                     const userThreads = await db.select().from(threadsTable).where(eq(threadsTable.email, user_email));
                     console.log(`📊 [${requestId}] User thread count:`, userThreads.length, '/', config.maxThreadsPerUser);
                     
-                    if (userThreads.length >= config.maxThreadsPerUser) {
+                    if (userThreads.length >= config.maxThreadsPerUser && user_email !== config.testingEmail) {
                         console.error(`❌ [${requestId}] Thread limit exceeded for user:`, user_email);
                         return new Response(
                             JSON.stringify({ 
@@ -177,20 +157,13 @@ export const POST: APIRoute = async ({ request, locals }) => {
                     isDev: import.meta.env.NODE_ENV === 'development'
                 };
                 
-                console.log(`💾 [${requestId}] Inserting new thread into database:`, {
-                    threadId: newThreadId,
-                    isPublic,
-                    isDev: newThread.isDev
-                });
+                console.log(`💾 [${requestId}] Inserting new thread into database.`);
                 
                 const dbResponse = await db.insert(threadsTable).values(newThread);
                 current_thread_id = newThreadId;
                 isNewThread = true;
                 
-                console.log(`✅ [${requestId}] Thread created successfully:`, {
-                    threadId: newThreadId,
-                    dbResponse: !!dbResponse
-                });
+                console.log(`✅ [${requestId}] Thread created successfully.`);
             } catch (error) {
                 console.error(`❌ [${requestId}] Error generating thread:`, error);
                 return new Response(
@@ -209,10 +182,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
         console.log(`🎯 [${requestId}] Loading system prompt`);
 
         const systemPrompt = config.systemPrompt;
-        console.log(`📝 [${requestId}] System prompt loaded:`, {
-            promptLength: systemPrompt.length,
-            promptPreview: systemPrompt.substring(0, 200) + '...'
-        });
+        console.log(`📝 [${requestId}] System prompt loaded.`);
         
         const systemObj = {
             role: 'system',
@@ -229,22 +199,10 @@ export const POST: APIRoute = async ({ request, locals }) => {
             try {
                 console.log(`🔍 [${requestId}] Querying database for thread data`);
                 const threads = await db.select().from(threadsTable).where(eq(threadsTable.id, current_thread_id));
-                console.log(`📊 [${requestId}] Database query result:`, {
-                    threadCount: threads.length,
-                    foundThread: threads.length > 0
-                });
                 
                 if (threads.length > 0) {
                     userData = threads[0];
-                    console.log(`📋 [${requestId}] Thread data loaded:`, {
-                        threadId: userData.id,
-                        title: userData.title || 'untitled',
-                        email: userData.email || 'none',
-                        isPublic: userData.isPublic,
-                        hasThreadData: !!userData.thread,
-                        createdAt: userData.createdAt,
-                        updatedAt: userData.updatedAt
-                    });
+                    console.log(`📋 [${requestId}] Thread data loaded.`);
                     
                     // Check thread ownership
                     if (userData.email && userData.email !== user_email) {
@@ -268,12 +226,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
                         Array.isArray((userData.thread as { messages: any[] }).messages)
                     ) {
                         convoHistory = [systemObj, ...(userData.thread as { messages: any[] }).messages];
-                        console.log(`💬 [${requestId}] Conversation history loaded with system message:`, {
-                            totalMessageCount: convoHistory.length,
-                            systemMessageIncluded: true,
-                            userMessagesCount: (userData.thread as { messages: any[] }).messages.length,
-                            lastMessageRole: convoHistory[convoHistory.length - 1]?.role || 'none'
-                        });
+                        console.log(`💬 [${requestId}] Conversation history loaded with system message.`);
                     } else {
                         console.log(`⚠️ [${requestId}] No valid conversation history found in thread data, keeping system message only`);
                     }
@@ -297,20 +250,14 @@ export const POST: APIRoute = async ({ request, locals }) => {
         // --- Append new user message ---
         console.log(`➕ [${requestId}] Adding user message to conversation history`);
         convoHistory.push({ role: 'user', content: userPrompt });
-        console.log(`📊 [${requestId}] Updated conversation history:`, {
-            totalMessages: convoHistory.length,
-            userMessageLength: userPrompt.length
-        });
+        console.log(`📊 [${requestId}] Updated conversation history.`);
 
         // --- Model/Provider selection ---
         console.log(`🤖 [${requestId}] Selecting AI model and provider`);
         let userModel = config.model;
         let userProvider = config.provider;
 
-        console.log(`🔍 [${requestId}] Initial model/provider selection:`, {
-            selectedModel: userModel,
-            selectedProvider: userProvider
-        });
+        console.log(`🔍 [${requestId}] Initial model/provider selection.`);
 
         userProvider = config.provider;
         let provider = providerFunctions[userProvider as keyof typeof providerFunctions] ? userProvider : config.providerFunction;
@@ -321,62 +268,27 @@ export const POST: APIRoute = async ({ request, locals }) => {
             provider = config.provider;
         }
 
-        console.log(`✅ [${requestId}] Final model/provider selection:`, {
-            model: userModel,
-            provider: provider,
-            providerFunctionExists: !!providerFunctions[provider as keyof typeof providerFunctions]
-        });
-
         let aiModel = providerFunctions[provider as keyof typeof providerFunctions](userModel) as LanguageModel;
 
         const tools = config.tools || {};
-        
-        console.log(`🛠️ [${requestId}] AI generation setup:`, {
-            toolsCount: Object.keys(tools).length,
-            toolsList: Object.keys(tools),
-            systemPromptLength: systemPrompt.length,
-            systemPromptPreview: systemPrompt.substring(0, 200) + '...',
-            conversationHistoryLength: convoHistory.length,
-            systemMessageIncluded: convoHistory[0]?.role === 'system'
-        });
-        
+                
         // --- AI Generation ---
         console.log(`🧠 [${requestId}] Starting AI text generation with pre-built conversation history`);
         const aiStartTime = Date.now();
         let generatedText: string;
         try {
-            console.log(`📤 [${requestId}] Sending to AI model:`, {
-                model: userModel,
-                provider: provider,
-                messageCount: convoHistory.length,
-                firstMessageRole: convoHistory[0]?.role,
-                lastMessageRole: convoHistory[convoHistory.length - 1]?.role,
-                toolsEnabled: Object.keys(tools).length > 0,
-                maxSteps: 25
-            });
+            console.log(`📤 [${requestId}] Sending to AI model.`);
             
             const result = await generateText({
                 model: aiModel,
                 messages: convoHistory,
+                // prompt: 'Hello',
                 tools: tools,
-                maxSteps: 25,
+                // maxSteps: 25,
             });
             generatedText = result.text;
-            
-            const aiEndTime = Date.now();
-            const aiDuration = aiEndTime - aiStartTime;
-            
-            console.log(`✅ [${requestId}] AI generation completed:`, {
-                duration: `${aiDuration}ms`,
-                generatedTextLength: generatedText.length,
-                generatedTextPreview: generatedText.substring(0, 200) + (generatedText.length > 200 ? '...' : ''),
-                hasUsage: !!result.usage,
-                usageTokens: result.usage ? {
-                    promptTokens: result.usage.promptTokens,
-                    completionTokens: result.usage.completionTokens,
-                    totalTokens: result.usage.totalTokens
-                } : 'none'
-            });
+                        
+            console.log(`✅ [${requestId}] AI generation completed.`);
         } catch (error) {
             const aiEndTime = Date.now();
             const aiDuration = aiEndTime - aiStartTime;
@@ -398,10 +310,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
         // --- Append AI response to history ---
         console.log(`➕ [${requestId}] Adding AI response to conversation history`);
         convoHistory.push({ role: 'assistant', content: generatedText });
-        console.log(`📊 [${requestId}] Final conversation history:`, {
-            totalMessages: convoHistory.length,
-            aiResponseLength: generatedText.length
-        });
+        console.log(`📊 [${requestId}] Final conversation history.`);
 
         // --- Generate conversation title ---
         let convoTitle = userData?.title;
@@ -409,13 +318,10 @@ export const POST: APIRoute = async ({ request, locals }) => {
             console.log(`🏷️ [${requestId}] Generating conversation title`);
             const titleStartTime = Date.now();
             try {
-                convoTitle = await generateTitle(convoHistory, userModel, provider);
+                convoTitle = await generateTitle(convoHistory, userModel, userProvider);
                 const titleEndTime = Date.now();
                 const titleDuration = titleEndTime - titleStartTime;
-                console.log(`✅ [${requestId}] Title generated successfully:`, {
-                    title: convoTitle,
-                    duration: `${titleDuration}ms`
-                });
+                console.log(`✅ [${requestId}] Title generated successfully.`);
             } catch (error) {
                 console.error(`❌ [${requestId}] Error generating title:`, error);
                 convoTitle = 'Untitled Conversation';
@@ -491,28 +397,10 @@ export const POST: APIRoute = async ({ request, locals }) => {
         const extractEndTime = Date.now();
         const extractDuration = extractEndTime - extractStartTime;
         
-        console.log(`✅ [${requestId}] Response extraction completed:`, {
-            duration: `${extractDuration}ms`,
-            extractedKeys: Object.keys(obj),
-            htmlTextLength: htmlText.length,
-            // hasStudyGuide: !!obj?.studyGuide,
-            // hasReferenceSheet: !!obj?.referenceSheet,
-            // studyGuideLength: obj?.studyGuide?.length || 0,
-            // referenceSheetLength: obj?.referenceSheet?.length || 0
-        });
+        console.log(`✅ [${requestId}] Response extraction completed.`);
 
         const totalDuration = Date.now() - startTime;
-        console.log(`🎉 [${requestId}] Request completed successfully:`, {
-            totalDuration: `${totalDuration}ms`,
-            threadId: current_thread_id,
-            finalTitle: convoTitle,
-            responseSize: JSON.stringify({
-                ...obj,
-                generatedText: htmlText,
-                generatedTitle: true,
-                id: current_thread_id,
-            }).length
-        });
+        console.log(`🎉 [${requestId}] Request completed successfully.`);
 
         return new Response(
             JSON.stringify({
@@ -545,13 +433,9 @@ export const POST: APIRoute = async ({ request, locals }) => {
     }
 };
 
-async function generateTitle(convoHistory: any[], userModel: string, provider: ProviderKey) {
+async function generateTitle(convoHistory: any[], userModel: string, provider: string) {
     const titleRequestId = nanoid();
-    console.log(`🏷️ [${titleRequestId}] Starting title generation:`, {
-        conversationLength: convoHistory.length,
-        model: userModel,
-        provider: provider
-    });
+    console.log(`🏷️ [${titleRequestId}] Starting title generation.`);
     
     try {
         const titleStartTime = Date.now();
@@ -573,11 +457,7 @@ async function generateTitle(convoHistory: any[], userModel: string, provider: P
         const titleEndTime = Date.now();
         const titleDuration = titleEndTime - titleStartTime;
         
-        console.log(`✅ [${titleRequestId}] Title generation completed:`, {
-            duration: `${titleDuration}ms`,
-            generatedTitle: generatedText,
-            titleLength: generatedText.length
-        });
+        console.log(`✅ [${titleRequestId}] Title generation completed.`);
         
         return generatedText;
     } catch (error) {
