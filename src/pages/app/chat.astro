@@ -7,7 +7,7 @@
   *
   * Features:
   * - Real-time AI chat responses
-  * - Thread-based conversation history
+  * - Thread-based conversation history (server-side loaded)
   * - Auto-resizing textarea input
   * - Loading indicators
   * - Error handling and display
@@ -16,6 +16,7 @@
   *
   * Architecture:
   * - Uses the App layout (Nav + Footer)
+  * - Server-side rendering with thread history pre-loaded
   * - Client-side TypeScript for interactivity
   * - Communicates with /api/message/generate endpoint
   * - Stores thread ID for conversation context
@@ -29,6 +30,7 @@ import '../../styles/pages/app/chat.scss';
 
 <!-- Chat Page Content -->
 <App title="Stack Generator">
+
     <!-- Chat Header Section -->
     <div class="chat-header">
         <h1><i class="fa-solid fa-layer-group"></i> Stack Generator</h1>
@@ -96,8 +98,8 @@ import '../../styles/pages/app/chat.scss';
     });
 
     /**
-     * Chat State Variables
-     */
+      * Chat State Variables
+      */
 
     // LocalStorage key for thread ID persistence
     const THREAD_ID_KEY = 'stack-generator-thread-id';
@@ -110,8 +112,8 @@ import '../../styles/pages/app/chat.scss';
     let messageHistory: Array<{ role: 'user' | 'assistant', content: string }> = [];
 
     /**
-     * DOM Element References
-     */
+      * DOM Element References
+      */
     const chatMessages = document.getElementById('chatMessages')!;
     const messageInput = document.getElementById('messageInput') as HTMLTextAreaElement;
     const sendButton = document.getElementById('sendButton') as HTMLButtonElement;
@@ -120,8 +122,8 @@ import '../../styles/pages/app/chat.scss';
     const newChatBtn = document.getElementById('newChatBtn')!;
 
     /**
-     * Initialize chat with simple welcome message
-     */
+      * Initialize chat with simple welcome message
+      */
     function initializeChat() {
         // Add welcome message
         const welcomeEl = document.createElement('div');
@@ -140,26 +142,83 @@ import '../../styles/pages/app/chat.scss';
         chatMessages.scrollTop = chatMessages.scrollHeight;
     }
 
-    // Start with welcome message
-    initializeChat();
+    /**
+      * Load Thread History
+      *
+      * Fetches and displays existing conversation history from the server
+      * when a thread ID is present in localStorage
+      */
+    async function loadThreadHistory() {
+        if (!currentThreadId) {
+            // No thread ID, show welcome message
+            initializeChat();
+            return;
+        }
+
+        try {
+            // Fetch thread data from API
+            const response = await fetch(`/api/thread/${currentThreadId}`);
+
+            if (!response.ok) {
+                // Thread not found or error, clear invalid thread ID and show welcome
+                console.error('Failed to load thread history:', response.statusText);
+                localStorage.removeItem(THREAD_ID_KEY);
+                currentThreadId = null;
+                initializeChat();
+                return;
+            }
+
+            const data = await response.json();
+
+            // Update thread info with title
+            if (data.title) {
+                threadInfo.textContent = `Thread: ${data.title}`;
+            } else {
+                threadInfo.textContent = `Thread: ${data.id.substring(0, 8)}`;
+            }
+
+            // Display message history
+            if (data.messages && data.messages.length > 0) {
+                messageHistory = data.messages;
+
+                // Render all messages
+                data.messages.forEach((msg: { role: 'user' | 'assistant', content: string }) => {
+                    addMessage(msg.role, msg.content);
+                });
+            } else {
+                // No messages yet, show welcome
+                initializeChat();
+            }
+
+        } catch (error) {
+            console.error('Error loading thread history:', error);
+            // On error, clear thread ID and show welcome
+            localStorage.removeItem(THREAD_ID_KEY);
+            currentThreadId = null;
+            initializeChat();
+        }
+    }
+
+    // Load thread history on page load (or show welcome if no thread)
+    loadThreadHistory();
 
     /**
-     * Auto-Resize Textarea
-     *
-     * Automatically adjusts the height of the textarea as the user types
-     * to accommodate multi-line messages without manual scrolling
-     */
+      * Auto-Resize Textarea
+      *
+      * Automatically adjusts the height of the textarea as the user types
+      * to accommodate multi-line messages without manual scrolling
+      */
     messageInput.addEventListener('input', () => {
         messageInput.style.height = 'auto';  // Reset height
         messageInput.style.height = messageInput.scrollHeight + 'px';  // Set to content height
     });
 
     /**
-     * Keyboard Shortcut: Enter to Send
-     *
-     * - Enter: Send message
-     * - Shift+Enter: Insert newline (default textarea behavior)
-     */
+      * Keyboard Shortcut: Enter to Send
+      *
+      * - Enter: Send message
+      * - Shift+Enter: Insert newline (default textarea behavior)
+      */
     messageInput.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();  // Prevent newline
@@ -168,16 +227,16 @@ import '../../styles/pages/app/chat.scss';
     });
 
     /**
-     * Send Button Click Handler
-     */
+      * Send Button Click Handler
+      */
     sendButton.addEventListener('click', sendMessage);
 
     /**
-     * New Chat Button Handler
-     *
-     * Prompts the user to confirm starting a new conversation,
-     * then resets the chat state, localStorage, and UI
-     */
+      * New Chat Button Handler
+      *
+      * Prompts the user to confirm starting a new conversation,
+      * then resets the chat state, localStorage, and UI
+      */
     newChatBtn.addEventListener('click', () => {
         if (confirm('Start a new conversation?')) {
             // Reset state
@@ -206,16 +265,16 @@ import '../../styles/pages/app/chat.scss';
     });
 
     /**
-     * Send Message Function
-     *
-     * Handles the complete message sending flow:
-     * 1. Validate input
-     * 2. Add user message to UI
-     * 3. Disable input while processing
-     * 4. Send request to API
-     * 5. Handle response or errors
-     * 6. Re-enable input
-     */
+      * Send Message Function
+      *
+      * Handles the complete message sending flow:
+      * 1. Validate input
+      * 2. Add user message to UI
+      * 3. Disable input while processing
+      * 4. Send request to API
+      * 5. Handle response or errors
+      * 6. Re-enable input
+      */
     async function sendMessage() {
         // Get and validate message text
         const message = messageInput.value.trim();
@@ -237,22 +296,22 @@ import '../../styles/pages/app/chat.scss';
 
         try {
             /**
-             * Prepare API Request
-             *
-             * Include thread ID if this is a continuing conversation
-             * Otherwise, the API will create a new thread
-             */
+              * Prepare API Request
+              *
+              * Include thread ID if this is a continuing conversation
+              * Otherwise, the API will create a new thread
+              */
             const requestBody: { text: string; id?: string } = { text: message };
             if (currentThreadId) {
                 requestBody.id = currentThreadId;
             }
 
             /**
-             * Send Request to API
-             *
-             * POST to /api/message/generate with the user's message
-             * and optional thread ID
-             */
+              * Send Request to API
+              *
+              * POST to /api/message/generate with the user's message
+              * and optional thread ID
+              */
             const response = await fetch('/api/message/generate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -271,20 +330,20 @@ import '../../styles/pages/app/chat.scss';
             loadingEl.remove();
 
             /**
-             * Add AI Response to UI
-             *
-             * Display the generated text from the AI model
-             */
+              * Add AI Response to UI
+              *
+              * Display the generated text from the AI model
+              */
             addMessage('assistant', data.generatedText);
             messageHistory.push({ role: 'assistant', content: data.generatedText });
 
             /**
-             * Update Thread Info
-             *
-             * Store the thread ID for future messages
-             * Save to localStorage for persistence across page reloads
-             * Display the conversation title in the UI
-             */
+              * Update Thread Info
+              *
+              * Store the thread ID for future messages
+              * Save to localStorage for persistence across page reloads
+              * Display the conversation title in the UI
+              */
             if (data.id) {
                 currentThreadId = data.id;
                 localStorage.setItem(THREAD_ID_KEY, data.id);
@@ -296,11 +355,11 @@ import '../../styles/pages/app/chat.scss';
 
         } catch (error) {
             /**
-             * Error Handling
-             *
-             * Display error to user and remove loading indicator
-             * Also remove the user's message from history since it failed
-             */
+              * Error Handling
+              *
+              * Display error to user and remove loading indicator
+              * Also remove the user's message from history since it failed
+              */
             loadingEl.remove();
             showError(error instanceof Error ? error.message : String(error));
 
@@ -309,24 +368,24 @@ import '../../styles/pages/app/chat.scss';
 
         } finally {
             /**
-             * Re-enable Input
-             *
-             * Allow user to send another message and focus the input
-             */
+              * Re-enable Input
+              *
+              * Allow user to send another message and focus the input
+              */
             setInputState(true);
             messageInput.focus();
         }
     }
 
     /**
-     * Add Message to UI
-     *
-     * Creates a message element and appends it to the chat messages container
-     * AI messages are rendered as markdown for better formatting
-     *
-     * @param role - 'user' or 'assistant'
-     * @param content - The message text
-     */
+      * Add Message to UI
+      *
+      * Creates a message element and appends it to the chat messages container
+      * AI messages are rendered as markdown for better formatting
+      *
+      * @param role - 'user' or 'assistant'
+      * @param content - The message text
+      */
     function addMessage(role: 'user' | 'assistant', content: string) {
         // Create message container
         const messageEl = document.createElement('div');
@@ -359,12 +418,12 @@ import '../../styles/pages/app/chat.scss';
     }
 
     /**
-     * Add Loading Message
-     *
-     * Creates a loading indicator message to show while waiting for AI response
-     *
-     * @returns The loading element (so it can be removed later)
-     */
+      * Add Loading Message
+      *
+      * Creates a loading indicator message to show while waiting for AI response
+      *
+      * @returns The loading element (so it can be removed later)
+      */
     function addLoadingMessage(): HTMLElement {
         const loadingEl = document.createElement('div');
         loadingEl.className = 'message assistant loading';
@@ -391,49 +450,49 @@ import '../../styles/pages/app/chat.scss';
     }
 
     /**
-     * Set Input State
-     *
-     * Enable or disable the message input and send button
-     * Used to prevent multiple simultaneous messages
-     *
-     * @param enabled - true to enable input, false to disable
-     */
+      * Set Input State
+      *
+      * Enable or disable the message input and send button
+      * Used to prevent multiple simultaneous messages
+      *
+      * @param enabled - true to enable input, false to disable
+      */
     function setInputState(enabled: boolean) {
         messageInput.disabled = !enabled;
         sendButton.disabled = !enabled;
     }
 
     /**
-     * Show Error Banner
-     *
-     * Displays an error message at the top of the chat input area
-     *
-     * @param message - The error message to display
-     */
+      * Show Error Banner
+      *
+      * Displays an error message at the top of the chat input area
+      *
+      * @param message - The error message to display
+      */
     function showError(message: string) {
         errorBanner.textContent = `Error: ${message}`;
         errorBanner.classList.add('show');
     }
 
     /**
-     * Hide Error Banner
-     *
-     * Hides the error message banner
-     */
+      * Hide Error Banner
+      *
+      * Hides the error message banner
+      */
     function hideError() {
         errorBanner.textContent = '';
         errorBanner.classList.remove('show');
     }
 
     /**
-     * Escape HTML
-     *
-     * Prevents XSS attacks by escaping HTML special characters
-     * in user and AI generated content
-     *
-     * @param text - The text to escape
-     * @returns HTML-safe text
-     */
+      * Escape HTML
+      *
+      * Prevents XSS attacks by escaping HTML special characters
+      * in user and AI generated content
+      *
+      * @param text - The text to escape
+      * @returns HTML-safe text
+      */
     function escapeHtml(text: string): string {
         const div = document.createElement('div');
         div.textContent = text;
