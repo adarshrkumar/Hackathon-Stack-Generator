@@ -17,7 +17,7 @@ async function getAnthropicModelID(modelName: string): Promise<string> {
     });
     const modelsData = (await resp.json())?.data;
 
-    const modelID = modelsData?.find((model: any) => model.display_name.toLowerCase().includes(modelName.toLowerCase()))//?.id;
+    const modelID = modelsData?.find((model: any) => model.display_name.toLowerCase().includes(modelName.toLowerCase()))?.id;
     if (!modelID) {
         return ''
     }
