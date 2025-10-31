@@ -52,8 +52,20 @@ const serverThreadData = threadIdFromCookie ? await getThread(threadIdFromCookie
     <div class="chat-wrapper">
         <!-- Chat Messages Container (scrollable) -->
         <div class="chat-messages" id="chatMessages">
-            {serverThreadData && serverThreadData.messages.length > 0 ? (
-                // Server-rendered thread messages
+            <!-- Welcome message (always displayed) -->
+            <div class="message assistant">
+                <div class="message-icon">
+                    <i class="fa-solid fa-robot"></i>
+                </div>
+                <div class="message-content">
+                    <p><strong>Welcome to Stack Generator!</strong></p>
+                    <p>I'll help you design the perfect tech stack for your project.</p>
+                    <p>Please describe what type of product or application you're trying to build, and I'll recommend the best technologies, services, and architecture for your needs.</p>
+                </div>
+            </div>
+
+            {/* Server-rendered thread messages (if they exist) */}
+            {serverThreadData && serverThreadData.messages.length > 0 && (
                 serverThreadData.messages.map((msg) => (
                     <div class={`message ${msg.role}`}>
                         <div class="message-icon">
@@ -62,18 +74,6 @@ const serverThreadData = threadIdFromCookie ? await getThread(threadIdFromCookie
                         <div class="message-content" set:html={msg.role === 'assistant' ? msg.content : msg.content.replace(/\n/g, '<br>')}></div>
                     </div>
                 ))
-            ) : (
-                // Welcome message (default)
-                <div class="message assistant">
-                    <div class="message-icon">
-                        <i class="fa-solid fa-robot"></i>
-                    </div>
-                    <div class="message-content">
-                        <p><strong>Welcome to Stack Generator!</strong></p>
-                        <p>I'll help you design the perfect tech stack for your project.</p>
-                        <p>Please describe what type of product or application you're trying to build, and I'll recommend the best technologies, services, and architecture for your needs.</p>
-                    </div>
-                </div>
             )}
         </div>
 
