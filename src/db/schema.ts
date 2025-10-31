@@ -1,11 +1,11 @@
 import { pgTable, text, timestamp, jsonb, boolean, integer, numeric } from 'drizzle-orm/pg-core';
 
 /**
- * Threads Table Schema
- *
- * Stores conversation threads with message history.
- * Migrated from DynamoDB to PostgreSQL with Drizzle ORM.
- */
+  * Threads Table Schema
+  *
+  * Stores conversation threads with message history.
+  * Migrated from DynamoDB to PostgreSQL with Drizzle ORM.
+  */
 const threadsTable = pgTable('threads', {
     // Unique thread identifier (primary key)
     id: text('id').primaryKey(),
