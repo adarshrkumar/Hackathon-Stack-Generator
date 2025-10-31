@@ -26,10 +26,21 @@
 import App from '../../layouts/App.astro';
 
 import '../../styles/pages/app/chat.scss';
+
+// Server-side imports for thread loading
+import { getThread } from '../../lib/getThread';
+
+// Get thread ID from cookie (set by client-side)
+const threadIdFromCookie = Astro.cookies.get('stack-generator-thread-id')?.value;
+
+// Fetch thread data server-side if thread ID exists in cookie
+const serverThreadData = threadIdFromCookie ? await getThread(threadIdFromCookie) : null;
 ---
 
 <!-- Chat Page Content -->
 <App title="Stack Generator">
+    <!-- Hidden data attribute to pass server thread data -->
+    <div id="serverThreadData" data-thread-id={serverThreadData?.id} data-thread-title={serverThreadData?.title} style="display: none;"></div>
 
     <!-- Chat Header Section -->
     <div class="chat-header">
@@ -41,7 +52,29 @@ import '../../styles/pages/app/chat.scss';
     <div class="chat-wrapper">
         <!-- Chat Messages Container (scrollable) -->
         <div class="chat-messages" id="chatMessages">
-            <!-- Messages will be added dynamically -->
+            {serverThreadData && serverThreadData.messages.length > 0 ? (
+                // Server-rendered thread messages
+                serverThreadData.messages.map((msg) => (
+                    <div class={`message ${msg.role}`}>
+                        <div class="message-icon">
+                            <i class={`fa-solid ${msg.role === 'user' ? 'fa-user' : 'fa-robot'}`}></i>
+                        </div>
+                        <div class="message-content" set:html={msg.role === 'assistant' ? msg.content : msg.content.replace(/\n/g, '<br>')}></div>
+                    </div>
+                ))
+            ) : (
+                // Welcome message (default)
+                <div class="message assistant">
+                    <div class="message-icon">
+                        <i class="fa-solid fa-robot"></i>
+                    </div>
+                    <div class="message-content">
+                        <p><strong>Welcome to Stack Generator!</strong></p>
+                        <p>I'll help you design the perfect tech stack for your project.</p>
+                        <p>Please describe what type of product or application you're trying to build, and I'll recommend the best technologies, services, and architecture for your needs.</p>
+                    </div>
+                </div>
+            )}
         </div>
 
         <!-- Chat Input Section (fixed at bottom) -->
@@ -101,12 +134,32 @@ import '../../styles/pages/app/chat.scss';
       * Chat State Variables
       */
 
-    // LocalStorage key for thread ID persistence
-    const THREAD_ID_KEY = 'stack-generator-thread-id';
+    // Cookie name for thread ID persistence
+    const COOKIE_NAME = 'stack-generator-thread-id';
+
+    // Helper to set cookie
+    function setCookie(name: string, value: string, days: number = 30) {
+        const expires = new Date();
+        expires.setTime(expires.getTime() + days * 24 * 60 * 60 * 1000);
+        document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/`;
+    }
+
+    // Helper to delete cookie
+    function deleteCookie(name: string) {
+        document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/`;
+    }
+
+    // Helper to get cookie value
+    function getCookie(name: string): string | null {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop()?.split(';').shift() || null;
+        return null;
+    }
 
     // Current conversation thread ID (null for new conversations)
-    // Load from localStorage if available to persist across page reloads
-    let currentThreadId: string | null = localStorage.getItem(THREAD_ID_KEY);
+    // Load from cookie if available to persist across page reloads
+    let currentThreadId: string | null = getCookie(COOKIE_NAME);
 
     // In-memory message history (for reference, not sent to API)
     let messageHistory: Array<{ role: 'user' | 'assistant', content: string }> = [];
@@ -122,85 +175,44 @@ import '../../styles/pages/app/chat.scss';
     const newChatBtn = document.getElementById('newChatBtn')!;
 
     /**
-      * Initialize chat with simple welcome message
+      * Initialize state from server-rendered DOM
       */
-    function initializeChat() {
-        // Add welcome message
-        const welcomeEl = document.createElement('div');
-        welcomeEl.className = 'message assistant';
-        welcomeEl.innerHTML = `
-            <div class="message-icon">
-                <i class="fa-solid fa-robot"></i>
-            </div>
-            <div class="message-content">
-                <p><strong>Welcome to Stack Generator!</strong></p>
-                <p>I'll help you design the perfect tech stack for your project.</p>
-                <p>Please describe what type of product or application you're trying to build, and I'll recommend the best technologies, services, and architecture for your needs.</p>
-            </div>
-        `;
-        chatMessages.appendChild(welcomeEl);
+    (function initializeFromDOM() {
+        // Extract messages from server-rendered DOM
+        const existingMessages = chatMessages.querySelectorAll('.message');
+
+        existingMessages.forEach((msgEl) => {
+            // Skip welcome message (don't add to history)
+            const contentEl = msgEl.querySelector('.message-content');
+            const isWelcome = contentEl?.innerHTML.includes('Welcome to Stack Generator');
+
+            if (!isWelcome) {
+                const role = msgEl.classList.contains('user') ? 'user' : 'assistant';
+                const content = contentEl?.innerHTML || '';
+                messageHistory.push({ role: role as 'user' | 'assistant', content });
+            }
+        });
+
+        // Get thread data from hidden element
+        const serverDataEl = document.getElementById('serverThreadData');
+        const threadId = serverDataEl?.dataset.threadId;
+        const threadTitle = serverDataEl?.dataset.threadTitle;
+
+        if (threadId) {
+            currentThreadId = threadId;
+            setCookie(COOKIE_NAME, threadId);
+
+            // Update thread info
+            if (threadTitle) {
+                threadInfo.textContent = `Thread: ${threadTitle}`;
+            } else {
+                threadInfo.textContent = `Thread: ${threadId.substring(0, 8)}`;
+            }
+        }
+
+        // Scroll to bottom
         chatMessages.scrollTop = chatMessages.scrollHeight;
-    }
-
-    /**
-      * Load Thread History
-      *
-      * Fetches and displays existing conversation history from the server
-      * when a thread ID is present in localStorage
-      */
-    async function loadThreadHistory() {
-        if (!currentThreadId) {
-            // No thread ID, show welcome message
-            initializeChat();
-            return;
-        }
-
-        try {
-            // Fetch thread data from API
-            const response = await fetch(`/api/thread/${currentThreadId}`);
-
-            if (!response.ok) {
-                // Thread not found or error, clear invalid thread ID and show welcome
-                console.error('Failed to load thread history:', response.statusText);
-                localStorage.removeItem(THREAD_ID_KEY);
-                currentThreadId = null;
-                initializeChat();
-                return;
-            }
-
-            const data = await response.json();
-
-            // Update thread info with title
-            if (data.title) {
-                threadInfo.textContent = `Thread: ${data.title}`;
-            } else {
-                threadInfo.textContent = `Thread: ${data.id.substring(0, 8)}`;
-            }
-
-            // Display message history
-            if (data.messages && data.messages.length > 0) {
-                messageHistory = data.messages;
-
-                // Render all messages
-                data.messages.forEach((msg: { role: 'user' | 'assistant', content: string }) => {
-                    addMessage(msg.role, msg.content);
-                });
-            } else {
-                // No messages yet, show welcome
-                initializeChat();
-            }
-
-        } catch (error) {
-            console.error('Error loading thread history:', error);
-            // On error, clear thread ID and show welcome
-            localStorage.removeItem(THREAD_ID_KEY);
-            currentThreadId = null;
-            initializeChat();
-        }
-    }
-
-    // Load thread history on page load (or show welcome if no thread)
-    loadThreadHistory();
+    })();
 
     /**
       * Auto-Resize Textarea
@@ -235,7 +247,7 @@ import '../../styles/pages/app/chat.scss';
       * New Chat Button Handler
       *
       * Prompts the user to confirm starting a new conversation,
-      * then resets the chat state, localStorage, and UI
+      * then resets the chat state, cookie, and UI
       */
     newChatBtn.addEventListener('click', () => {
         if (confirm('Start a new conversation?')) {
@@ -243,11 +255,22 @@ import '../../styles/pages/app/chat.scss';
             currentThreadId = null;
             messageHistory = [];
 
-            // Clear thread ID from localStorage
-            localStorage.removeItem(THREAD_ID_KEY);
+            // Clear thread ID from cookie
+            deleteCookie(COOKIE_NAME);
 
-            // Clear chat messages
-            chatMessages.innerHTML = '';
+            // Clear chat messages and show welcome
+            chatMessages.innerHTML = `
+                <div class="message assistant">
+                    <div class="message-icon">
+                        <i class="fa-solid fa-robot"></i>
+                    </div>
+                    <div class="message-content">
+                        <p><strong>Welcome to Stack Generator!</strong></p>
+                        <p>I'll help you design the perfect tech stack for your project.</p>
+                        <p>Please describe what type of product or application you're trying to build, and I'll recommend the best technologies, services, and architecture for your needs.</p>
+                    </div>
+                </div>
+            `;
 
             // Re-enable input
             messageInput.disabled = false;
@@ -258,9 +281,6 @@ import '../../styles/pages/app/chat.scss';
 
             // Clear any errors
             hideError();
-
-            // Restart with welcome message
-            initializeChat();
         }
     });
 
@@ -341,12 +361,12 @@ import '../../styles/pages/app/chat.scss';
               * Update Thread Info
               *
               * Store the thread ID for future messages
-              * Save to localStorage for persistence across page reloads
+              * Save to cookie for persistence across page reloads
               * Display the conversation title in the UI
               */
             if (data.id) {
                 currentThreadId = data.id;
-                localStorage.setItem(THREAD_ID_KEY, data.id);
+                setCookie(COOKIE_NAME, data.id);
                 threadInfo.textContent = `Thread: ${data.generatedTitle || data.id.substring(0, 8)}`;
             }
 
