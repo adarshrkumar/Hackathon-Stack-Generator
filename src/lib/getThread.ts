@@ -1,9 +1,9 @@
 /**
- * Thread Fetching Utility
- *
- * Provides a function to fetch thread data from the database
- * Used for server-side rendering of chat history
- */
+  * Thread Fetching Utility
+  *
+  * Provides a function to fetch thread data from the database
+  * Used for server-side rendering of chat history
+  */
 
 import { db } from '../db/initialize';
 import { eq } from 'drizzle-orm';
@@ -17,12 +17,12 @@ export interface ThreadData {
 }
 
 /**
- * Fetch thread data by ID
- *
- * @param threadId - The thread ID to fetch
- * @param userEmail - The user's email for ownership verification (optional, uses test email by default)
- * @returns Thread data or null if not found/unauthorized
- */
+  * Fetch thread data by ID
+  *
+  * @param threadId - The thread ID to fetch
+  * @param userEmail - The user's email for ownership verification (optional, uses test email by default)
+  * @returns Thread data or null if not found/unauthorized
+  */
 export async function getThread(
     threadId: string,
     userEmail: string = config.testingEmail
