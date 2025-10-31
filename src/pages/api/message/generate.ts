@@ -279,15 +279,37 @@ export const POST: APIRoute = async ({ request, locals }) => {
         try {
             console.log(`📤 [${requestId}] Sending to AI model.`);
             
-            const result = await generateText({
+            let result = await generateText({
                 model: aiModel,
                 messages: convoHistory,
-                // prompt: 'Hello',
                 tools: tools,
-                // maxSteps: 25,
             });
+
+            console.log(`🔧 [${requestId}] Tool calls made:`, result.toolCalls?.length || 0);
+            console.log(`📝 [${requestId}] Tool results:`, result.toolResults?.length || 0);
+            if (result.toolResults && result.toolResults.length > 0) {
+                console.log(`🔍 [${requestId}] First tool result:`, JSON.stringify(result.toolResults[0]).substring(0, 200));
+            }
+
+            // If tools were called, we need to call the AI again with the tool results
+            if (result.toolCalls && result.toolCalls.length > 0) {
+                console.log(`🔄 [${requestId}] Tools were executed, calling AI again with results`);
+
+                // Add the response messages (includes tool calls and results)
+                convoHistory.push(...result.response.messages);
+
+                // Call the AI again to generate final response based on tool results
+                result = await generateText({
+                    model: aiModel,
+                    messages: convoHistory,
+                    tools: tools,
+                });
+
+                console.log(`✅ [${requestId}] AI generated final response after tool execution`);
+            }
+
             generatedText = result.text;
-                        
+
             console.log(`✅ [${requestId}] AI generation completed.`);
         } catch (error) {
             const aiEndTime = Date.now();
