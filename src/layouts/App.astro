@@ -1,23 +1,23 @@
 ---
 /**
- * Application Layout Component
- *
- * This layout is used for the application pages (/app/*) of the Stack Generator:
- * - /app/index.astro - Application dashboard
- * - /app/chat.astro - AI chat interface
- * - /app/test.astro - Test/demo pages
- *
- * Key Differences from Marketing Layout:
- * - Uses Nav component instead of Header
- * - No Hero component (apps don't need hero sections)
- * - Includes Font Awesome for icons in the UI
- * - Has app-specific CSS classes and styles
- *
- * Layout Structure:
- * - Nav (app navigation)
- * - Main content with .app class (via <slot />)
- * - Footer
- */
+  * Application Layout Component
+  *
+  * This layout is used for the application pages (/app/*) of the Stack Generator:
+  * - /app/index.astro - Application dashboard
+  * - /app/chat.astro - AI chat interface
+  * - /app/test.astro - Test/demo pages
+  *
+  * Key Differences from Marketing Layout:
+  * - Uses Nav component instead of Header
+  * - No Hero component (apps don't need hero sections)
+  * - Includes Font Awesome for icons in the UI
+  * - Has app-specific CSS classes and styles
+  *
+  * Layout Structure:
+  * - Nav (app navigation)
+  * - Main content with .app class (via <slot />)
+  * - Footer
+  */
 
 // Import app-specific components
 import Nav from '../components/app/Nav.astro';
@@ -29,8 +29,8 @@ import '../styles/layouts/Layout.scss';  // Base layout styles
 import '../styles/layouts/App.scss';     // App-specific layout styles
 
 /**
- * Extract title prop from component properties
- */
+  * Extract title prop from component properties
+  */
 const { title } = Astro.props;
 
 /**
