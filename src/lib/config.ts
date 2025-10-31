@@ -1,6 +1,6 @@
-/*
- * Application Configuration
- */
+/**
+  * Application Configuration
+  */
 
 import { anthropic } from '@ai-sdk/anthropic';
 
