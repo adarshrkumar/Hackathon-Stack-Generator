@@ -355,6 +355,11 @@ export const POST: APIRoute = async ({ request, locals }) => {
         // --- Save updated history back to DB ---
         console.log(`💾 [${requestId}] Saving conversation to database`);
         const saveStartTime = Date.now();
+
+        // Filter out system messages before saving (system message should only be in runtime, not stored)
+        const messagesToSave = convoHistory.filter((msg: any) => msg.role !== 'system');
+        console.log(`🔧 [${requestId}] Filtered out system messages for DB storage`);
+
         try {
             if (current_thread_id && userData) {
                 console.log(`🔄 [${requestId}] Updating existing thread`);
@@ -362,7 +367,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
                     .update(threadsTable)
                     .set({
                         title: convoTitle,
-                        thread: { messages: convoHistory },
+                        thread: { messages: messagesToSave },
                         updatedAt: new Date(),
                         isDev: import.meta.env.NODE_ENV === 'development' ? true : false,
                     })
@@ -376,7 +381,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
                 await db.insert(threadsTable).values({
                     id: current_thread_id,
                     title: convoTitle || '',
-                    thread: { messages: convoHistory },
+                    thread: { messages: messagesToSave },
                     email: user_email,
                     isPublic: isPublic,
                     isDev: import.meta.env.NODE_ENV === 'development'
@@ -388,7 +393,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
                     .update(threadsTable)
                     .set({
                         title: convoTitle,
-                        thread: { messages: convoHistory },
+                        thread: { messages: messagesToSave },
                         updatedAt: new Date(),
                         isDev: import.meta.env.NODE_ENV === 'development' ? true : false,
                     })
