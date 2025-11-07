@@ -29,6 +29,13 @@ import '../../styles/pages/app/chat.scss';
 
 // Server-side imports for thread loading
 import { getThread } from '../../lib/getThread';
+import { marked } from 'marked';
+
+// Configure marked for server-side rendering
+marked.setOptions({
+    breaks: true,  // Convert line breaks to <br>
+    gfm: true,     // GitHub Flavored Markdown
+});
 
 // Get thread ID from cookie (set by client-side)
 const threadIdFromCookie = Astro.cookies.get('stack-generator-thread-id')?.value;
@@ -79,7 +86,7 @@ if (threadNotFound) {
                         <div class="message-icon">
                             <i class={`fa-solid ${msg.role === 'user' ? 'fa-user' : 'fa-robot'}`}></i>
                         </div>
-                        <div class="message-content" set:html={msg.role === 'assistant' ? msg.content : msg.content.replace(/\n/g, '<br>')}></div>
+                        <div class="message-content" set:html={msg.role === 'assistant' ? marked.parse(msg.content) : msg.content.replace(/\n/g, '<br>')}></div>
                     </div>
                 ))
             )}
