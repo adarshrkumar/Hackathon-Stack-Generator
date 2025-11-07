@@ -28,6 +28,10 @@
        - navmain-start to navmain-end: 1fr for nav and main (fills available height)
        - footer-start to footer-end: Auto height for footer (fits content) */
     grid-template-rows: [navmain-start] 1fr [navmain-end footer-start] auto [footer-end];
+
+    &:has(.chat-wrapper) {
+        max-height: 100dvh;
+    }
 }
 
 /* Navigation Sidebar */
