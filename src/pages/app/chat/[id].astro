@@ -38,13 +38,13 @@ marked.setOptions({
 });
 
 // Get thread ID from cookie (set by client-side)
-const threadIdFromCookie = Astro.cookies.get('stack-generator-thread-id')?.value;
+const { id } = Astro.params;
 
 // Fetch thread data server-side if thread ID exists in cookie
-const serverThreadData = threadIdFromCookie ? await getThread(threadIdFromCookie) : null;
+const serverThreadData = id ? await getThread(id) : null;
 
 // Check if thread was not found (deleted or invalid)
-const threadNotFound = threadIdFromCookie && !serverThreadData;
+const threadNotFound = id && !serverThreadData;
 
 // If thread was expected but not found, clear the invalid cookie
 if (threadNotFound) {
@@ -55,7 +55,11 @@ if (threadNotFound) {
 <!-- Chat Page Content -->
 <App title="Stack Generator">
     <!-- Hidden data attribute to pass server thread data -->
-    <div id="serverThreadData" data-thread-id={serverThreadData?.id} data-thread-title={serverThreadData?.title} data-thread-not-found={threadNotFound ? 'true' : 'false'} style="display: none;"></div>
+    <div id="serverThreadData" style="display: none;" data-thread={JSON.stringify({
+        threadId: serverThreadData?.id || null,
+        threadTitle: serverThreadData?.title || null,
+        threadNotFound: threadNotFound
+    })}></div>
 
     <!-- Chat Header Section -->
     <div class="chat-header">
@@ -124,7 +128,7 @@ if (threadNotFound) {
 </App>
 
 <!-- Client-Side TypeScript -->
-<script>
+<script is:inline define:vars={ serverThreadData }>
     /**
       * CLIENT-SIDE CHAT LOGIC WITH SELECTION PROMPTS
       *
@@ -153,19 +157,19 @@ if (threadNotFound) {
     const COOKIE_NAME = 'stack-generator-thread-id';
 
     // Helper to set cookie
-    function setCookie(name: string, value: string, days: number = 30) {
+    function setCookie(name, value, days = 30) {
         const expires = new Date();
         expires.setTime(expires.getTime() + days * 24 * 60 * 60 * 1000);
         document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/`;
     }
 
     // Helper to delete cookie
-    function deleteCookie(name: string) {
+    function deleteCookie(name) {
         document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/`;
     }
 
     // Helper to get cookie value
-    function getCookie(name: string): string | null {
+    function getCookie(name) {
         const value = `; ${document.cookie}`;
         const parts = value.split(`; ${name}=`);
         if (parts.length === 2) return parts.pop()?.split(';').shift() || null;
@@ -174,20 +178,20 @@ if (threadNotFound) {
 
     // Current conversation thread ID (null for new conversations)
     // Load from cookie if available to persist across page reloads
-    let currentThreadId: string | null = getCookie(COOKIE_NAME);
+    let currentThreadId = getCookie(COOKIE_NAME);
 
     // In-memory message history (for reference, not sent to API)
-    let messageHistory: Array<{ role: 'user' | 'assistant', content: string }> = [];
+    let messageHistory = [];
 
     /**
       * DOM Element References
       */
-    const chatMessages = document.getElementById('chatMessages')!;
-    const messageInput = document.getElementById('messageInput') as HTMLTextAreaElement;
-    const sendButton = document.getElementById('sendButton') as HTMLButtonElement;
-    const errorBanner = document.getElementById('errorBanner')!;
-    const threadInfo = document.getElementById('threadInfo')!;
-    const newChatBtn = document.getElementById('newChatBtn')!;
+    const chatMessages = document.getElementById('chatMessages');
+    const messageInput = document.getElementById('messageInput');
+    const sendButton = document.getElementById('sendButton');
+    const errorBanner = document.getElementById('errorBanner');
+    const threadInfo = document.getElementById('threadInfo');
+    const newChatBtn = document.getElementById('newChatBtn');
 
     /**
       * Initialize state from server-rendered DOM
@@ -195,9 +199,12 @@ if (threadNotFound) {
     (function initializeFromDOM() {
         // Get thread data from hidden element
         const serverDataEl = document.getElementById('serverThreadData');
-        const threadId = serverDataEl?.dataset.threadId;
-        const threadTitle = serverDataEl?.dataset.threadTitle;
-        const threadNotFound = serverDataEl?.dataset.threadNotFound === 'true';
+        const serverThreadDataStr = serverDataEl?.getAttribute('data-thread');
+        const serverThreadData = serverThreadDataStr ? JSON.parse(serverThreadDataStr) : null;
+
+        const threadId = serverThreadData?.threadId;
+        const threadTitle = serverThreadData?.threadTitle;
+        const threadNotFound = serverThreadData?.threadNotFound === true;
 
         // Handle deleted/invalid thread
         if (threadNotFound) {
@@ -222,7 +229,7 @@ if (threadNotFound) {
             if (!isWelcome) {
                 const role = msgEl.classList.contains('user') ? 'user' : 'assistant';
                 const content = contentEl?.innerHTML || '';
-                messageHistory.push({ role: role as 'user' | 'assistant', content });
+                messageHistory.push({ role: role, content });
             }
         });
 
@@ -350,7 +357,7 @@ if (threadNotFound) {
               * Include thread ID if this is a continuing conversation
               * Otherwise, the API will create a new thread
               */
-            const requestBody: { text: string; id?: string } = { text: message };
+            const requestBody = { text: message };
             if (currentThreadId) {
                 requestBody.id = currentThreadId;
             }
@@ -417,7 +424,7 @@ if (threadNotFound) {
               * Also remove the user's message from history since it failed
               */
             loadingEl.remove();
-            showError(error instanceof Error ? error.message : String(error));
+            showError(error instanceof Error ? error.message(error) : '');
 
             // Remove the user message from history since request failed
             messageHistory.pop();
@@ -442,7 +449,7 @@ if (threadNotFound) {
       * @param role - 'user' or 'assistant'
       * @param content - The message text
       */
-    function addMessage(role: 'user' | 'assistant', content: string) {
+    function addMessage(role, content) {
         // Create message container
         const messageEl = document.createElement('div');
         messageEl.className = `message ${role}`;
@@ -451,10 +458,10 @@ if (threadNotFound) {
         const icon = role === 'user' ? 'fa-user' : 'fa-robot';
 
         // Format content based on role
-        let formattedContent: string;
+        let formattedContent;
         if (role === 'assistant') {
             // Render markdown for AI responses
-            formattedContent = marked.parse(content) as string;
+            formattedContent = marked.parse(content);
         } else {
             // Escape HTML for user messages to prevent XSS
             formattedContent = escapeHtml(content).replace(/\n/g, '<br>');
@@ -480,7 +487,7 @@ if (threadNotFound) {
       *
       * @returns The loading element (so it can be removed later)
       */
-    function addLoadingMessage(): HTMLElement {
+    function addLoadingMessage() {
         const loadingEl = document.createElement('div');
         loadingEl.className = 'message assistant loading';
 
@@ -513,7 +520,7 @@ if (threadNotFound) {
       *
       * @param enabled - true to enable input, false to disable
       */
-    function setInputState(enabled: boolean) {
+    function setInputState(enabled) {
         messageInput.disabled = !enabled;
         sendButton.disabled = !enabled;
     }
@@ -525,7 +532,7 @@ if (threadNotFound) {
       *
       * @param message - The error message to display
       */
-    function showError(message: string) {
+    function showError(message) {
         errorBanner.textContent = `Error: ${message}`;
         errorBanner.classList.add('show');
     }
@@ -549,7 +556,7 @@ if (threadNotFound) {
       * @param text - The text to escape
       * @returns HTML-safe text
       */
-    function escapeHtml(text: string): string {
+    function escapeHtml(text) {
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
