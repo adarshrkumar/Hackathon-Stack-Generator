@@ -53,7 +53,9 @@ h1, h2, h3, h4, h5, h6, p, ol, ul {
 
 /* List Reset */
 ol, ul {
-    list-style: none;  /* Remove default bullets/numbers for custom styling */
+    &:not(.message-content &) {
+        list-style: none;  /* Remove default bullets/numbers for custom styling */
+    }
 }
 
 /* Responsive Image Defaults */
