@@ -370,11 +370,16 @@ export const POST: APIRoute = async ({ request, locals }) => {
             });
 
             // Return streaming response with metadata in headers
+            const responseHeaders: Record<string, string> = {};
+            if (current_thread_id) {
+                responseHeaders['X-Thread-ID'] = current_thread_id;
+            }
+            if (userData?.title) {
+                responseHeaders['X-Thread-Title'] = userData.title;
+            }
+
             return result.toTextStreamResponse({
-                headers: {
-                    'X-Thread-ID': current_thread_id || '',
-                    'X-Thread-Title': userData?.title || '',
-                },
+                headers: responseHeaders,
             });
         } catch (error) {
             const aiEndTime = Date.now();

@@ -138,7 +138,7 @@ const { serverThreadData = null, isThreadPage = false } = Astro.props;
             }
 
             // Scroll to bottom
-            chatMessages.scrollTop = chatMessages.scrollHeight;
+            scrollToBottom(true);
         }
     }
 
@@ -197,6 +197,9 @@ const { serverThreadData = null, isThreadPage = false } = Astro.props;
         // Clear input and reset height
         messageInput.value = '';
         messageInput.style.height = 'auto';
+
+        // Enable auto-scroll for the new message and response
+        shouldAutoScroll = true;
 
         // Add user message to UI immediately for better UX
         addMessage('user', message);
@@ -279,11 +282,11 @@ const { serverThreadData = null, isThreadPage = false } = Astro.props;
                 contentEl.innerHTML = marked.parse(fullText);
 
                 // Auto-scroll to bottom
-                chatMessages.scrollTop = chatMessages.scrollHeight;
+                scrollToBottom();
             }
 
             // If this is the index page, redirect to the thread page
-            if (!isThreadPage && threadId) {
+            if (!isThreadPage && threadId && threadId.trim() !== '') {
                 window.location.href = `/app/chat/${threadId}`;
                 return;
             }
@@ -369,7 +372,7 @@ const { serverThreadData = null, isThreadPage = false } = Astro.props;
 
         // Append to chat and scroll to bottom
         chatMessages.appendChild(messageEl);
-        chatMessages.scrollTop = chatMessages.scrollHeight;
+        scrollToBottom();
     }
 
     /**
@@ -399,7 +402,7 @@ const { serverThreadData = null, isThreadPage = false } = Astro.props;
 
         // Append and scroll to bottom
         chatMessages.appendChild(loadingEl);
-        chatMessages.scrollTop = chatMessages.scrollHeight;
+        scrollToBottom();
 
         return loadingEl;
     }
