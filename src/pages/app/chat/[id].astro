@@ -127,7 +127,7 @@ if (threadNotFound) {
     serverThreadData={{
         threadId: serverThreadData?.id || null,
         threadTitle: serverThreadData?.title || null,
-        threadNotFound: threadNotFound
+        threadNotFound: !!threadNotFound
     }}
     isThreadPage={true}
 />
