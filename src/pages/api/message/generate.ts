@@ -437,7 +437,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
             JSON.stringify({
                 ...obj,
                 generatedText: htmlText,
-                generatedTitle: true,
+                generatedTitle: convoTitle,
                 id: current_thread_id,
             }),
             {
