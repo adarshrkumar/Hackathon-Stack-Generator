@@ -35,12 +35,20 @@ const threadIdFromCookie = Astro.cookies.get('stack-generator-thread-id')?.value
 
 // Fetch thread data server-side if thread ID exists in cookie
 const serverThreadData = threadIdFromCookie ? await getThread(threadIdFromCookie) : null;
+
+// Check if thread was not found (deleted or invalid)
+const threadNotFound = threadIdFromCookie && !serverThreadData;
+
+// If thread was expected but not found, clear the invalid cookie
+if (threadNotFound) {
+    Astro.cookies.delete('stack-generator-thread-id', { path: '/' });
+}
 ---
 
 <!-- Chat Page Content -->
 <App title="Stack Generator">
     <!-- Hidden data attribute to pass server thread data -->
-    <div id="serverThreadData" data-thread-id={serverThreadData?.id} data-thread-title={serverThreadData?.title} style="display: none;"></div>
+    <div id="serverThreadData" data-thread-id={serverThreadData?.id} data-thread-title={serverThreadData?.title} data-thread-not-found={threadNotFound ? 'true' : 'false'} style="display: none;"></div>
 
     <!-- Chat Header Section -->
     <div class="chat-header">
@@ -178,6 +186,24 @@ const serverThreadData = threadIdFromCookie ? await getThread(threadIdFromCookie
       * Initialize state from server-rendered DOM
       */
     (function initializeFromDOM() {
+        // Get thread data from hidden element
+        const serverDataEl = document.getElementById('serverThreadData');
+        const threadId = serverDataEl?.dataset.threadId;
+        const threadTitle = serverDataEl?.dataset.threadTitle;
+        const threadNotFound = serverDataEl?.dataset.threadNotFound === 'true';
+
+        // Handle deleted/invalid thread
+        if (threadNotFound) {
+            console.log('Thread not found or deleted, starting new conversation');
+            currentThreadId = null;
+            deleteCookie(COOKIE_NAME);
+            threadInfo.textContent = 'New conversation';
+
+            // Scroll to bottom and return early (no messages to load)
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            return;
+        }
+
         // Extract messages from server-rendered DOM
         const existingMessages = chatMessages.querySelectorAll('.message');
 
@@ -193,11 +219,7 @@ const serverThreadData = threadIdFromCookie ? await getThread(threadIdFromCookie
             }
         });
 
-        // Get thread data from hidden element
-        const serverDataEl = document.getElementById('serverThreadData');
-        const threadId = serverDataEl?.dataset.threadId;
-        const threadTitle = serverDataEl?.dataset.threadTitle;
-
+        // Load thread data if available
         if (threadId) {
             currentThreadId = threadId;
             setCookie(COOKIE_NAME, threadId);
@@ -343,6 +365,13 @@ const serverThreadData = threadIdFromCookie ? await getThread(threadIdFromCookie
 
             // Check for HTTP errors
             if (!response.ok) {
+                // If thread is unauthorized or not found, clear it and start fresh
+                if (response.status === 403 || response.status === 404) {
+                    console.log('Thread invalid or unauthorized, clearing and starting new conversation');
+                    currentThreadId = null;
+                    deleteCookie(COOKIE_NAME);
+                    threadInfo.textContent = 'New conversation';
+                }
                 throw new Error(data.error || 'Request failed');
             }
 
