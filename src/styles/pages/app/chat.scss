@@ -17,130 +17,9 @@
 /* Import global variables */
 @use '../../variables/globals.scss' as *;
 
-/* Project Type Selection Grid */
-.selection-options-grid {
+.main.app:has(.chat-wrapper) {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 1rem;
-    margin: 1.5rem 0;
-}
-
-.project-type-btn {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 1.25rem;
-    border: 2px solid #ddd;
-    border-radius: 12px;
-    background: white;
-    cursor: pointer;
-    transition: all 0.3s;
-    text-align: left;
-    min-height: 100px;
-
-    strong {
-        font-size: 1.05rem;
-        color: #333;
-        margin-bottom: 0.5rem;
-        display: block;
-        font-family: 'Montserrat', sans-serif;
-    }
-
-    .option-description {
-        font-size: 0.85rem;
-        color: #666;
-        line-height: 1.4;
-        font-weight: 400;
-    }
-
-    &:hover:not(:disabled) {
-        border-color: #FF9900;
-        background: #FFF5E6;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(255, 153, 0, 0.15);
-    }
-
-    &.selected {
-        border-color: #FF9900;
-        background: #FF9900;
-
-        strong {
-            color: white;
-        }
-
-        .option-description {
-            color: rgba(255, 255, 255, 0.9);
-        }
-    }
-
-    &:disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
-    }
-}
-
-/* Inline Selection Options (Chat Style) */
-.selection-options-inline {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin: 1rem 0;
-}
-
-.option-btn {
-    padding: 0.5rem 1rem;
-    border: 2px solid #ddd;
-    border-radius: 8px;
-    background: white;
-    color: #333;
-    cursor: pointer;
-    font-size: 0.9rem;
-    font-family: 'Montserrat', sans-serif;
-    transition: all 0.2s;
-    font-weight: 500;
-    white-space: normal;
-
-    &:hover:not(:disabled) {
-        border-color: #FF9900;
-        background: #FFF5E6;
-        transform: translateY(-1px);
-    }
-
-    &.selected {
-        border-color: #FF9900;
-        background: #FF9900;
-        color: white;
-    }
-
-    &.skip-btn-inline {
-        border-color: #999;
-        color: #666;
-
-        &:hover {
-            border-color: #666;
-            background: #f0f0f0;
-        }
-    }
-
-    &:disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
-    }
-}
-
-.selection-hint {
-    font-size: 0.85rem;
-    color: #666;
-    font-style: italic;
-    margin: 0.5rem 0 0 0;
-}
-
-.selection-message {
-    .message-content {
-        p:first-child {
-            font-weight: 600;
-        }
-    }
+    grid-template-rows: auto 1fr;
 }
 
 /* Chat Header */
@@ -176,7 +55,7 @@
     width: 100%;
     max-width: 1200px;
     margin: 0 auto;
-    height: calc(100vh - 240px); /* Fit the viewport while leaving room for header/footer */
+    height: 100%; /* Fit the viewport while leaving room for header/footer */
     display: flex;
     flex-direction: column;
     overflow: hidden; /* Clips overflowing children */
