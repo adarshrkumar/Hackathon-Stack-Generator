@@ -59,6 +59,9 @@ const { serverThreadData = null, isThreadPage = false } = Astro.props;
     // In-memory message history (for reference, not sent to API)
     let messageHistory = [];
 
+    // Auto-scroll control
+    let shouldAutoScroll = true;
+
     /**
      * DOM Element References
      */
@@ -68,6 +71,27 @@ const { serverThreadData = null, isThreadPage = false } = Astro.props;
     const errorBanner = document.getElementById('errorBanner');
     const threadInfo = document.getElementById('threadInfo');
     const newChatBtn = document.getElementById('newChatBtn');
+
+    /**
+     * Auto-Scroll Detection
+     *
+     * Detects when user manually scrolls up and disables auto-scroll
+     * Re-enables auto-scroll when user scrolls back to bottom
+     */
+    function isScrolledToBottom() {
+        const threshold = 50; // pixels from bottom to consider "at bottom"
+        return chatMessages.scrollHeight - chatMessages.scrollTop - chatMessages.clientHeight < threshold;
+    }
+
+    function scrollToBottom(force = false) {
+        if (force || shouldAutoScroll) {
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+    }
+
+    chatMessages.addEventListener('scroll', () => {
+        shouldAutoScroll = isScrolledToBottom();
+    });
 
     /**
      * Initialize state from server-rendered DOM (only for thread page)
@@ -83,7 +107,7 @@ const { serverThreadData = null, isThreadPage = false } = Astro.props;
             currentThreadId = null;
             deleteCookie(COOKIE_NAME);
             threadInfo.textContent = 'New conversation';
-            chatMessages.scrollTop = chatMessages.scrollHeight;
+            scrollToBottom(true);
         } else {
             // Extract messages from server-rendered DOM
             const existingMessages = chatMessages.querySelectorAll('.message');
@@ -197,16 +221,13 @@ const { serverThreadData = null, isThreadPage = false } = Astro.props;
             }
 
             /**
-             * Send Request to API
+             * Send Request to API for streaming
              */
             const response = await fetch('/api/message/generate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(requestBody),
             });
-
-            // Parse JSON response
-            const data = await response.json();
 
             // Check for HTTP errors
             if (!response.ok) {
@@ -217,32 +238,73 @@ const { serverThreadData = null, isThreadPage = false } = Astro.props;
                     deleteCookie(COOKIE_NAME);
                     threadInfo.textContent = 'New conversation';
                 }
-                throw new Error(data.error || 'Request failed');
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Request failed');
             }
 
-            // Remove loading indicator
+            // Get thread info from headers
+            const threadId = response.headers.get('X-Thread-ID');
+            const threadTitle = response.headers.get('X-Thread-Title');
+
+            // Remove loading indicator and create message element for streaming
             loadingEl.remove();
 
+            // Create assistant message element that we'll update as chunks arrive
+            const messageEl = document.createElement('div');
+            messageEl.className = 'message assistant';
+            messageEl.innerHTML = `
+                <div class="message-icon">
+                    <i class="fa-solid fa-robot"></i>
+                </div>
+                <div class="message-content"></div>
+            `;
+            chatMessages.appendChild(messageEl);
+            const contentEl = messageEl.querySelector('.message-content');
+
+            let fullText = '';
+
+            // Read the streaming response
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+
+            while (true) {
+                const { done, value } = await reader.read();
+
+                if (done) break;
+
+                const chunk = decoder.decode(value, { stream: true });
+                fullText += chunk;
+
+                // Update the message content with markdown rendering
+                contentEl.innerHTML = marked.parse(fullText);
+
+                // Auto-scroll to bottom
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+
             // If this is the index page, redirect to the thread page
-            if (!isThreadPage && data.id) {
-                window.location.href = `/app/chat/${data.id}`;
+            if (!isThreadPage && threadId) {
+                window.location.href = `/app/chat/${threadId}`;
                 return;
             }
 
             /**
-             * Add AI Response to UI (thread page only)
+             * Update state after streaming completes (thread page only)
              */
             if (isThreadPage) {
-                addMessage('assistant', data.generatedText);
-                messageHistory.push({ role: 'assistant', content: data.generatedText });
+                messageHistory.push({ role: 'assistant', content: fullText });
 
                 /**
                  * Update Thread Info
                  */
-                if (data.id) {
-                    currentThreadId = data.id;
-                    setCookie(COOKIE_NAME, data.id);
-                    threadInfo.textContent = `Thread: ${data.generatedTitle || data.id}`;
+                if (threadId) {
+                    currentThreadId = threadId;
+                    setCookie(COOKIE_NAME, threadId);
+                    if (threadTitle) {
+                        threadInfo.textContent = `Thread: ${threadTitle}`;
+                    } else {
+                        threadInfo.textContent = `Thread: ${threadId.substring(0, 8)}`;
+                    }
                 }
             }
 

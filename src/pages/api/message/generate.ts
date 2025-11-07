@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro';
 
-import { generateText, type LanguageModel, stepCountIs } from 'ai';
+import { generateText, streamText, type LanguageModel, stepCountIs } from 'ai';
 
 // import { openai } from '@ai-sdk/openai';
 import { anthropic } from '@ai-sdk/anthropic';
@@ -278,32 +278,104 @@ export const POST: APIRoute = async ({ request, locals }) => {
         let aiModel = providerFunctions[provider as keyof typeof providerFunctions](userModel) as LanguageModel;
 
         const tools = config.tools || {};
-                
-        // --- AI Generation ---
-        console.log(`🧠 [${requestId}] Starting AI text generation with pre-built conversation history`);
+
+        // --- AI Generation with Streaming ---
+        console.log(`🧠 [${requestId}] Starting AI text streaming with pre-built conversation history`);
         const aiStartTime = Date.now();
-        let generatedText: string;
+
         try {
             console.log(`📤 [${requestId}] Sending to AI model with stopWhen enabled for tool feedback loops.`);
 
-            const result = await generateText({
+            const result = streamText({
                 model: aiModel,
                 messages: convoHistory,
                 tools: tools,
                 stopWhen: stepCountIs(10), // Allow up to 10 rounds of tool calls for longer feedback loops
+                onFinish: async ({ text: generatedText, finishReason, usage, steps }) => {
+                    // This runs after streaming completes
+                    console.log(`✅ [${requestId}] AI generation completed.`);
+                    console.log(`🔧 [${requestId}] Finish reason:`, finishReason);
+                    console.log(`🔄 [${requestId}] Steps taken:`, steps?.length || 1);
+
+                    // --- Append AI response to history ---
+                    console.log(`➕ [${requestId}] Adding AI response to conversation history`);
+                    const updatedHistory = [...convoHistory, { role: 'assistant', content: generatedText }];
+
+                    // --- Generate conversation title ---
+                    let convoTitle = userData?.title;
+                    if (!convoTitle) {
+                        console.log(`🏷️ [${requestId}] Generating conversation title`);
+                        try {
+                            convoTitle = await generateTitle(updatedHistory, userModel, userProvider);
+                            console.log(`✅ [${requestId}] Title generated successfully.`);
+                        } catch (error) {
+                            console.error(`❌ [${requestId}] Error generating title:`, error);
+                            convoTitle = 'Untitled Conversation';
+                        }
+                    } else {
+                        console.log(`🏷️ [${requestId}] Using existing title:`, convoTitle);
+                    }
+
+                    // --- Save updated history back to DB ---
+                    console.log(`💾 [${requestId}] Saving conversation to database`);
+
+                    // Filter out system messages before saving
+                    const messagesToSave = updatedHistory.filter((msg: any) => msg.role !== 'system');
+
+                    try {
+                        if (current_thread_id && userData) {
+                            console.log(`🔄 [${requestId}] Updating existing thread`);
+                            await db
+                                .update(threadsTable)
+                                .set({
+                                    title: convoTitle,
+                                    thread: { messages: messagesToSave },
+                                    updatedAt: new Date(),
+                                    isDev: import.meta.env.NODE_ENV === 'development' ? true : false,
+                                })
+                                .where(eq(threadsTable.id, current_thread_id));
+                            console.log(`✅ [${requestId}] Thread updated successfully`);
+                        } else if (current_thread_id && !userData && !isNewThread) {
+                            console.log(`🆕 [${requestId}] Inserting new thread with provided ID`);
+                            await db.insert(threadsTable).values({
+                                id: current_thread_id,
+                                title: convoTitle || '',
+                                thread: { messages: messagesToSave },
+                                email: user_email,
+                                isPublic: isPublic,
+                                isDev: import.meta.env.NODE_ENV === 'development'
+                            } as ThreadInsert);
+                            console.log(`✅ [${requestId}] New thread inserted successfully`);
+                        } else if (isNewThread) {
+                            console.log(`🔄 [${requestId}] Updating newly created thread`);
+                            await db
+                                .update(threadsTable)
+                                .set({
+                                    title: convoTitle,
+                                    thread: { messages: messagesToSave },
+                                    updatedAt: new Date(),
+                                    isDev: import.meta.env.NODE_ENV === 'development' ? true : false,
+                                })
+                                .where(eq(threadsTable.id, current_thread_id));
+                            console.log(`✅ [${requestId}] New thread updated successfully`);
+                        }
+
+                        console.log(`💾 [${requestId}] Database save completed`);
+                    } catch (error) {
+                        console.error(`❌ [${requestId}] Error saving conversation to database:`, error);
+                    }
+
+                    console.log(`🎉 [${requestId}] Request completed successfully.`);
+                },
             });
 
-            console.log(`🔧 [${requestId}] Total tool calls made:`, result.toolCalls?.length || 0);
-            console.log(`📝 [${requestId}] Total tool results:`, result.toolResults?.length || 0);
-            console.log(`🔄 [${requestId}] Steps taken:`, result.steps?.length || 1);
-
-            if (result.toolResults && result.toolResults.length > 0) {
-                console.log(`🔍 [${requestId}] First tool result:`, JSON.stringify(result.toolResults[0]).substring(0, 200));
-            }
-
-            generatedText = result.text;
-
-            console.log(`✅ [${requestId}] AI generation completed.`);
+            // Return streaming response with metadata in headers
+            return result.toTextStreamResponse({
+                headers: {
+                    'X-Thread-ID': current_thread_id || '',
+                    'X-Thread-Title': userData?.title || '',
+                },
+            });
         } catch (error) {
             const aiEndTime = Date.now();
             const aiDuration = aiEndTime - aiStartTime;
@@ -321,119 +393,6 @@ export const POST: APIRoute = async ({ request, locals }) => {
                 }
             );
         }
-
-        // --- Append AI response to history ---
-        console.log(`➕ [${requestId}] Adding AI response to conversation history`);
-        convoHistory.push({ role: 'assistant', content: generatedText });
-        console.log(`📊 [${requestId}] Final conversation history.`);
-
-        // --- Generate conversation title ---
-        let convoTitle = userData?.title;
-        if (!convoTitle) {
-            console.log(`🏷️ [${requestId}] Generating conversation title`);
-            const titleStartTime = Date.now();
-            try {
-                convoTitle = await generateTitle(convoHistory, userModel, userProvider);
-                const titleEndTime = Date.now();
-                const titleDuration = titleEndTime - titleStartTime;
-                console.log(`✅ [${requestId}] Title generated successfully.`);
-            } catch (error) {
-                console.error(`❌ [${requestId}] Error generating title:`, error);
-                convoTitle = 'Untitled Conversation';
-            }
-        } else {
-            console.log(`🏷️ [${requestId}] Using existing title:`, convoTitle);
-        }
-
-        // --- Save updated history back to DB ---
-        console.log(`💾 [${requestId}] Saving conversation to database`);
-        const saveStartTime = Date.now();
-
-        // Filter out system messages before saving (system message should only be in runtime, not stored)
-        const messagesToSave = convoHistory.filter((msg: any) => msg.role !== 'system');
-        console.log(`🔧 [${requestId}] Filtered out system messages for DB storage`);
-
-        try {
-            if (current_thread_id && userData) {
-                console.log(`🔄 [${requestId}] Updating existing thread`);
-                await db
-                    .update(threadsTable)
-                    .set({
-                        title: convoTitle,
-                        thread: { messages: messagesToSave },
-                        updatedAt: new Date(),
-                        isDev: import.meta.env.NODE_ENV === 'development' ? true : false,
-                    })
-                    .where(eq(threadsTable.id, current_thread_id));
-                console.log(`✅ [${requestId}] Thread updated successfully`);
-            } else if (current_thread_id && !userData && !isNewThread) {
-                console.log(`🆕 [${requestId}] Inserting new thread with provided ID`);
-                if (!current_thread_id) {
-                    throw new Error('Thread ID is null or undefined');
-                }
-                await db.insert(threadsTable).values({
-                    id: current_thread_id,
-                    title: convoTitle || '',
-                    thread: { messages: messagesToSave },
-                    email: user_email,
-                    isPublic: isPublic,
-                    isDev: import.meta.env.NODE_ENV === 'development'
-                } as ThreadInsert);
-                console.log(`✅ [${requestId}] New thread inserted successfully`);
-            } else if (isNewThread) {
-                console.log(`🔄 [${requestId}] Updating newly created thread`);
-                await db
-                    .update(threadsTable)
-                    .set({
-                        title: convoTitle,
-                        thread: { messages: messagesToSave },
-                        updatedAt: new Date(),
-                        isDev: import.meta.env.NODE_ENV === 'development' ? true : false,
-                    })
-                    .where(eq(threadsTable.id, current_thread_id));
-                console.log(`✅ [${requestId}] New thread updated successfully`);
-            }
-            
-            const saveEndTime = Date.now();
-            const saveDuration = saveEndTime - saveStartTime;
-            console.log(`💾 [${requestId}] Database save completed in ${saveDuration}ms`);
-        } catch (error) {
-            console.error(`❌ [${requestId}] Error saving conversation to database:`, error);
-            return new Response(
-                JSON.stringify({ error: `Failed to save conversation: ${error}` }),
-                {
-                    status: 500,
-                    headers: { 'Content-Type': 'application/json' },
-                }
-            );
-        }
-
-        // --- Extract and format response ---
-        console.log(`🔧 [${requestId}] Extracting and formatting response`);
-        const extractStartTime = Date.now();
-        const obj = {};
-        const htmlText = generatedText;
-        // const { obj, generatedText: htmlText } = await extract(generatedText);
-        const extractEndTime = Date.now();
-        const extractDuration = extractEndTime - extractStartTime;
-        
-        console.log(`✅ [${requestId}] Response extraction completed.`);
-
-        const totalDuration = Date.now() - startTime;
-        console.log(`🎉 [${requestId}] Request completed successfully.`);
-
-        return new Response(
-            JSON.stringify({
-                ...obj,
-                generatedText: htmlText,
-                generatedTitle: convoTitle,
-                id: current_thread_id,
-            }),
-            {
-                status: 200,
-                headers: { 'Content-Type': 'application/json' },
-            }
-        );
     } catch (error) {
         const totalDuration = Date.now() - startTime;
         console.error(`💥 [${requestId}] Fatal error in generate.ts after ${totalDuration}ms:`, error);
