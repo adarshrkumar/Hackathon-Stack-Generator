@@ -11,6 +11,9 @@ import { anthropic } from '@ai-sdk/anthropic';
 import config from '../../../lib/config';
 // import { providers } from '../../../lib/models';
 
+import { marked } from 'marked';
+import { JSDOM } from 'jsdom';
+
 import { nanoid } from 'nanoid';
 
 import { db } from '../../../db/initialize';
@@ -455,7 +458,7 @@ async function generateTitle(convoHistory: any[], userModel: string, provider: s
     console.log(`🏷️ [${titleRequestId}] Starting title generation.`);
     
     try {
-        const titleStartTime = Date.now();
+        // const titleStartTime = Date.now();
         const { text: generatedText } = await generateText({
             model: providerFunctions[provider as keyof typeof providerFunctions](userModel) as LanguageModel,
             messages: [
@@ -466,17 +469,24 @@ async function generateTitle(convoHistory: any[], userModel: string, provider: s
                 ...convoHistory,
                 {
                     role: 'user',
-                    content: 'Please generate a concise title for this conversation.',
+                    content: 'Please generate a concise title for this conversation. No markdown, just plain text.',
                 },
             ],
         });
+
+        const htmlText = await marked.parse(generatedText)
+
+        const dom = new JSDOM(htmlText);
+        const document = dom.window.document;
+
+        const plainText = Array.from(document.querySelectorAll('*')).map(i => i.textContent).join(' ').trim().replaceAll('  ', ' ');
         
-        const titleEndTime = Date.now();
-        const titleDuration = titleEndTime - titleStartTime;
+        // const titleEndTime = Date.now();
+        // const titleDuration = titleEndTime - titleStartTime;
         
         console.log(`✅ [${titleRequestId}] Title generation completed.`);
         
-        return generatedText;
+        return plainText;
     } catch (error) {
         console.error(`❌ [${titleRequestId}] Error in generateTitle:`, error);
         console.error(`❌ [${titleRequestId}] Title generation error details:`, {
