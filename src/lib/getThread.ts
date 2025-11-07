@@ -47,7 +47,7 @@ export async function getThread(
             return null;
         }
 
-        // Extract messages from thread data (excluding system message)
+        // Extract messages from thread data (excluding system messages and tool results)
         let messages: Array<{ role: string; content: string }> = [];
         if (
             thread.thread &&
@@ -55,9 +55,11 @@ export async function getThread(
             'messages' in thread.thread &&
             Array.isArray((thread.thread as { messages: any[] }).messages)
         ) {
-            // Filter out system messages to only return user/assistant messages
+            // Filter out system messages and tool-result messages to only return user/assistant messages
             messages = (thread.thread as { messages: any[] }).messages.filter(
-                (msg: any) => msg.role === 'user' || msg.role === 'assistant'
+                (msg: any) =>
+                    (msg.role === 'user' || msg.role === 'assistant') &&
+                    msg.type !== 'tool-result'
             );
         }
 
