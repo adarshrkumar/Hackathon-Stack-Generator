@@ -20,9 +20,7 @@ const { serverThreadData = null, isThreadPage = false } = Astro.props;
 
 <!-- Client-Side TypeScript -->
 <script is:inline define:vars={{ serverThreadData, isThreadPage }}>
-    import { marked } from 'marked';
-
-    // Configure marked for better rendering
+    // Configure marked for better rendering (loaded via CDN)
     marked.setOptions({
         breaks: true,  // Convert line breaks to <br>
         gfm: true,     // GitHub Flavored Markdown
