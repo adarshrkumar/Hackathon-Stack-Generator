@@ -58,31 +58,53 @@ export async function getThread(
             // Process user/assistant messages and filter out tool-call portions from content
             messages = (thread.thread as { messages: any[] }).messages
                 .filter((msg: any) => msg.role === 'user' || msg.role === 'assistant')
-                .map((msg: any) => {
+                .flatMap((msg: any) => {
                     let content = msg.content;
 
-                    // If content is an array, filter out tool-call items but keep array structure
+                    // If content is an array, filter out tool-call items and create separate messages
                     if (Array.isArray(content)) {
-                        content = content.filter((item: any) => item.type !== 'tool-call');
+                        const filteredContent = content.filter((item: any) => item.type !== 'tool-call');
 
                         // If no content left after filtering, skip this message
-                        if (content.length === 0) {
-                            return null;
+                        if (filteredContent.length === 0) {
+                            return [];
                         }
+
+                        // Create a separate message for each array item
+                        return filteredContent.map((item: any) => {
+                            let messageContent: string;
+
+                            // If item has a text property, use that
+                            if (item && typeof item === 'object' && 'text' in item) {
+                                messageContent = item.text;
+                            }
+                            // If item is a string, use it directly
+                            else if (typeof item === 'string') {
+                                messageContent = item;
+                            }
+                            // Otherwise stringify the object
+                            else {
+                                messageContent = JSON.stringify(item);
+                            }
+
+                            return {
+                                role: msg.role,
+                                content: messageContent
+                            };
+                        });
                     }
 
                     // If content is an object with type: "tool-call", skip this message
                     if (typeof content === 'object' && !Array.isArray(content) && content?.type === 'tool-call') {
-                        return null;
+                        return [];
                     }
 
-                    return {
+                    // Single message with string content
+                    return [{
                         role: msg.role,
-                        // Stringify content if it's an object/array (not a string)
                         content: typeof content === 'string' ? content : JSON.stringify(content)
-                    };
-                })
-                .filter((msg): msg is { role: string; content: any } => msg !== null);
+                    }];
+                });
         }
 
         return {
