@@ -1,0 +1,557 @@
+---
+/**
+  * AI Chat Interface Page
+  *
+  * This is the main chat interface for the Stack Generator application.
+  * It provides a conversational AI experience powered by AWS Bedrock and Llama 3.1.
+  *
+  * Features:
+  * - Real-time AI chat responses
+  * - Thread-based conversation history (server-side loaded)
+  * - Auto-resizing textarea input
+  * - Loading indicators
+  * - Error handling and display
+  * - New chat functionality
+  * - Keyboard shortcuts (Enter to send, Shift+Enter for newline)
+  *
+  * Architecture:
+  * - Uses the App layout (Nav + Footer)
+  * - Server-side rendering with thread history pre-loaded
+  * - Client-side TypeScript for interactivity
+  * - Communicates with /api/message/generate endpoint
+  * - Stores thread ID for conversation context
+  */
+
+// Import the application layout
+import App from '../../../layouts/App.astro';
+
+import '../../../styles/pages/app/chat.scss';
+
+// Server-side imports for thread loading
+import { getThread } from '../../../lib/getThread';
+import { marked } from 'marked';
+
+// Configure marked for server-side rendering
+marked.setOptions({
+    breaks: true,  // Convert line breaks to <br>
+    gfm: true,     // GitHub Flavored Markdown
+});
+
+// Get thread ID from cookie (set by client-side)
+const threadIdFromCookie = Astro.cookies.get('stack-generator-thread-id')?.value;
+
+// Fetch thread data server-side if thread ID exists in cookie
+const serverThreadData = threadIdFromCookie ? await getThread(threadIdFromCookie) : null;
+
+// Check if thread was not found (deleted or invalid)
+const threadNotFound = threadIdFromCookie && !serverThreadData;
+
+// If thread was expected but not found, clear the invalid cookie
+if (threadNotFound) {
+    Astro.cookies.delete('stack-generator-thread-id', { path: '/' });
+}
+---
+
+<!-- Chat Page Content -->
+<App title="Stack Generator">
+    <!-- Hidden data attribute to pass server thread data -->
+    <div id="serverThreadData" data-thread-id={serverThreadData?.id} data-thread-title={serverThreadData?.title} data-thread-not-found={threadNotFound ? 'true' : 'false'} style="display: none;"></div>
+
+    <!-- Chat Header Section -->
+    <div class="chat-header">
+        <h1><i class="fa-solid fa-layer-group"></i> Stack Generator</h1>
+        <p class="subtitle">Build your perfect tech stack with AI guidance</p>
+    </div>
+
+    <!-- Main Chat Wrapper -->
+    <div class="chat-wrapper">
+        <!-- Chat Messages Container (scrollable) -->
+        <div class="chat-messages" id="chatMessages">
+            <!-- Welcome message (always displayed) -->
+            <div class="message assistant">
+                <div class="message-icon">
+                    <i class="fa-solid fa-robot"></i>
+                </div>
+                <div class="message-content">
+                    <p><strong>Welcome to Stack Generator!</strong></p>
+                    <p>I'll help you design the perfect tech stack for your project.</p>
+                    <p>Please describe what type of product or application you're trying to build, and I'll recommend the best technologies, services, and architecture for your needs.</p>
+                </div>
+            </div>
+
+            {/* Server-rendered thread messages (if they exist) */}
+            {serverThreadData && serverThreadData.messages.length > 0 && (
+                serverThreadData.messages.map((msg) => (
+                    <div class={`message ${msg.role}`}>
+                        <div class="message-icon">
+                            <i class={`fa-solid ${msg.role === 'user' ? 'fa-user' : 'fa-robot'}`}></i>
+                        </div>
+                        <div class="message-content" set:html={msg.role === 'assistant' ? marked.parse(msg.content) : msg.content.replace(/\n/g, '<br>')}></div>
+                    </div>
+                ))
+            )}
+        </div>
+
+        <!-- Chat Input Section (fixed at bottom) -->
+        <div class="chat-input-container">
+            <!-- Error Banner (hidden by default) -->
+            <div class="error-banner" id="errorBanner"></div>
+
+            <!-- Input Wrapper (textarea + send button) -->
+            <div class="input-wrapper">
+                <!-- Message Textarea (auto-resizing) -->
+                <textarea
+                    id="messageInput"
+                    placeholder="Type your message here..."
+                    rows="1"
+                ></textarea>
+
+                <!-- Send Button -->
+                <button id="sendButton" class="send-btn">
+                    <i class="fa-solid fa-paper-plane"></i>
+                </button>
+            </div>
+
+            <!-- Chat Info Bar (thread info + new chat button) -->
+            <div class="chat-info">
+                <span id="threadInfo">New conversation</span>
+                <button id="newChatBtn" class="new-chat-btn">
+                    <i class="fa-solid fa-plus"></i> New Chat
+                </button>
+            </div>
+        </div>
+    </div>
+</App>
+
+<!-- Client-Side TypeScript -->
+<script>
+    /**
+      * CLIENT-SIDE CHAT LOGIC WITH SELECTION PROMPTS
+      *
+      * This script handles:
+      * - Multi-step selection prompts for tech stack preferences
+      * - Message sending and receiving
+      * - UI updates (adding messages, loading indicators)
+      * - Thread management
+      * - Error handling
+      * - Markdown rendering for AI responses
+      */
+
+    import { marked } from 'marked';
+
+    // Configure marked for better rendering
+    marked.setOptions({
+        breaks: true,  // Convert line breaks to <br>
+        gfm: true,     // GitHub Flavored Markdown
+    });
+
+    /**
+      * Chat State Variables
+      */
+
+    // Cookie name for thread ID persistence
+    const COOKIE_NAME = 'stack-generator-thread-id';
+
+    // Helper to set cookie
+    function setCookie(name: string, value: string, days: number = 30) {
+        const expires = new Date();
+        expires.setTime(expires.getTime() + days * 24 * 60 * 60 * 1000);
+        document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/`;
+    }
+
+    // Helper to delete cookie
+    function deleteCookie(name: string) {
+        document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/`;
+    }
+
+    // Helper to get cookie value
+    function getCookie(name: string): string | null {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop()?.split(';').shift() || null;
+        return null;
+    }
+
+    // Current conversation thread ID (null for new conversations)
+    // Load from cookie if available to persist across page reloads
+    let currentThreadId: string | null = getCookie(COOKIE_NAME);
+
+    // In-memory message history (for reference, not sent to API)
+    let messageHistory: Array<{ role: 'user' | 'assistant', content: string }> = [];
+
+    /**
+      * DOM Element References
+      */
+    const chatMessages = document.getElementById('chatMessages')!;
+    const messageInput = document.getElementById('messageInput') as HTMLTextAreaElement;
+    const sendButton = document.getElementById('sendButton') as HTMLButtonElement;
+    const errorBanner = document.getElementById('errorBanner')!;
+    const threadInfo = document.getElementById('threadInfo')!;
+    const newChatBtn = document.getElementById('newChatBtn')!;
+
+    /**
+      * Initialize state from server-rendered DOM
+      */
+    (function initializeFromDOM() {
+        // Get thread data from hidden element
+        const serverDataEl = document.getElementById('serverThreadData');
+        const threadId = serverDataEl?.dataset.threadId;
+        const threadTitle = serverDataEl?.dataset.threadTitle;
+        const threadNotFound = serverDataEl?.dataset.threadNotFound === 'true';
+
+        // Handle deleted/invalid thread
+        if (threadNotFound) {
+            console.log('Thread not found or deleted, starting new conversation');
+            currentThreadId = null;
+            deleteCookie(COOKIE_NAME);
+            threadInfo.textContent = 'New conversation';
+
+            // Scroll to bottom and return early (no messages to load)
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            return;
+        }
+
+        // Extract messages from server-rendered DOM
+        const existingMessages = chatMessages.querySelectorAll('.message');
+
+        existingMessages.forEach((msgEl) => {
+            // Skip welcome message (don't add to history)
+            const contentEl = msgEl.querySelector('.message-content');
+            const isWelcome = contentEl?.innerHTML.includes('Welcome to Stack Generator');
+
+            if (!isWelcome) {
+                const role = msgEl.classList.contains('user') ? 'user' : 'assistant';
+                const content = contentEl?.innerHTML || '';
+                messageHistory.push({ role: role as 'user' | 'assistant', content });
+            }
+        });
+
+        // Load thread data if available
+        if (threadId) {
+            currentThreadId = threadId;
+            setCookie(COOKIE_NAME, threadId);
+
+            // Update thread info
+            if (threadTitle) {
+                threadInfo.textContent = `Thread: ${threadTitle}`;
+            } else {
+                threadInfo.textContent = `Thread: ${threadId.substring(0, 8)}`;
+            }
+        }
+
+        // Scroll to bottom
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    })();
+
+    /**
+      * Auto-Resize Textarea
+      *
+      * Automatically adjusts the height of the textarea as the user types
+      * to accommodate multi-line messages without manual scrolling
+      */
+    messageInput.addEventListener('input', () => {
+        messageInput.style.height = 'auto';  // Reset height
+        messageInput.style.height = messageInput.scrollHeight + 'px';  // Set to content height
+    });
+
+    /**
+      * Keyboard Shortcut: Enter to Send
+      *
+      * - Enter: Send message
+      * - Shift+Enter: Insert newline (default textarea behavior)
+      */
+    messageInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();  // Prevent newline
+            sendMessage();       // Send the message
+        }
+    });
+
+    /**
+      * Send Button Click Handler
+      */
+    sendButton.addEventListener('click', sendMessage);
+
+    /**
+      * New Chat Button Handler
+      *
+      * Prompts the user to confirm starting a new conversation,
+      * then resets the chat state, cookie, and UI
+      */
+    newChatBtn.addEventListener('click', () => {
+        if (confirm('Start a new conversation?')) {
+            // Reset state
+            currentThreadId = null;
+            messageHistory = [];
+
+            // Clear thread ID from cookie
+            deleteCookie(COOKIE_NAME);
+
+            // Clear chat messages and show welcome
+            chatMessages.innerHTML = `
+                <div class="message assistant">
+                    <div class="message-icon">
+                        <i class="fa-solid fa-robot"></i>
+                    </div>
+                    <div class="message-content">
+                        <p><strong>Welcome to Stack Generator!</strong></p>
+                        <p>I'll help you design the perfect tech stack for your project.</p>
+                        <p>Please describe what type of product or application you're trying to build, and I'll recommend the best technologies, services, and architecture for your needs.</p>
+                    </div>
+                </div>
+            `;
+
+            // Re-enable input
+            messageInput.disabled = false;
+            sendButton.disabled = false;
+
+            // Update thread info
+            threadInfo.textContent = 'New conversation';
+
+            // Clear any errors
+            hideError();
+        }
+    });
+
+    /**
+      * Send Message Function
+      *
+      * Handles the complete message sending flow:
+      * 1. Validate input
+      * 2. Add user message to UI
+      * 3. Disable input while processing
+      * 4. Send request to API
+      * 5. Handle response or errors
+      * 6. Re-enable input
+      */
+    async function sendMessage() {
+        // Get and validate message text
+        const message = messageInput.value.trim();
+        if (!message) return;  // Don't send empty messages
+
+        // Clear input and reset height
+        messageInput.value = '';
+        messageInput.style.height = 'auto';
+
+        // Add user message to UI immediately for better UX
+        addMessage('user', message);
+        messageHistory.push({ role: 'user', content: message });
+
+        // Disable input while waiting for response
+        setInputState(false);
+
+        // Show loading indicator
+        const loadingEl = addLoadingMessage();
+
+        try {
+            /**
+              * Prepare API Request
+              *
+              * Include thread ID if this is a continuing conversation
+              * Otherwise, the API will create a new thread
+              */
+            const requestBody: { text: string; id?: string } = { text: message };
+            if (currentThreadId) {
+                requestBody.id = currentThreadId;
+            }
+
+            /**
+              * Send Request to API
+              *
+              * POST to /api/message/generate with the user's message
+              * and optional thread ID
+              */
+            const response = await fetch('/api/message/generate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(requestBody),
+            });
+
+            // Parse JSON response
+            const data = await response.json();
+
+            // Check for HTTP errors
+            if (!response.ok) {
+                // If thread is unauthorized or not found, clear it and start fresh
+                if (response.status === 403 || response.status === 404) {
+                    console.log('Thread invalid or unauthorized, clearing and starting new conversation');
+                    currentThreadId = null;
+                    deleteCookie(COOKIE_NAME);
+                    threadInfo.textContent = 'New conversation';
+                }
+                throw new Error(data.error || 'Request failed');
+            }
+
+            // Remove loading indicator
+            loadingEl.remove();
+
+            /**
+              * Add AI Response to UI
+              *
+              * Display the generated text from the AI model
+              */
+            addMessage('assistant', data.generatedText);
+            messageHistory.push({ role: 'assistant', content: data.generatedText });
+
+            /**
+              * Update Thread Info
+              *
+              * Store the thread ID for future messages
+              * Save to cookie for persistence across page reloads
+              * Display the conversation title in the UI
+              */
+            if (data.id) {
+                currentThreadId = data.id;
+                setCookie(COOKIE_NAME, data.id);
+                threadInfo.textContent = `Thread: ${data.generatedTitle || data.id.substring(0, 8)}`;
+            }
+
+            // Clear any previous errors
+            hideError();
+
+        } catch (error) {
+            /**
+              * Error Handling
+              *
+              * Display error to user and remove loading indicator
+              * Also remove the user's message from history since it failed
+              */
+            loadingEl.remove();
+            showError(error instanceof Error ? error.message : String(error));
+
+            // Remove the user message from history since request failed
+            messageHistory.pop();
+
+        } finally {
+            /**
+              * Re-enable Input
+              *
+              * Allow user to send another message and focus the input
+              */
+            setInputState(true);
+            messageInput.focus();
+        }
+    }
+
+    /**
+      * Add Message to UI
+      *
+      * Creates a message element and appends it to the chat messages container
+      * AI messages are rendered as markdown for better formatting
+      *
+      * @param role - 'user' or 'assistant'
+      * @param content - The message text
+      */
+    function addMessage(role: 'user' | 'assistant', content: string) {
+        // Create message container
+        const messageEl = document.createElement('div');
+        messageEl.className = `message ${role}`;
+
+        // Select appropriate icon
+        const icon = role === 'user' ? 'fa-user' : 'fa-robot';
+
+        // Format content based on role
+        let formattedContent: string;
+        if (role === 'assistant') {
+            // Render markdown for AI responses
+            formattedContent = marked.parse(content) as string;
+        } else {
+            // Escape HTML for user messages to prevent XSS
+            formattedContent = escapeHtml(content).replace(/\n/g, '<br>');
+        }
+
+        // Build message HTML with icon and content
+        messageEl.innerHTML = `
+            <div class="message-icon">
+                <i class="fa-solid ${icon}"></i>
+            </div>
+            <div class="message-content">${formattedContent}</div>
+        `;
+
+        // Append to chat and scroll to bottom
+        chatMessages.appendChild(messageEl);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    /**
+      * Add Loading Message
+      *
+      * Creates a loading indicator message to show while waiting for AI response
+      *
+      * @returns The loading element (so it can be removed later)
+      */
+    function addLoadingMessage(): HTMLElement {
+        const loadingEl = document.createElement('div');
+        loadingEl.className = 'message assistant loading';
+
+        // Create animated typing indicator
+        loadingEl.innerHTML = `
+            <div class="message-icon">
+                <i class="fa-solid fa-robot"></i>
+            </div>
+            <div class="message-content">
+                <div class="typing-indicator">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+        `;
+
+        // Append and scroll to bottom
+        chatMessages.appendChild(loadingEl);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+
+        return loadingEl;
+    }
+
+    /**
+      * Set Input State
+      *
+      * Enable or disable the message input and send button
+      * Used to prevent multiple simultaneous messages
+      *
+      * @param enabled - true to enable input, false to disable
+      */
+    function setInputState(enabled: boolean) {
+        messageInput.disabled = !enabled;
+        sendButton.disabled = !enabled;
+    }
+
+    /**
+      * Show Error Banner
+      *
+      * Displays an error message at the top of the chat input area
+      *
+      * @param message - The error message to display
+      */
+    function showError(message: string) {
+        errorBanner.textContent = `Error: ${message}`;
+        errorBanner.classList.add('show');
+    }
+
+    /**
+      * Hide Error Banner
+      *
+      * Hides the error message banner
+      */
+    function hideError() {
+        errorBanner.textContent = '';
+        errorBanner.classList.remove('show');
+    }
+
+    /**
+      * Escape HTML
+      *
+      * Prevents XSS attacks by escaping HTML special characters
+      * in user and AI generated content
+      *
+      * @param text - The text to escape
+      * @returns HTML-safe text
+      */
+    function escapeHtml(text: string): string {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+</script>
