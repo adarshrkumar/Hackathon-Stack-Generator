@@ -220,12 +220,16 @@ export const POST: APIRoute = async ({ request, locals }) => {
                     }
                     
                     if (
-                        userData.thread && 
-                        typeof userData.thread === 'object' && 
+                        userData.thread &&
+                        typeof userData.thread === 'object' &&
                         'messages' in userData.thread &&
                         Array.isArray((userData.thread as { messages: any[] }).messages)
                     ) {
-                        convoHistory = [systemObj, ...(userData.thread as { messages: any[] }).messages];
+                        // Filter out any system messages from DB (they should be runtime-only)
+                        const messagesFromDB = (userData.thread as { messages: any[] }).messages.filter(
+                            (msg: any) => msg.role !== 'system'
+                        );
+                        convoHistory = [systemObj, ...messagesFromDB];
                         console.log(`💬 [${requestId}] Conversation history loaded with system message.`);
                     } else {
                         console.log(`⚠️ [${requestId}] No valid conversation history found in thread data, keeping system message only`);
