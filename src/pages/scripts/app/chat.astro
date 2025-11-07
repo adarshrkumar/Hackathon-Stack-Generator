@@ -109,7 +109,7 @@ const { serverThreadData = null, isThreadPage = false } = Astro.props;
                 if (threadTitle) {
                     threadInfo.textContent = `Thread: ${threadTitle}`;
                 } else {
-                    threadInfo.textContent = `Thread: ${threadId.substring(0, 8)}`;
+                    threadInfo.textContent = `Thread: ${threadId}`;
                 }
             }
 
@@ -242,7 +242,7 @@ const { serverThreadData = null, isThreadPage = false } = Astro.props;
                 if (data.id) {
                     currentThreadId = data.id;
                     setCookie(COOKIE_NAME, data.id);
-                    threadInfo.textContent = `Thread: ${data.generatedTitle || data.id.substring(0, 8)}`;
+                    threadInfo.textContent = `Thread: ${data.generatedTitle || data.id}`;
                 }
             }
 
