@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro';
 
-import { generateText, type LanguageModel } from 'ai';
+import { generateText, type LanguageModel, stepCountIs } from 'ai';
 
 // import { openai } from '@ai-sdk/openai';
 import { anthropic } from '@ai-sdk/anthropic';
@@ -281,35 +281,21 @@ export const POST: APIRoute = async ({ request, locals }) => {
         const aiStartTime = Date.now();
         let generatedText: string;
         try {
-            console.log(`📤 [${requestId}] Sending to AI model.`);
-            
-            let result = await generateText({
+            console.log(`📤 [${requestId}] Sending to AI model with stopWhen enabled for tool feedback loops.`);
+
+            const result = await generateText({
                 model: aiModel,
                 messages: convoHistory,
                 tools: tools,
+                stopWhen: stepCountIs(10), // Allow up to 10 rounds of tool calls for longer feedback loops
             });
 
-            console.log(`🔧 [${requestId}] Tool calls made:`, result.toolCalls?.length || 0);
-            console.log(`📝 [${requestId}] Tool results:`, result.toolResults?.length || 0);
+            console.log(`🔧 [${requestId}] Total tool calls made:`, result.toolCalls?.length || 0);
+            console.log(`📝 [${requestId}] Total tool results:`, result.toolResults?.length || 0);
+            console.log(`🔄 [${requestId}] Steps taken:`, result.steps?.length || 1);
+
             if (result.toolResults && result.toolResults.length > 0) {
                 console.log(`🔍 [${requestId}] First tool result:`, JSON.stringify(result.toolResults[0]).substring(0, 200));
-            }
-
-            // If tools were called, we need to call the AI again with the tool results
-            if (result.toolCalls && result.toolCalls.length > 0) {
-                console.log(`🔄 [${requestId}] Tools were executed, calling AI again with results`);
-
-                // Add the response messages (includes tool calls and results)
-                convoHistory.push(...result.response.messages);
-
-                // Call the AI again to generate final response based on tool results
-                result = await generateText({
-                    model: aiModel,
-                    messages: convoHistory,
-                    tools: tools,
-                });
-
-                console.log(`✅ [${requestId}] AI generated final response after tool execution`);
             }
 
             generatedText = result.text;
