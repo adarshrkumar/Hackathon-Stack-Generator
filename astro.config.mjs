@@ -10,11 +10,11 @@ import vercel from '@astrojs/vercel';
 /**
   * Astro Configuration File
   *
-  * This configuration sets up the Stack Generator application for server-side rendering (SSR)
+  * This configuration sets up BuildLoom for server-side rendering (SSR)
   * and deployment to Vercel. The SSR mode is essential for:
-  * - Dynamic API routes that interact with AWS Bedrock and DynamoDB
+  * - Dynamic API routes that interact with Claude AI and PostgreSQL
   * - Real-time conversation handling without pre-rendering
-  * - Server-side environment variable access for AWS credentials
+  * - Server-side environment variable access for API credentials
   *
   * @see https://astro.build/config
   */

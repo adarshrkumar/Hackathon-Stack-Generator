@@ -5,7 +5,7 @@ const toolDescriptions = Object.entries(tools)
     .map(([name, tool]) => `- **${name}**: ${tool.description}`)
     .join('\n');
 
-const systemPrompt = `You are a helpful AI assistant for the Stack Generator application.
+const systemPrompt = `You are a helpful AI assistant for BuildLoom.
 
 You help users design technology stacks tailored to their specific project needs. Users will describe what type of product or application they want to build, and you'll provide comprehensive tech stack recommendations.
 

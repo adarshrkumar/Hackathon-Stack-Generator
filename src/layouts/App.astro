@@ -2,7 +2,7 @@
 /**
   * Application Layout Component
   *
-  * This layout is used for the application pages (/app/*) of the Stack Generator:
+  * This layout is used for the application pages (/app/*) of BuildLoom:
   * - /app/index.astro - Application dashboard
   * - /app/chat.astro - AI chat interface
   * - /app/test.astro - Test/demo pages
@@ -36,10 +36,10 @@ const { title } = Astro.props;
 /**
   * Application Title
   *
-  * Use "Stack Generator App" as the base title for application pages
+  * Use "BuildLoom App" as the base title for application pages
   * to differentiate from marketing pages
   */
-const sTitle = 'Stack Generator App';
+const sTitle = 'BuildLoom App';
 
 /**
   * Homepage Detection
@@ -51,7 +51,7 @@ const pageIsHome = !title || title === '' || title === 'Home' || title === 'Inde
 /**
   * Page Title Generation
   *
-  * Format: "{Page Title} | Stack Generator App"
+  * Format: "{Page Title} | BuildLoom App"
   */
 let pTitle
 if (pageIsHome) {

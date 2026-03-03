@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is the **Stack Generator** web application built for the SCU AWS Hackathon Project. It's an Astro-based application using server-side rendering (SSR) with Anthropic Claude AI integration (via Vercel AI SDK) for AI-powered tech stack recommendations. The app uses PostgreSQL with Drizzle ORM for data persistence, SCSS for styling, and is deployed on Vercel.
+This is the **BuildLoom** web application, an AI-powered tech stack recommendation engine. It's an Astro-based application using server-side rendering (SSR) with Anthropic Claude AI integration (via Vercel AI SDK) for intelligent tech stack recommendations. The app uses PostgreSQL with Drizzle ORM for data persistence, SCSS for styling, and is deployed on Vercel.
 
 ## Development Commands
 
@@ -58,14 +58,14 @@ The project has two distinct layouts for different sections:
 1. **Marketing Layout (`Layout.astro`)**:
    - Used for: homepage, about, contact pages
    - Includes: Header, Hero (homepage only), Footer
-   - Title format: "Stack Generator" or "{title} | Stack Generator"
+   - Title format: "BuildLoom" or "{title} | BuildLoom"
    - Imports: `reset.scss`, `Layout.scss`
    - Typography: Montserrat (Google Fonts)
 
 2. **App Layout (`App.astro`)**:
    - Used for: `/app/*` pages (app interface)
    - Includes: Nav, Footer (no Hero)
-   - Title format: "Stack Generator App" or "{title} | Stack Generator App"
+   - Title format: "BuildLoom App" or "{title} | BuildLoom App"
    - Imports: `reset.scss`, `Layout.scss`, `App.scss`
    - Includes Font Awesome icons via CDN
    - Body has `class="app-layout"`, main has `class="main app"`
@@ -83,7 +83,7 @@ The application uses Anthropic's Claude AI for generating tech stack recommendat
 **Key files**:
 
 - `src/lib/config.ts` - Model configuration, system prompt, and tools
-- `src/lib/prompt.ts` - System prompt for Stack Generator assistant
+- `src/lib/prompt.ts` - System prompt for BuildLoom assistant
 - `src/lib/tools.ts` - Dynamic tool loader
 - `src/lib/tools/search.ts` - Web search using Exa API
 - `src/lib/tools/calculate.ts` - Mathematical calculations
@@ -213,7 +213,7 @@ The application has an extensible AI tools system located in `src/lib/tools/`:
 - **astro.config.mjs** - SSR mode with Vercel adapter (`output: 'server'`)
 - **drizzle.config.ts** - Drizzle ORM configuration (PostgreSQL dialect, migrations in `src/db/migrations`)
 - **tsconfig.json** - TypeScript strict mode (extends `astro/tsconfigs/strict`)
-- **package.json** - Project name: "tech-stack-generator", version 0.0.1, uses ES modules
+- **package.json** - Project name: "build-loom", version 0.0.1, uses ES modules
 - **.gitignore** - Excludes `dist/`, `.astro/`, `.vercel/`, `node_modules/`, `.env*`
 
 ## Key Technologies

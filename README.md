@@ -1,8 +1,8 @@
-# Stack Generator
+# BuildLoom
 
-A concise README for the Stack Generator web application used in the SCU AWS Hackathon Project.
+An AI-powered tech stack recommendation engine built with Astro.
 
-This project is an Astro-based SSR application that integrates with AWS Bedrock for AI-powered conversations and uses DynamoDB for persistent conversation threads. Styling is implemented using SCSS.
+This project is an Astro-based SSR application that integrates with Anthropic's Claude AI via the Vercel AI SDK for intelligent conversations and uses PostgreSQL with Drizzle ORM for persistent conversation threads. Styling is implemented using SCSS.
 
 ## Quick start
 
@@ -30,36 +30,39 @@ export const prerender = false;
   - Marketing pages: `index.astro`, `about.astro`, `contact.astro`
   - App pages: `app/index.astro`, `app/chat.astro`, `app/test.astro`
 - `src/pages/api/` - server API routes (e.g., `api/message/generate.ts`)
-- `src/lib/` - Bedrock client, DynamoDB helpers, config and types
+- `src/lib/` - AI config, database helpers, utilities and types
 - `src/layouts/` - `Layout.astro` (marketing) and `App.astro` (app)
 - `src/components/` - reusable components
 - `src/styles/` - SCSS variables, components, layouts, pages
+- `src/db/` - Drizzle ORM schema and initialization
 
-## AWS Bedrock integration
+## Anthropic Claude AI integration
 
-- Model: `meta.llama3-1-70b-instruct-v1:0` (configured in `src/lib/config.ts`)
-- Region: `us-east-1`
-- SDK: `@aws-sdk/client-bedrock-runtime`
+- Model: `claude-sonnet-4.5` (configured in `src/lib/config.ts`)
+- SDK: Vercel AI SDK (`ai` v5.0.81) with `@ai-sdk/anthropic`
 - Main chat endpoint: `src/pages/api/message/generate.ts`
+- Tools: Dynamic tool loading system in `src/lib/tools/`
 
-## DynamoDB
+## PostgreSQL with Drizzle ORM
 
-Conversation threads are stored in DynamoDB.
+Conversation threads are stored in PostgreSQL.
 
-- Default table name: `stack-generator-threads` (configurable via env)
-- Primary key: `id` (String)
-- Attributes: `userId`, `title`, `messages[]`, `createdAt`, `updatedAt`
+- Database: Vercel Postgres
+- ORM: Drizzle ORM v0.44.7
+- Tables: `threads`, `mega_list`, `company_info`
+- Primary key: `id` (text)
+- Attributes: `title`, `thread` (JSONB), `email`, `isPublic`, `isDev`, timestamps
 
-See `src/lib/dynamodb.ts` for helper functions like `createThread`, `getThread`, and `updateThread`.
+See `src/db/schema.ts` for schema definitions.
 
 ## Environment variables
 
 Create a `.env` file (or set env vars in deployment) with these values:
 
-- `AWS_ACCESS_KEY_ID`
-- `AWS_SECRET_ACCESS_KEY`
-- `AWS_REGION` (e.g. `us-east-1`)
-- `DYNAMODB_TABLE_NAME` (e.g. `stack-generator-threads`)
+- `ANTHROPIC_API_KEY` - Anthropic API key for Claude access
+- `EXA_SEARCH_API_KEY` - Exa search API key for web search
+- `POSTGRES_URL` - PostgreSQL connection string
+- Or individual: `PGHOST`, `PGUSER`, `PGDATABASE`, `PGPASSWORD`
 
 Other configuration values (model, system prompts) live in `src/lib/config.ts`.
 
@@ -70,11 +73,8 @@ Other configuration values (model, system prompts) live in `src/lib/config.ts`.
 
 ## Where to look next
 
-- AI integration: `src/lib/bedrock.ts`
+- AI integration: `src/lib/config.ts`
 - Chat API: `src/pages/api/message/generate.ts`
-- DynamoDB helpers: `src/lib/dynamodb.ts`
+- Database schema: `src/db/schema.ts`
 - App layout: `src/layouts/App.astro` (includes Font Awesome CDN)
-
----
-
-If you'd like, I can: add a sample `.env.example`, expand deployment notes for Vercel, or add a troubleshooting/dev checklist.
+- Tools system: `src/lib/tools.ts` and `src/lib/tools/*.ts`
