@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git fsck *)",
+      "Bash(rm *)",
+      "Bash(git restore *)",
+      "Bash(git config *)",
+      "Bash(pg_dump *)",
+      "PowerShell(pg_dump *)",
+      "Bash(node -e \"require\\('@vercel/postgres'\\)\")",
+      "Bash(node -e \"require\\('pg'\\)\")",
+      "Bash(npm install *)",
+      "Bash(node backup.mjs)"
+    ]
+  }
+}

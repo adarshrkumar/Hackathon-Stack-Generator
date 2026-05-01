@@ -1,0 +1,2032 @@
+[
+  {
+    "name": "Neon (Postgres)",
+    "type": "Database",
+    "subtype": "Hosts",
+    "created_at": "2025-10-30T04:50:37.791Z",
+    "updated_at": "2025-10-30T04:59:58.114Z"
+  },
+  {
+    "name": "Databricks",
+    "type": "Database",
+    "subtype": "Hosts",
+    "created_at": "2025-10-30T04:50:37.270Z",
+    "updated_at": "2025-10-30T04:59:57.827Z"
+  },
+  {
+    "name": "Raleway",
+    "type": "Hpsting Platform",
+    "subtype": "Platform as a Service",
+    "created_at": "2025-10-30T04:50:35.914Z",
+    "updated_at": "2025-10-30T04:59:56.330Z"
+  },
+  {
+    "name": "Handlebars",
+    "type": "Front-End",
+    "subtype": "Basic HTML Pre-Processors",
+    "created_at": "2025-10-30T04:50:31.880Z",
+    "updated_at": "2025-10-30T04:59:52.078Z"
+  },
+  {
+    "name": "EJS",
+    "type": "Front-End",
+    "subtype": "Basic HTML Pre-Processors",
+    "created_at": "2025-10-30T04:50:31.998Z",
+    "updated_at": "2025-10-30T04:59:52.442Z"
+  },
+  {
+    "name": "Pug",
+    "type": "Front-End",
+    "subtype": "Basic HTML Pre-Processors",
+    "created_at": "2025-10-30T04:50:32.071Z",
+    "updated_at": "2025-10-30T04:59:52.515Z"
+  },
+  {
+    "name": "Nunjucks",
+    "type": "Front-End",
+    "subtype": "Basic HTML Pre-Processors",
+    "created_at": "2025-10-30T04:50:32.144Z",
+    "updated_at": "2025-10-30T04:59:52.588Z"
+  },
+  {
+    "name": "Haml",
+    "type": "Front-End",
+    "subtype": "Basic HTML Pre-Processors",
+    "created_at": "2025-10-30T04:50:32.217Z",
+    "updated_at": "2025-10-30T04:59:52.661Z"
+  },
+  {
+    "name": "React",
+    "type": "Front-End",
+    "subtype": "The Big Three JavaScript Framework",
+    "created_at": "2025-10-30T04:50:32.288Z",
+    "updated_at": "2025-10-30T04:59:52.736Z"
+  },
+  {
+    "name": "Vue.js",
+    "type": "Front-End",
+    "subtype": "The Big Three JavaScript Framework",
+    "created_at": "2025-10-30T04:50:32.420Z",
+    "updated_at": "2025-10-30T04:59:52.809Z"
+  },
+  {
+    "name": "Angular",
+    "type": "Front-End",
+    "subtype": "The Big Three JavaScript Framework",
+    "created_at": "2025-10-30T04:50:32.494Z",
+    "updated_at": "2025-10-30T04:59:52.965Z"
+  },
+  {
+    "name": "HTMX",
+    "type": "Front-End",
+    "subtype": "Modern & Emerging JavaScript Framework",
+    "created_at": "2025-10-30T04:50:32.568Z",
+    "updated_at": "2025-10-30T04:59:53.038Z"
+  },
+  {
+    "name": "Preact",
+    "type": "Front-End",
+    "subtype": "Modern & Emerging JavaScript Framework",
+    "created_at": "2025-10-30T04:50:32.642Z",
+    "updated_at": "2025-10-30T04:59:53.112Z"
+  },
+  {
+    "name": "Lit",
+    "type": "Front-End",
+    "subtype": "Modern & Emerging JavaScript Framework",
+    "created_at": "2025-10-30T04:50:32.714Z",
+    "updated_at": "2025-10-30T04:59:53.186Z"
+  },
+  {
+    "name": "Alpine.js",
+    "type": "Front-End",
+    "subtype": "Modern & Emerging JavaScript Framework",
+    "created_at": "2025-10-30T04:50:32.787Z",
+    "updated_at": "2025-10-30T04:59:53.259Z"
+  },
+  {
+    "name": "Svelte",
+    "type": "Front-End",
+    "subtype": "Modern & Emerging JavaScript Framework",
+    "created_at": "2025-10-30T04:50:32.934Z",
+    "updated_at": "2025-10-30T04:59:53.332Z"
+  },
+  {
+    "name": "Qwik",
+    "type": "Front-End",
+    "subtype": "Modern & Emerging JavaScript Framework",
+    "created_at": "2025-10-30T04:50:33.006Z",
+    "updated_at": "2025-10-30T04:59:53.489Z"
+  },
+  {
+    "name": "SolidJS",
+    "type": "Front-End",
+    "subtype": "Modern & Emerging JavaScript Framework",
+    "created_at": "2025-10-30T04:50:33.079Z",
+    "updated_at": "2025-10-30T04:59:53.563Z"
+  },
+  {
+    "name": "RedwoodJS",
+    "type": "Front-End",
+    "subtype": "Meta-Framework (Framework for Frameworks)",
+    "created_at": "2025-10-30T04:50:33.151Z",
+    "updated_at": "2025-10-30T04:59:53.635Z"
+  },
+  {
+    "name": "Nuxt.js",
+    "type": "Front-End",
+    "subtype": "Meta-Framework (Framework for Frameworks)",
+    "created_at": "2025-10-30T04:50:33.225Z",
+    "updated_at": "2025-10-30T04:59:53.707Z"
+  },
+  {
+    "name": "SvelteKit",
+    "type": "Front-End",
+    "subtype": "Meta-Framework (Framework for Frameworks)",
+    "created_at": "2025-10-30T04:50:33.298Z",
+    "updated_at": "2025-10-30T04:59:53.779Z"
+  },
+  {
+    "name": "Next.js",
+    "type": "Front-End",
+    "subtype": "Meta-Framework (Framework for Frameworks)",
+    "created_at": "2025-10-30T04:50:33.458Z",
+    "updated_at": "2025-10-30T04:59:53.854Z"
+  },
+  {
+    "name": "Remix",
+    "type": "Front-End",
+    "subtype": "Meta-Framework (Framework for Frameworks)",
+    "created_at": "2025-10-30T04:50:33.529Z",
+    "updated_at": "2025-10-30T04:59:54.016Z"
+  },
+  {
+    "name": "Astro.js",
+    "type": "Front-End",
+    "subtype": "Meta-Framework (Framework for Frameworks)",
+    "created_at": "2025-10-30T04:50:33.601Z",
+    "updated_at": "2025-10-30T04:59:54.088Z"
+  },
+  {
+    "name": "Foundation",
+    "type": "Front-End",
+    "subtype": "UI Component Framework",
+    "created_at": "2025-10-30T04:50:33.673Z",
+    "updated_at": "2025-10-30T04:59:54.160Z"
+  },
+  {
+    "name": "Chakra UI",
+    "type": "Front-End",
+    "subtype": "UI Component Framework",
+    "created_at": "2025-10-30T04:50:33.747Z",
+    "updated_at": "2025-10-30T04:59:54.233Z"
+  },
+  {
+    "name": "Bulma",
+    "type": "Front-End",
+    "subtype": "UI Component Framework",
+    "created_at": "2025-10-30T04:50:33.820Z",
+    "updated_at": "2025-10-30T04:59:54.304Z"
+  },
+  {
+    "name": "Ant Design",
+    "type": "Front-End",
+    "subtype": "UI Component Framework",
+    "created_at": "2025-10-30T04:50:33.982Z",
+    "updated_at": "2025-10-30T04:59:54.377Z"
+  },
+  {
+    "name": "Bootstrap",
+    "type": "Front-End",
+    "subtype": "UI Component Framework",
+    "created_at": "2025-10-30T04:50:34.127Z",
+    "updated_at": "2025-10-30T04:59:54.610Z"
+  },
+  {
+    "name": "Semantic UI",
+    "type": "Front-End",
+    "subtype": "UI Component Framework",
+    "created_at": "2025-10-30T04:50:34.200Z",
+    "updated_at": "2025-10-30T04:59:54.682Z"
+  },
+  {
+    "name": "Meteor.js",
+    "type": "Front-End",
+    "subtype": "Legacy & Less Common Framework",
+    "created_at": "2025-10-30T04:50:34.307Z",
+    "updated_at": "2025-10-30T04:59:54.753Z"
+  },
+  {
+    "name": "jQuery",
+    "type": "Front-End",
+    "subtype": "Legacy & Less Common Framework",
+    "created_at": "2025-10-30T04:50:34.382Z",
+    "updated_at": "2025-10-30T04:59:54.825Z"
+  },
+  {
+    "name": "Backbone.js",
+    "type": "Front-End",
+    "subtype": "Legacy & Less Common Framework",
+    "created_at": "2025-10-30T04:50:34.506Z",
+    "updated_at": "2025-10-30T04:59:54.896Z"
+  },
+  {
+    "name": "Ember.js",
+    "type": "Front-End",
+    "subtype": "Legacy & Less Common Framework",
+    "created_at": "2025-10-30T04:50:34.579Z",
+    "updated_at": "2025-10-30T04:59:54.970Z"
+  },
+  {
+    "name": "CSS",
+    "type": "Style Manager",
+    "subtype": "Build-In / Basic Ones",
+    "created_at": "2025-10-30T04:50:34.652Z",
+    "updated_at": "2025-10-30T04:59:55.127Z"
+  },
+  {
+    "name": "React/Next Styles",
+    "type": "Style Manager",
+    "subtype": "Build-In / Basic Ones",
+    "created_at": "2025-10-30T04:50:34.724Z",
+    "updated_at": "2025-10-30T04:59:55.200Z"
+  },
+  {
+    "name": "Sass/SCSS",
+    "type": "Style Manager",
+    "subtype": "Most Popular & Widely Used",
+    "created_at": "2025-10-30T04:50:34.798Z",
+    "updated_at": "2025-10-30T04:59:55.272Z"
+  },
+  {
+    "name": "Less",
+    "type": "Style Manager",
+    "subtype": "Most Popular & Widely Used",
+    "created_at": "2025-10-30T04:50:34.871Z",
+    "updated_at": "2025-10-30T04:59:55.346Z"
+  },
+  {
+    "name": "Stylus",
+    "type": "Style Manager",
+    "subtype": "Most Popular & Widely Used",
+    "created_at": "2025-10-30T04:50:35.031Z",
+    "updated_at": "2025-10-30T04:59:55.418Z"
+  },
+  {
+    "name": "Tailwind CSS",
+    "type": "Style Manager",
+    "subtype": "Most Popular & Widely Used",
+    "created_at": "2025-10-30T04:50:35.104Z",
+    "updated_at": "2025-10-30T04:59:55.491Z"
+  },
+  {
+    "name": "PostCSS",
+    "type": "Style Manager",
+    "subtype": "Most Popular & Widely Used",
+    "created_at": "2025-10-30T04:50:35.175Z",
+    "updated_at": "2025-10-30T04:59:55.587Z"
+  },
+  {
+    "name": "Myth",
+    "type": "Style Manager",
+    "subtype": "Less Common & Historical",
+    "created_at": "2025-10-30T04:50:35.249Z",
+    "updated_at": "2025-10-30T04:59:55.658Z"
+  },
+  {
+    "name": "CSS-Crush",
+    "type": "Style Manager",
+    "subtype": "Less Common & Historical",
+    "created_at": "2025-10-30T04:50:35.320Z",
+    "updated_at": "2025-10-30T04:59:55.731Z"
+  },
+  {
+    "name": "Stylable",
+    "type": "Style Manager",
+    "subtype": "Less Common & Historical",
+    "created_at": "2025-10-30T04:50:35.393Z",
+    "updated_at": "2025-10-30T04:59:55.804Z"
+  },
+  {
+    "name": "Switch CSS",
+    "type": "Style Manager",
+    "subtype": "Less Common & Historical",
+    "created_at": "2025-10-30T04:50:35.549Z",
+    "updated_at": "2025-10-30T04:59:55.877Z"
+  },
+  {
+    "name": "Rework",
+    "type": "Style Manager",
+    "subtype": "Less Common & Historical",
+    "created_at": "2025-10-30T04:50:35.623Z",
+    "updated_at": "2025-10-30T04:59:55.949Z"
+  },
+  {
+    "name": "GitHub Pages",
+    "type": "Hpsting Platform",
+    "subtype": "Static Hosting",
+    "created_at": "2025-10-30T04:50:35.696Z",
+    "updated_at": "2025-10-30T04:59:56.111Z"
+  },
+  {
+    "name": "Replit",
+    "type": "Hpsting Platform",
+    "subtype": "Web Hosting",
+    "created_at": "2025-10-30T04:50:35.767Z",
+    "updated_at": "2025-10-30T04:59:56.185Z"
+  },
+  {
+    "name": "Render",
+    "type": "Hpsting Platform",
+    "subtype": "Platform as a Service",
+    "created_at": "2025-10-30T04:50:36.074Z",
+    "updated_at": "2025-10-30T04:59:56.403Z"
+  },
+  {
+    "name": "Heroku",
+    "type": "Hpsting Platform",
+    "subtype": "Platform as a Service",
+    "created_at": "2025-10-30T04:50:36.148Z",
+    "updated_at": "2025-10-30T04:59:56.476Z"
+  },
+  {
+    "name": "Fly.io",
+    "type": "Hpsting Platform",
+    "subtype": "Platform as a Service",
+    "created_at": "2025-10-30T04:50:36.223Z",
+    "updated_at": "2025-10-30T04:59:56.635Z"
+  },
+  {
+    "name": "DigitalOcean",
+    "type": "Hpsting Platform",
+    "subtype": "Server Hosting",
+    "created_at": "2025-10-30T04:50:36.296Z",
+    "updated_at": "2025-10-30T04:59:56.706Z"
+  },
+  {
+    "name": "Linode",
+    "type": "Hpsting Platform",
+    "subtype": "Server Hosting",
+    "created_at": "2025-10-30T04:50:36.369Z",
+    "updated_at": "2025-10-30T04:59:56.781Z"
+  },
+  {
+    "name": "AWS Lambda",
+    "type": "Hpsting Platform",
+    "subtype": "Serverless Computing",
+    "created_at": "2025-10-30T04:50:36.440Z",
+    "updated_at": "2025-10-30T04:59:56.853Z"
+  },
+  {
+    "name": "Serverless Computing",
+    "type": "Hpsting Platform",
+    "subtype": "Serverless Computing",
+    "created_at": "2025-10-30T04:50:36.672Z",
+    "updated_at": "2025-10-30T04:59:56.998Z"
+  },
+  {
+    "name": "Cloudflare Workers / Workers KV",
+    "type": "Hpsting Platform",
+    "subtype": "Serverless Computing",
+    "created_at": "2025-10-30T04:50:36.744Z",
+    "updated_at": "2025-10-30T04:59:57.160Z"
+  },
+  {
+    "name": "Vercel Functions",
+    "type": "Hpsting Platform",
+    "subtype": "Serverless Computing",
+    "created_at": "2025-10-30T04:50:36.816Z",
+    "updated_at": "2025-10-30T04:59:57.232Z"
+  },
+  {
+    "name": "Postgres",
+    "type": "Database",
+    "subtype": "Architectures",
+    "created_at": "2025-10-30T04:50:36.889Z",
+    "updated_at": "2025-10-30T04:59:57.307Z"
+  },
+  {
+    "name": "SQL",
+    "type": "Database",
+    "subtype": "Architectures",
+    "created_at": "2025-10-30T04:50:36.962Z",
+    "updated_at": "2025-10-30T04:59:57.379Z"
+  },
+  {
+    "name": "NoSQL",
+    "type": "Database",
+    "subtype": "Architectures",
+    "created_at": "2025-10-30T04:50:37.122Z",
+    "updated_at": "2025-10-30T04:59:57.451Z"
+  },
+  {
+    "name": "Redis",
+    "type": "Database",
+    "subtype": "Architectures",
+    "created_at": "2025-10-30T04:50:37.197Z",
+    "updated_at": "2025-10-30T04:59:57.524Z"
+  },
+  {
+    "name": "AWS DynamoDB",
+    "type": "Database",
+    "subtype": "Hosts",
+    "created_at": "2025-10-30T04:50:37.488Z",
+    "updated_at": "2025-10-30T04:59:57.899Z"
+  },
+  {
+    "name": "GCP Databases",
+    "type": "Database",
+    "subtype": "Hosts",
+    "created_at": "2025-10-30T04:50:37.647Z",
+    "updated_at": "2025-10-30T04:59:57.971Z"
+  },
+  {
+    "name": "MS Access",
+    "type": "Database",
+    "subtype": "Hosts",
+    "created_at": "2025-10-30T04:50:37.343Z",
+    "updated_at": "2025-10-30T04:59:58.041Z"
+  },
+  {
+    "name": "Planetscale",
+    "type": "Database",
+    "subtype": "Hosts",
+    "created_at": "2025-10-30T04:50:37.863Z",
+    "updated_at": "2025-10-30T04:59:58.274Z"
+  },
+  {
+    "name": "Azure SQL DB",
+    "type": "Database",
+    "subtype": "Hosts",
+    "created_at": "2025-10-30T04:50:37.935Z",
+    "updated_at": "2025-10-30T04:59:58.346Z"
+  },
+  {
+    "name": "Cloudflare D1",
+    "type": "Database",
+    "subtype": "Hosts",
+    "created_at": "2025-10-30T04:50:38.008Z",
+    "updated_at": "2025-10-30T04:59:58.419Z"
+  },
+  {
+    "name": "MongoDB",
+    "type": "Database",
+    "subtype": "Hosts",
+    "created_at": "2025-10-30T04:50:38.080Z",
+    "updated_at": "2025-10-30T04:59:58.493Z"
+  },
+  {
+    "name": "Auth0",
+    "type": "User Management",
+    "subtype": "Identity as a Service",
+    "created_at": "2025-10-30T04:50:38.178Z",
+    "updated_at": "2025-10-30T04:59:58.564Z"
+  },
+  {
+    "name": "Okta",
+    "type": "User Management",
+    "subtype": "Identity as a Service",
+    "created_at": "2025-10-30T04:50:38.255Z",
+    "updated_at": "2025-10-30T04:59:58.637Z"
+  },
+  {
+    "name": "Casbin",
+    "type": "User Management",
+    "subtype": "Identity as a Service",
+    "created_at": "2025-10-30T04:50:38.331Z",
+    "updated_at": "2025-10-30T04:59:58.733Z"
+  },
+  {
+    "name": "Clerk",
+    "type": "User Management",
+    "subtype": "Identity as a Service",
+    "created_at": "2025-10-30T04:50:38.403Z",
+    "updated_at": "2025-10-30T04:59:58.805Z"
+  },
+  {
+    "name": "Logto",
+    "type": "User Management",
+    "subtype": "Identity as a Service",
+    "created_at": "2025-10-30T04:50:38.475Z",
+    "updated_at": "2025-10-30T04:59:58.877Z"
+  },
+  {
+    "name": "Auth.js (formerky NextAuth)",
+    "type": "User Management",
+    "subtype": "On your exsisting DB",
+    "created_at": "2025-10-30T04:50:38.548Z",
+    "updated_at": "2025-10-30T04:59:58.950Z"
+  },
+  {
+    "name": "Keycloak",
+    "type": "User Management",
+    "subtype": "On your exsisting DB",
+    "created_at": "2025-10-30T04:50:38.701Z",
+    "updated_at": "2025-10-30T04:59:59.022Z"
+  },
+  {
+    "name": "Passport.js",
+    "type": "User Management",
+    "subtype": "On your exsisting DB",
+    "created_at": "2025-10-30T04:50:38.774Z",
+    "updated_at": "2025-10-30T04:59:59.095Z"
+  },
+  {
+    "name": "Ory",
+    "type": "User Management",
+    "subtype": "On your exsisting DB",
+    "created_at": "2025-10-30T04:50:38.846Z",
+    "updated_at": "2025-10-30T04:59:59.259Z"
+  },
+  {
+    "name": "Google Cloud Storage & Cloud CDN",
+    "type": "Storage and CDN",
+    "subtype": "Integrated Cloud Storage & CDN",
+    "created_at": "2025-10-30T04:50:38.992Z",
+    "updated_at": "2025-10-30T04:59:59.407Z"
+  },
+  {
+    "name": "Microsoft Azure Blob Storage & Azure CDN",
+    "type": "Storage and CDN",
+    "subtype": "Integrated Cloud Storage & CDN",
+    "created_at": "2025-10-30T04:50:39.067Z",
+    "updated_at": "2025-10-30T04:59:59.480Z"
+  },
+  {
+    "name": "Backblaze B2",
+    "type": "Storage and CDN",
+    "subtype": "Standalone Object Storage",
+    "created_at": "2025-10-30T04:50:39.226Z",
+    "updated_at": "2025-10-30T04:59:59.563Z"
+  },
+  {
+    "name": "Netlify",
+    "type": "Storage and CDN",
+    "subtype": "Edge Platforms (with built-in CDN & Storage)",
+    "created_at": "2025-10-30T04:50:35.840Z",
+    "updated_at": "2025-10-30T05:00:00.004Z"
+  },
+  {
+    "name": "Material UI (MUI)",
+    "type": "Front-End",
+    "subtype": "UI Component Framework",
+    "created_at": "2025-10-30T04:50:34.055Z",
+    "updated_at": "2025-10-30T04:59:54.537Z"
+  },
+  {
+    "name": "Google Cloud Function",
+    "type": "Hpsting Platform",
+    "subtype": "Serverless Computing",
+    "created_at": "2025-10-30T04:50:36.598Z",
+    "updated_at": "2025-10-30T04:59:56.926Z"
+  },
+  {
+    "name": "AWS S3 & CloudFront",
+    "type": "Storage and CDN",
+    "subtype": "Integrated Cloud Storage & CDN",
+    "created_at": "2025-10-30T04:50:38.918Z",
+    "updated_at": "2025-10-30T04:59:59.332Z"
+  },
+  {
+    "name": "DigitalOcean Spaces",
+    "type": "Storage and CDN",
+    "subtype": "Standalone Object Storage",
+    "created_at": "2025-10-30T04:50:39.298Z",
+    "updated_at": "2025-10-30T04:59:59.635Z"
+  },
+  {
+    "name": "Wasabi Hot Cloud Storage",
+    "type": "Storage and CDN",
+    "subtype": "Standalone Object Storage",
+    "created_at": "2025-10-30T04:50:39.377Z",
+    "updated_at": "2025-10-30T04:59:59.784Z"
+  },
+  {
+    "name": "Cloudflare R2",
+    "type": "Storage and CDN",
+    "subtype": "Standalone Object Storage",
+    "created_at": "2025-10-30T04:50:39.449Z",
+    "updated_at": "2025-10-30T04:59:59.857Z"
+  },
+  {
+    "name": "Vercel",
+    "type": "Storage and CDN",
+    "subtype": "Edge Platforms (with built-in CDN & Storage)",
+    "created_at": "2025-10-30T04:50:39.523Z",
+    "updated_at": "2025-10-30T04:59:59.930Z"
+  },
+  {
+    "name": "Cloudflare",
+    "type": "Storage and CDN",
+    "subtype": "Edge Platforms (with built-in CDN & Storage)",
+    "created_at": "2025-10-30T04:50:39.749Z",
+    "updated_at": "2025-10-30T05:00:00.078Z"
+  },
+  {
+    "name": "Fastly",
+    "type": "Storage and CDN",
+    "subtype": "Standalone CDNs",
+    "created_at": "2025-10-30T04:50:39.820Z",
+    "updated_at": "2025-10-30T05:00:00.150Z"
+  },
+  {
+    "name": "Akamai",
+    "type": "Storage and CDN",
+    "subtype": "Standalone CDNs",
+    "created_at": "2025-10-30T04:50:39.895Z",
+    "updated_at": "2025-10-30T05:00:00.308Z"
+  },
+  {
+    "name": "Firebase Storage",
+    "type": "Storage and CDN",
+    "subtype": "Backend-as-a-Service (with Storage)",
+    "created_at": "2025-10-30T04:50:39.968Z",
+    "updated_at": "2025-10-30T05:00:00.381Z"
+  },
+  {
+    "name": "Supabase Storage",
+    "type": "Storage and CDN",
+    "subtype": "Backend-as-a-Service (with Storage)",
+    "created_at": "2025-10-30T04:50:40.039Z",
+    "updated_at": "2025-10-30T05:00:00.453Z"
+  },
+  {
+    "name": "Cloudinary",
+    "type": "Storage and CDN",
+    "subtype": "Specialized Media Platforms",
+    "created_at": "2025-10-30T04:50:40.112Z",
+    "updated_at": "2025-10-30T05:00:00.543Z"
+  },
+  {
+    "name": "imgix",
+    "type": "Storage and CDN",
+    "subtype": "Specialized Media Platforms",
+    "created_at": "2025-10-30T04:50:40.268Z",
+    "updated_at": "2025-10-30T05:00:00.615Z"
+  },
+  {
+    "name": "REST",
+    "type": "API Communication Style",
+    "subtype": null,
+    "created_at": "2025-10-30T04:50:40.340Z",
+    "updated_at": "2025-10-30T05:00:00.688Z"
+  },
+  {
+    "name": "GraphQL",
+    "type": "API Communication Style",
+    "subtype": null,
+    "created_at": "2025-10-30T04:50:40.415Z",
+    "updated_at": "2025-10-30T05:00:00.831Z"
+  },
+  {
+    "name": "gRPC",
+    "type": "API Communication Style",
+    "subtype": null,
+    "created_at": "2025-10-30T04:50:40.486Z",
+    "updated_at": "2025-10-30T05:00:00.904Z"
+  },
+  {
+    "name": "WebSockets",
+    "type": "API Communication Style",
+    "subtype": null,
+    "created_at": "2025-10-30T04:50:40.561Z",
+    "updated_at": "2025-10-30T05:00:00.978Z"
+  },
+  {
+    "name": "Event-driven with SNS or SQS",
+    "type": "API Communication Style",
+    "subtype": null,
+    "created_at": "2025-10-30T04:50:40.633Z",
+    "updated_at": "2025-10-30T05:00:01.051Z"
+  },
+  {
+    "name": "AWS Pinpoint",
+    "type": "Analytics and Product Insight",
+    "subtype": null,
+    "created_at": "2025-10-30T04:50:40.865Z",
+    "updated_at": "2025-10-30T05:00:01.357Z"
+  },
+  {
+    "name": "Mixpanel",
+    "type": "Analytics and Product Insight",
+    "subtype": null,
+    "created_at": "2025-10-30T04:50:40.938Z",
+    "updated_at": "2025-10-30T05:00:01.437Z"
+  },
+  {
+    "name": "Segment",
+    "type": "Analytics and Product Insight",
+    "subtype": null,
+    "created_at": "2025-10-30T04:50:41.010Z",
+    "updated_at": "2025-10-30T05:00:01.512Z"
+  },
+  {
+    "name": "Amplitude",
+    "type": "Analytics and Product Insight",
+    "subtype": null,
+    "created_at": "2025-10-30T04:50:41.083Z",
+    "updated_at": "2025-10-30T05:00:01.585Z"
+  },
+  {
+    "name": "Google Analytics",
+    "type": "Analytics and Product Insight",
+    "subtype": "Analytics",
+    "created_at": "2025-10-30T04:50:40.793Z",
+    "updated_at": "2025-10-30T05:00:01.123Z"
+  },
+  {
+    "name": "Selenium",
+    "type": "Testing Framework",
+    "subtype": "End-to-End Testing",
+    "created_at": "2026-01-08T03:34:52.522Z",
+    "updated_at": "2026-01-08T03:34:52.522Z"
+  },
+  {
+    "name": "Cypress",
+    "type": "Testing Framework",
+    "subtype": "End-to-End Testing",
+    "created_at": "2026-01-08T03:34:52.610Z",
+    "updated_at": "2026-01-08T03:34:52.610Z"
+  },
+  {
+    "name": "Puppeteer",
+    "type": "Testing Framework",
+    "subtype": "Headless Browser Testing",
+    "created_at": "2026-01-08T03:34:52.686Z",
+    "updated_at": "2026-01-08T03:34:52.686Z"
+  },
+  {
+    "name": "Playwright",
+    "type": "Testing Framework",
+    "subtype": "End-to-End Testing",
+    "created_at": "2026-01-08T03:34:52.761Z",
+    "updated_at": "2026-01-08T03:34:52.761Z"
+  },
+  {
+    "name": "Jest",
+    "type": "Testing Framework",
+    "subtype": "Unit Testing",
+    "created_at": "2026-01-08T03:34:52.834Z",
+    "updated_at": "2026-01-08T03:34:52.834Z"
+  },
+  {
+    "name": "Vitest",
+    "type": "Testing Framework",
+    "subtype": "Unit Testing",
+    "created_at": "2026-01-08T03:34:52.908Z",
+    "updated_at": "2026-01-08T03:34:52.908Z"
+  },
+  {
+    "name": "Express.js",
+    "type": "Back-End Framework",
+    "subtype": "Node.js Framework",
+    "created_at": "2026-01-08T03:34:52.983Z",
+    "updated_at": "2026-01-08T03:34:52.983Z"
+  },
+  {
+    "name": "Django",
+    "type": "Back-End Framework",
+    "subtype": "Python Framework",
+    "created_at": "2026-01-08T03:34:53.056Z",
+    "updated_at": "2026-01-08T03:34:53.056Z"
+  },
+  {
+    "name": "Flask",
+    "type": "Back-End Framework",
+    "subtype": "Python Framework",
+    "created_at": "2026-01-08T03:34:53.131Z",
+    "updated_at": "2026-01-08T03:34:53.131Z"
+  },
+  {
+    "name": "FastAPI",
+    "type": "Back-End Framework",
+    "subtype": "Python Framework",
+    "created_at": "2026-01-08T03:34:53.206Z",
+    "updated_at": "2026-01-08T03:34:53.206Z"
+  },
+  {
+    "name": "Spring Boot",
+    "type": "Back-End Framework",
+    "subtype": "Java Framework",
+    "created_at": "2026-01-08T03:34:53.280Z",
+    "updated_at": "2026-01-08T03:34:53.280Z"
+  },
+  {
+    "name": "Ruby on Rails",
+    "type": "Back-End Framework",
+    "subtype": "Ruby Framework",
+    "created_at": "2026-01-08T03:34:53.354Z",
+    "updated_at": "2026-01-08T03:34:53.354Z"
+  },
+  {
+    "name": "Laravel",
+    "type": "Back-End Framework",
+    "subtype": "PHP Framework",
+    "created_at": "2026-01-08T03:34:53.428Z",
+    "updated_at": "2026-01-08T03:34:53.428Z"
+  },
+  {
+    "name": "ASP.NET Core",
+    "type": "Back-End Framework",
+    "subtype": ".NET Framework",
+    "created_at": "2026-01-08T03:34:53.503Z",
+    "updated_at": "2026-01-08T03:34:53.503Z"
+  },
+  {
+    "name": "NestJS",
+    "type": "Back-End Framework",
+    "subtype": "Node.js Framework",
+    "created_at": "2026-01-08T03:34:53.578Z",
+    "updated_at": "2026-01-08T03:34:53.578Z"
+  },
+  {
+    "name": "Webpack",
+    "type": "Build Tool",
+    "subtype": "Module Bundler",
+    "created_at": "2026-01-08T03:34:53.652Z",
+    "updated_at": "2026-01-08T03:34:53.652Z"
+  },
+  {
+    "name": "Vite",
+    "type": "Build Tool",
+    "subtype": "Module Bundler",
+    "created_at": "2026-01-08T03:34:53.727Z",
+    "updated_at": "2026-01-08T03:34:53.727Z"
+  },
+  {
+    "name": "Rollup",
+    "type": "Build Tool",
+    "subtype": "Module Bundler",
+    "created_at": "2026-01-08T03:34:53.801Z",
+    "updated_at": "2026-01-08T03:34:53.801Z"
+  },
+  {
+    "name": "esbuild",
+    "type": "Build Tool",
+    "subtype": "Module Bundler",
+    "created_at": "2026-01-08T03:34:53.877Z",
+    "updated_at": "2026-01-08T03:34:53.877Z"
+  },
+  {
+    "name": "Parcel",
+    "type": "Build Tool",
+    "subtype": "Module Bundler",
+    "created_at": "2026-01-08T03:34:53.952Z",
+    "updated_at": "2026-01-08T03:34:53.952Z"
+  },
+  {
+    "name": "Turbopack",
+    "type": "Build Tool",
+    "subtype": "Module Bundler",
+    "created_at": "2026-01-08T03:34:54.026Z",
+    "updated_at": "2026-01-08T03:34:54.026Z"
+  },
+  {
+    "name": "SWC",
+    "type": "Build Tool",
+    "subtype": "Compiler/Transpiler",
+    "created_at": "2026-01-08T03:34:54.100Z",
+    "updated_at": "2026-01-08T03:34:54.100Z"
+  },
+  {
+    "name": "Babel",
+    "type": "Build Tool",
+    "subtype": "Compiler/Transpiler",
+    "created_at": "2026-01-08T03:34:54.175Z",
+    "updated_at": "2026-01-08T03:34:54.175Z"
+  },
+  {
+    "name": "Node.js",
+    "type": "Runtime Environment",
+    "subtype": "JavaScript Runtime",
+    "created_at": "2026-01-08T03:34:54.250Z",
+    "updated_at": "2026-01-08T03:34:54.250Z"
+  },
+  {
+    "name": "Deno",
+    "type": "Runtime Environment",
+    "subtype": "JavaScript Runtime",
+    "created_at": "2026-01-08T03:34:54.327Z",
+    "updated_at": "2026-01-08T03:34:54.327Z"
+  },
+  {
+    "name": "Bun",
+    "type": "Runtime Environment",
+    "subtype": "JavaScript Runtime & Toolkit",
+    "created_at": "2026-01-08T03:34:54.401Z",
+    "updated_at": "2026-01-08T03:34:54.401Z"
+  },
+  {
+    "name": "npm",
+    "type": "Package Manager",
+    "subtype": "JavaScript Package Manager",
+    "created_at": "2026-01-08T03:34:54.476Z",
+    "updated_at": "2026-01-08T03:34:54.476Z"
+  },
+  {
+    "name": "yarn",
+    "type": "Package Manager",
+    "subtype": "JavaScript Package Manager",
+    "created_at": "2026-01-08T03:34:54.550Z",
+    "updated_at": "2026-01-08T03:34:54.550Z"
+  },
+  {
+    "name": "pnpm",
+    "type": "Package Manager",
+    "subtype": "JavaScript Package Manager",
+    "created_at": "2026-01-08T03:34:54.625Z",
+    "updated_at": "2026-01-08T03:34:54.625Z"
+  },
+  {
+    "name": "Prisma",
+    "type": "ORM",
+    "subtype": "Database ORM",
+    "created_at": "2026-01-08T03:34:54.698Z",
+    "updated_at": "2026-01-08T03:34:54.698Z"
+  },
+  {
+    "name": "Drizzle",
+    "type": "ORM",
+    "subtype": "Database ORM",
+    "created_at": "2026-01-08T03:34:54.773Z",
+    "updated_at": "2026-01-08T03:34:54.773Z"
+  },
+  {
+    "name": "TypeORM",
+    "type": "ORM",
+    "subtype": "Database ORM",
+    "created_at": "2026-01-08T03:34:54.848Z",
+    "updated_at": "2026-01-08T03:34:54.848Z"
+  },
+  {
+    "name": "Sequelize",
+    "type": "ORM",
+    "subtype": "Database ORM",
+    "created_at": "2026-01-08T03:34:54.921Z",
+    "updated_at": "2026-01-08T03:34:54.921Z"
+  },
+  {
+    "name": "Mongoose",
+    "type": "ORM",
+    "subtype": "MongoDB ODM",
+    "created_at": "2026-01-08T03:34:54.998Z",
+    "updated_at": "2026-01-08T03:34:54.998Z"
+  },
+  {
+    "name": "Jenkins",
+    "type": "CI/CD",
+    "subtype": "Continuous Integration",
+    "created_at": "2026-01-08T03:34:55.074Z",
+    "updated_at": "2026-01-08T03:34:55.074Z"
+  },
+  {
+    "name": "GitHub Actions",
+    "type": "CI/CD",
+    "subtype": "Continuous Integration",
+    "created_at": "2026-01-08T03:34:55.147Z",
+    "updated_at": "2026-01-08T03:34:55.147Z"
+  },
+  {
+    "name": "GitLab CI/CD",
+    "type": "CI/CD",
+    "subtype": "Continuous Integration",
+    "created_at": "2026-01-08T03:34:55.221Z",
+    "updated_at": "2026-01-08T03:34:55.221Z"
+  },
+  {
+    "name": "CircleCI",
+    "type": "CI/CD",
+    "subtype": "Continuous Integration",
+    "created_at": "2026-01-08T03:34:55.296Z",
+    "updated_at": "2026-01-08T03:34:55.296Z"
+  },
+  {
+    "name": "Travis CI",
+    "type": "CI/CD",
+    "subtype": "Continuous Integration",
+    "created_at": "2026-01-08T03:34:55.371Z",
+    "updated_at": "2026-01-08T03:34:55.371Z"
+  },
+  {
+    "name": "Azure DevOps",
+    "type": "CI/CD",
+    "subtype": "Continuous Integration",
+    "created_at": "2026-01-08T03:34:55.448Z",
+    "updated_at": "2026-01-08T03:34:55.448Z"
+  },
+  {
+    "name": "Argo CD",
+    "type": "CI/CD",
+    "subtype": "Continuous Deployment",
+    "created_at": "2026-01-08T03:34:55.523Z",
+    "updated_at": "2026-01-08T03:34:55.523Z"
+  },
+  {
+    "name": "Datadog",
+    "type": "Monitoring & Observability",
+    "subtype": "Application Performance Monitoring",
+    "created_at": "2026-01-08T03:34:55.597Z",
+    "updated_at": "2026-01-08T03:34:55.597Z"
+  },
+  {
+    "name": "New Relic",
+    "type": "Monitoring & Observability",
+    "subtype": "Application Performance Monitoring",
+    "created_at": "2026-01-08T03:34:55.672Z",
+    "updated_at": "2026-01-08T03:34:55.672Z"
+  },
+  {
+    "name": "Grafana",
+    "type": "Monitoring & Observability",
+    "subtype": "Metrics Visualization",
+    "created_at": "2026-01-08T03:34:55.747Z",
+    "updated_at": "2026-01-08T03:34:55.747Z"
+  },
+  {
+    "name": "Prometheus",
+    "type": "Monitoring & Observability",
+    "subtype": "Metrics Collection",
+    "created_at": "2026-01-08T03:34:55.821Z",
+    "updated_at": "2026-01-08T03:34:55.821Z"
+  },
+  {
+    "name": "Elastic Observability",
+    "type": "Monitoring & Observability",
+    "subtype": "Full Stack Observability",
+    "created_at": "2026-01-08T03:34:55.896Z",
+    "updated_at": "2026-01-08T03:34:55.896Z"
+  },
+  {
+    "name": "Splunk",
+    "type": "Monitoring & Observability",
+    "subtype": "Log Management",
+    "created_at": "2026-01-08T03:34:55.972Z",
+    "updated_at": "2026-01-08T03:34:55.972Z"
+  },
+  {
+    "name": "Middleware",
+    "type": "Monitoring & Observability",
+    "subtype": "Full Stack Observability",
+    "created_at": "2026-01-08T03:34:56.047Z",
+    "updated_at": "2026-01-08T03:34:56.047Z"
+  },
+  {
+    "name": "Sentry",
+    "type": "Error Tracking",
+    "subtype": "Application Error Monitoring",
+    "created_at": "2026-01-08T03:34:56.122Z",
+    "updated_at": "2026-01-08T03:34:56.122Z"
+  },
+  {
+    "name": "LogRocket",
+    "type": "Error Tracking",
+    "subtype": "Frontend Error & Session Replay",
+    "created_at": "2026-01-08T03:34:56.196Z",
+    "updated_at": "2026-01-08T03:34:56.196Z"
+  },
+  {
+    "name": "Bugsnag",
+    "type": "Error Tracking",
+    "subtype": "Error Monitoring",
+    "created_at": "2026-01-08T03:34:56.275Z",
+    "updated_at": "2026-01-08T03:34:56.275Z"
+  },
+  {
+    "name": "Rollbar",
+    "type": "Error Tracking",
+    "subtype": "Error Monitoring",
+    "created_at": "2026-01-08T03:34:56.351Z",
+    "updated_at": "2026-01-08T03:34:56.351Z"
+  },
+  {
+    "name": "TrackJS",
+    "type": "Error Tracking",
+    "subtype": "JavaScript Error Tracking",
+    "created_at": "2026-01-08T03:34:56.426Z",
+    "updated_at": "2026-01-08T03:34:56.426Z"
+  },
+  {
+    "name": "Strapi",
+    "type": "CMS",
+    "subtype": "Headless CMS",
+    "created_at": "2026-01-08T03:34:56.507Z",
+    "updated_at": "2026-01-08T03:34:56.507Z"
+  },
+  {
+    "name": "Contentful",
+    "type": "CMS",
+    "subtype": "Headless CMS",
+    "created_at": "2026-01-08T03:34:56.591Z",
+    "updated_at": "2026-01-08T03:34:56.591Z"
+  },
+  {
+    "name": "Sanity",
+    "type": "CMS",
+    "subtype": "Headless CMS",
+    "created_at": "2026-01-08T03:34:56.671Z",
+    "updated_at": "2026-01-08T03:34:56.671Z"
+  },
+  {
+    "name": "WordPress",
+    "type": "CMS",
+    "subtype": "Traditional & Headless CMS",
+    "created_at": "2026-01-08T03:34:56.766Z",
+    "updated_at": "2026-01-08T03:34:56.766Z"
+  },
+  {
+    "name": "Storyblok",
+    "type": "CMS",
+    "subtype": "Headless CMS",
+    "created_at": "2026-01-08T03:34:56.840Z",
+    "updated_at": "2026-01-08T03:34:56.840Z"
+  },
+  {
+    "name": "Hygraph",
+    "type": "CMS",
+    "subtype": "Headless CMS",
+    "created_at": "2026-01-08T03:34:56.913Z",
+    "updated_at": "2026-01-08T03:34:56.913Z"
+  },
+  {
+    "name": "Prismic",
+    "type": "CMS",
+    "subtype": "Headless CMS",
+    "created_at": "2026-01-08T03:34:56.988Z",
+    "updated_at": "2026-01-08T03:34:56.988Z"
+  },
+  {
+    "name": "Ghost",
+    "type": "CMS",
+    "subtype": "Headless CMS",
+    "created_at": "2026-01-08T03:34:57.065Z",
+    "updated_at": "2026-01-08T03:34:57.065Z"
+  },
+  {
+    "name": "Directus",
+    "type": "CMS",
+    "subtype": "Headless CMS",
+    "created_at": "2026-01-08T03:34:57.138Z",
+    "updated_at": "2026-01-08T03:34:57.138Z"
+  },
+  {
+    "name": "SendGrid",
+    "type": "Email Service",
+    "subtype": "Transactional Email",
+    "created_at": "2026-01-08T03:34:57.213Z",
+    "updated_at": "2026-01-08T03:34:57.213Z"
+  },
+  {
+    "name": "Mailgun",
+    "type": "Email Service",
+    "subtype": "Transactional Email",
+    "created_at": "2026-01-08T03:34:57.293Z",
+    "updated_at": "2026-01-08T03:34:57.293Z"
+  },
+  {
+    "name": "Postmark",
+    "type": "Email Service",
+    "subtype": "Transactional Email",
+    "created_at": "2026-01-08T03:34:57.367Z",
+    "updated_at": "2026-01-08T03:34:57.367Z"
+  },
+  {
+    "name": "Resend",
+    "type": "Email Service",
+    "subtype": "Transactional Email",
+    "created_at": "2026-01-08T03:34:57.443Z",
+    "updated_at": "2026-01-08T03:34:57.443Z"
+  },
+  {
+    "name": "AWS SES",
+    "type": "Email Service",
+    "subtype": "Transactional Email",
+    "created_at": "2026-01-08T03:34:57.518Z",
+    "updated_at": "2026-01-08T03:34:57.518Z"
+  },
+  {
+    "name": "Twilio SendGrid",
+    "type": "Email Service",
+    "subtype": "Transactional Email",
+    "created_at": "2026-01-08T03:34:57.601Z",
+    "updated_at": "2026-01-08T03:34:57.601Z"
+  },
+  {
+    "name": "Mailtrap",
+    "type": "Email Service",
+    "subtype": "Email Testing",
+    "created_at": "2026-01-08T03:34:57.676Z",
+    "updated_at": "2026-01-08T03:34:57.676Z"
+  },
+  {
+    "name": "Stripe",
+    "type": "Payment Processor",
+    "subtype": "Payment Gateway",
+    "created_at": "2026-01-08T03:34:57.756Z",
+    "updated_at": "2026-01-08T03:34:57.756Z"
+  },
+  {
+    "name": "PayPal",
+    "type": "Payment Processor",
+    "subtype": "Payment Gateway",
+    "created_at": "2026-01-08T03:34:57.833Z",
+    "updated_at": "2026-01-08T03:34:57.833Z"
+  },
+  {
+    "name": "Square",
+    "type": "Payment Processor",
+    "subtype": "Payment Gateway",
+    "created_at": "2026-01-08T03:34:57.907Z",
+    "updated_at": "2026-01-08T03:34:57.907Z"
+  },
+  {
+    "name": "Braintree",
+    "type": "Payment Processor",
+    "subtype": "Payment Gateway",
+    "created_at": "2026-01-08T03:34:57.982Z",
+    "updated_at": "2026-01-08T03:34:57.982Z"
+  },
+  {
+    "name": "Adyen",
+    "type": "Payment Processor",
+    "subtype": "Payment Gateway",
+    "created_at": "2026-01-08T03:34:58.056Z",
+    "updated_at": "2026-01-08T03:34:58.056Z"
+  },
+  {
+    "name": "2Checkout",
+    "type": "Payment Processor",
+    "subtype": "Payment Gateway",
+    "created_at": "2026-01-08T03:34:58.131Z",
+    "updated_at": "2026-01-08T03:34:58.131Z"
+  },
+  {
+    "name": "Razorpay",
+    "type": "Payment Processor",
+    "subtype": "Payment Gateway",
+    "created_at": "2026-01-08T03:34:58.208Z",
+    "updated_at": "2026-01-08T03:34:58.208Z"
+  },
+  {
+    "name": "Paddle",
+    "type": "Payment Processor",
+    "subtype": "Payment Gateway",
+    "created_at": "2026-01-08T03:34:58.293Z",
+    "updated_at": "2026-01-08T03:34:58.293Z"
+  },
+  {
+    "name": "Redux",
+    "type": "State Management",
+    "subtype": "Centralized State Management",
+    "created_at": "2026-01-08T03:34:58.367Z",
+    "updated_at": "2026-01-08T03:34:58.367Z"
+  },
+  {
+    "name": "Zustand",
+    "type": "State Management",
+    "subtype": "Lightweight State Management",
+    "created_at": "2026-01-08T03:34:58.450Z",
+    "updated_at": "2026-01-08T03:34:58.450Z"
+  },
+  {
+    "name": "MobX",
+    "type": "State Management",
+    "subtype": "Observable State Management",
+    "created_at": "2026-01-08T03:34:58.525Z",
+    "updated_at": "2026-01-08T03:34:58.525Z"
+  },
+  {
+    "name": "Recoil",
+    "type": "State Management",
+    "subtype": "Atomic State Management (Discontinued)",
+    "created_at": "2026-01-08T03:34:58.599Z",
+    "updated_at": "2026-01-08T03:34:58.599Z"
+  },
+  {
+    "name": "Jotai",
+    "type": "State Management",
+    "subtype": "Atomic State Management",
+    "created_at": "2026-01-08T03:34:58.674Z",
+    "updated_at": "2026-01-08T03:34:58.674Z"
+  },
+  {
+    "name": "XState",
+    "type": "State Management",
+    "subtype": "State Machines",
+    "created_at": "2026-01-08T03:34:58.750Z",
+    "updated_at": "2026-01-08T03:34:58.750Z"
+  },
+  {
+    "name": "TanStack Query (React Query)",
+    "type": "State Management",
+    "subtype": "Server State Management",
+    "created_at": "2026-01-08T03:34:58.836Z",
+    "updated_at": "2026-01-08T03:34:58.836Z"
+  },
+  {
+    "name": "SWR",
+    "type": "State Management",
+    "subtype": "Server State Management",
+    "created_at": "2026-01-08T03:34:58.910Z",
+    "updated_at": "2026-01-08T03:34:58.910Z"
+  },
+  {
+    "name": "D3.js",
+    "type": "Data Visualization",
+    "subtype": "Custom Visualization Library",
+    "created_at": "2026-01-08T03:34:58.988Z",
+    "updated_at": "2026-01-08T03:34:58.988Z"
+  },
+  {
+    "name": "Chart.js",
+    "type": "Data Visualization",
+    "subtype": "Simple Chart Library",
+    "created_at": "2026-01-08T03:34:59.062Z",
+    "updated_at": "2026-01-08T03:34:59.062Z"
+  },
+  {
+    "name": "Recharts",
+    "type": "Data Visualization",
+    "subtype": "React Chart Library",
+    "created_at": "2026-01-08T03:34:59.137Z",
+    "updated_at": "2026-01-08T03:34:59.137Z"
+  },
+  {
+    "name": "Plotly",
+    "type": "Data Visualization",
+    "subtype": "Scientific Visualization",
+    "created_at": "2026-01-08T03:34:59.249Z",
+    "updated_at": "2026-01-08T03:34:59.249Z"
+  },
+  {
+    "name": "Highcharts",
+    "type": "Data Visualization",
+    "subtype": "Interactive Charts",
+    "created_at": "2026-01-08T03:34:59.334Z",
+    "updated_at": "2026-01-08T03:34:59.334Z"
+  },
+  {
+    "name": "ECharts",
+    "type": "Data Visualization",
+    "subtype": "Apache Visualization Library",
+    "created_at": "2026-01-08T03:34:59.409Z",
+    "updated_at": "2026-01-08T03:34:59.409Z"
+  },
+  {
+    "name": "ApexCharts",
+    "type": "Data Visualization",
+    "subtype": "Modern Chart Library",
+    "created_at": "2026-01-08T03:34:59.483Z",
+    "updated_at": "2026-01-08T03:34:59.483Z"
+  },
+  {
+    "name": "Victory",
+    "type": "Data Visualization",
+    "subtype": "React Chart Components",
+    "created_at": "2026-01-08T03:34:59.558Z",
+    "updated_at": "2026-01-08T03:34:59.558Z"
+  },
+  {
+    "name": "React Hook Form",
+    "type": "Form Library",
+    "subtype": "React Form Management",
+    "created_at": "2026-01-08T03:34:59.637Z",
+    "updated_at": "2026-01-08T03:34:59.637Z"
+  },
+  {
+    "name": "Formik",
+    "type": "Form Library",
+    "subtype": "React Form Management",
+    "created_at": "2026-01-08T03:34:59.714Z",
+    "updated_at": "2026-01-08T03:34:59.714Z"
+  },
+  {
+    "name": "Zod",
+    "type": "Validation Library",
+    "subtype": "Schema Validation",
+    "created_at": "2026-01-08T03:34:59.789Z",
+    "updated_at": "2026-01-08T03:34:59.789Z"
+  },
+  {
+    "name": "Yup",
+    "type": "Validation Library",
+    "subtype": "Schema Validation",
+    "created_at": "2026-01-08T03:34:59.871Z",
+    "updated_at": "2026-01-08T03:34:59.871Z"
+  },
+  {
+    "name": "Joi",
+    "type": "Validation Library",
+    "subtype": "Schema Validation",
+    "created_at": "2026-01-08T03:34:59.946Z",
+    "updated_at": "2026-01-08T03:34:59.946Z"
+  },
+  {
+    "name": "Ajv",
+    "type": "Validation Library",
+    "subtype": "JSON Schema Validator",
+    "created_at": "2026-01-08T03:35:00.025Z",
+    "updated_at": "2026-01-08T03:35:00.025Z"
+  },
+  {
+    "name": "React Spring",
+    "type": "Animation Library",
+    "subtype": "Physics-Based Animation",
+    "created_at": "2026-01-08T03:35:00.100Z",
+    "updated_at": "2026-01-08T03:35:00.100Z"
+  },
+  {
+    "name": "Framer Motion",
+    "type": "Animation Library",
+    "subtype": "React Animation Library",
+    "created_at": "2026-01-08T03:35:00.205Z",
+    "updated_at": "2026-01-08T03:35:00.205Z"
+  },
+  {
+    "name": "GSAP",
+    "type": "Animation Library",
+    "subtype": "Professional Animation",
+    "created_at": "2026-01-08T03:35:00.283Z",
+    "updated_at": "2026-01-08T03:35:00.283Z"
+  },
+  {
+    "name": "Lottie",
+    "type": "Animation Library",
+    "subtype": "Animation Player",
+    "created_at": "2026-01-08T03:35:00.358Z",
+    "updated_at": "2026-01-08T03:35:00.358Z"
+  },
+  {
+    "name": "Three.js",
+    "type": "3D Graphics",
+    "subtype": "WebGL Library",
+    "created_at": "2026-01-08T03:35:00.444Z",
+    "updated_at": "2026-01-08T03:35:00.444Z"
+  },
+  {
+    "name": "Babylon.js",
+    "type": "3D Graphics",
+    "subtype": "3D Engine",
+    "created_at": "2026-01-08T03:35:00.519Z",
+    "updated_at": "2026-01-08T03:35:00.519Z"
+  },
+  {
+    "name": "Socket.io",
+    "type": "Real-Time Communication",
+    "subtype": "WebSocket Library",
+    "created_at": "2026-01-08T03:35:00.594Z",
+    "updated_at": "2026-01-08T03:35:00.594Z"
+  },
+  {
+    "name": "Pusher",
+    "type": "Real-Time Communication",
+    "subtype": "Real-Time API",
+    "created_at": "2026-01-08T03:35:00.668Z",
+    "updated_at": "2026-01-08T03:35:00.668Z"
+  },
+  {
+    "name": "Ably",
+    "type": "Real-Time Communication",
+    "subtype": "Real-Time Messaging",
+    "created_at": "2026-01-08T03:35:00.744Z",
+    "updated_at": "2026-01-08T03:35:00.744Z"
+  },
+  {
+    "name": "tRPC",
+    "type": "API Framework",
+    "subtype": "Type-Safe API",
+    "created_at": "2026-01-08T03:35:00.819Z",
+    "updated_at": "2026-01-08T03:35:00.819Z"
+  },
+  {
+    "name": "Axios",
+    "type": "HTTP Client",
+    "subtype": "Promise-Based HTTP Client",
+    "created_at": "2026-01-08T03:35:00.893Z",
+    "updated_at": "2026-01-08T03:35:00.893Z"
+  },
+  {
+    "name": "Fetch API",
+    "type": "HTTP Client",
+    "subtype": "Native Browser API",
+    "created_at": "2026-01-08T03:35:00.978Z",
+    "updated_at": "2026-01-08T03:35:00.978Z"
+  },
+  {
+    "name": "Docker",
+    "type": "DevOps",
+    "subtype": "Containerization",
+    "created_at": "2026-01-08T03:35:01.060Z",
+    "updated_at": "2026-01-08T03:35:01.060Z"
+  },
+  {
+    "name": "Kubernetes",
+    "type": "DevOps",
+    "subtype": "Container Orchestration",
+    "created_at": "2026-01-08T03:35:01.137Z",
+    "updated_at": "2026-01-08T03:35:01.137Z"
+  },
+  {
+    "name": "Terraform",
+    "type": "DevOps",
+    "subtype": "Infrastructure as Code",
+    "created_at": "2026-01-08T03:35:01.215Z",
+    "updated_at": "2026-01-08T03:35:01.215Z"
+  },
+  {
+    "name": "Ansible",
+    "type": "DevOps",
+    "subtype": "Configuration Management",
+    "created_at": "2026-01-08T03:35:01.306Z",
+    "updated_at": "2026-01-08T03:35:01.306Z"
+  },
+  {
+    "name": "Nginx",
+    "type": "Web Server",
+    "subtype": "Reverse Proxy & Web Server",
+    "created_at": "2026-01-08T03:35:01.381Z",
+    "updated_at": "2026-01-08T03:35:01.381Z"
+  },
+  {
+    "name": "Apache HTTP Server",
+    "type": "Web Server",
+    "subtype": "Web Server",
+    "created_at": "2026-01-08T03:35:01.456Z",
+    "updated_at": "2026-01-08T03:35:01.456Z"
+  },
+  {
+    "name": "Caddy",
+    "type": "Web Server",
+    "subtype": "Modern Web Server",
+    "created_at": "2026-01-08T03:35:01.531Z",
+    "updated_at": "2026-01-08T03:35:01.531Z"
+  },
+  {
+    "name": "Elasticsearch",
+    "type": "Search Engine",
+    "subtype": "Full-Text Search",
+    "created_at": "2026-01-08T03:35:01.605Z",
+    "updated_at": "2026-01-08T03:35:01.605Z"
+  },
+  {
+    "name": "Algolia",
+    "type": "Search Engine",
+    "subtype": "Hosted Search API",
+    "created_at": "2026-01-08T03:35:01.689Z",
+    "updated_at": "2026-01-08T03:35:01.689Z"
+  },
+  {
+    "name": "MeiliSearch",
+    "type": "Search Engine",
+    "subtype": "Open Source Search",
+    "created_at": "2026-01-08T03:35:01.765Z",
+    "updated_at": "2026-01-08T03:35:01.765Z"
+  },
+  {
+    "name": "Typesense",
+    "type": "Search Engine",
+    "subtype": "Open Source Search",
+    "created_at": "2026-01-08T03:35:01.880Z",
+    "updated_at": "2026-01-08T03:35:01.880Z"
+  },
+  {
+    "name": "Storybook",
+    "type": "Development Tool",
+    "subtype": "Component Development",
+    "created_at": "2026-01-08T03:35:01.954Z",
+    "updated_at": "2026-01-08T03:35:01.954Z"
+  },
+  {
+    "name": "Vite DevTools",
+    "type": "Development Tool",
+    "subtype": "Development Environment",
+    "created_at": "2026-01-08T03:35:02.066Z",
+    "updated_at": "2026-01-08T03:35:02.066Z"
+  },
+  {
+    "name": "Nx",
+    "type": "Development Tool",
+    "subtype": "Monorepo Tool",
+    "created_at": "2026-01-08T03:35:02.145Z",
+    "updated_at": "2026-01-08T03:35:02.145Z"
+  },
+  {
+    "name": "Turborepo",
+    "type": "Development Tool",
+    "subtype": "Monorepo Tool",
+    "created_at": "2026-01-08T03:35:02.271Z",
+    "updated_at": "2026-01-08T03:35:02.271Z"
+  },
+  {
+    "name": "Lerna",
+    "type": "Development Tool",
+    "subtype": "Monorepo Tool",
+    "created_at": "2026-01-08T03:35:02.350Z",
+    "updated_at": "2026-01-08T03:35:02.350Z"
+  },
+  {
+    "name": "ESLint",
+    "type": "Code Quality",
+    "subtype": "Linting",
+    "created_at": "2026-01-08T03:35:02.437Z",
+    "updated_at": "2026-01-08T03:35:02.437Z"
+  },
+  {
+    "name": "Prettier",
+    "type": "Code Quality",
+    "subtype": "Code Formatting",
+    "created_at": "2026-01-08T03:35:02.512Z",
+    "updated_at": "2026-01-08T03:35:02.512Z"
+  },
+  {
+    "name": "Husky",
+    "type": "Development Tool",
+    "subtype": "Git Hooks",
+    "created_at": "2026-01-08T03:35:02.587Z",
+    "updated_at": "2026-01-08T03:35:02.587Z"
+  },
+  {
+    "name": "lint-staged",
+    "type": "Development Tool",
+    "subtype": "Pre-Commit Tool",
+    "created_at": "2026-01-08T03:35:02.664Z",
+    "updated_at": "2026-01-08T03:35:02.664Z"
+  },
+  {
+    "name": "shadcn/ui",
+    "type": "UI Component Library",
+    "subtype": "Headless Components",
+    "created_at": "2026-01-08T03:35:02.740Z",
+    "updated_at": "2026-01-08T03:35:02.740Z"
+  },
+  {
+    "name": "Radix UI",
+    "type": "UI Component Library",
+    "subtype": "Headless Components",
+    "created_at": "2026-01-08T03:35:02.815Z",
+    "updated_at": "2026-01-08T03:35:02.815Z"
+  },
+  {
+    "name": "Headless UI",
+    "type": "UI Component Library",
+    "subtype": "Headless Components",
+    "created_at": "2026-01-08T03:35:02.891Z",
+    "updated_at": "2026-01-08T03:35:02.891Z"
+  },
+  {
+    "name": "daisyUI",
+    "type": "UI Component Library",
+    "subtype": "Tailwind Components",
+    "created_at": "2026-01-08T03:35:02.964Z",
+    "updated_at": "2026-01-08T03:35:02.964Z"
+  },
+  {
+    "name": "Mantine",
+    "type": "UI Component Library",
+    "subtype": "React Components",
+    "created_at": "2026-01-08T03:35:03.039Z",
+    "updated_at": "2026-01-08T03:35:03.039Z"
+  },
+  {
+    "name": "PrimeReact",
+    "type": "UI Component Library",
+    "subtype": "React Components",
+    "created_at": "2026-01-08T03:35:03.115Z",
+    "updated_at": "2026-01-08T03:35:03.115Z"
+  },
+  {
+    "name": "Shopify",
+    "type": "E-Commerce Platform",
+    "subtype": "Hosted E-Commerce",
+    "created_at": "2026-01-08T03:35:03.191Z",
+    "updated_at": "2026-01-08T03:35:03.191Z"
+  },
+  {
+    "name": "WooCommerce",
+    "type": "E-Commerce Platform",
+    "subtype": "WordPress Plugin",
+    "created_at": "2026-01-08T03:35:03.266Z",
+    "updated_at": "2026-01-08T03:35:03.266Z"
+  },
+  {
+    "name": "Magento",
+    "type": "E-Commerce Platform",
+    "subtype": "Open Source E-Commerce",
+    "created_at": "2026-01-08T03:35:03.341Z",
+    "updated_at": "2026-01-08T03:35:03.341Z"
+  },
+  {
+    "name": "BigCommerce",
+    "type": "E-Commerce Platform",
+    "subtype": "Hosted E-Commerce",
+    "created_at": "2026-01-08T03:35:03.468Z",
+    "updated_at": "2026-01-08T03:35:03.468Z"
+  },
+  {
+    "name": "Commercetools",
+    "type": "E-Commerce Platform",
+    "subtype": "Headless Commerce",
+    "created_at": "2026-01-08T03:35:03.543Z",
+    "updated_at": "2026-01-08T03:35:03.543Z"
+  },
+  {
+    "name": "Medusa",
+    "type": "E-Commerce Platform",
+    "subtype": "Open Source Headless Commerce",
+    "created_at": "2026-01-08T03:35:03.617Z",
+    "updated_at": "2026-01-08T03:35:03.617Z"
+  },
+  {
+    "name": "Appwrite",
+    "type": "Backend-as-a-Service",
+    "subtype": "Open Source BaaS",
+    "created_at": "2026-01-08T03:35:03.690Z",
+    "updated_at": "2026-01-08T03:35:03.690Z"
+  },
+  {
+    "name": "CockroachDB",
+    "type": "Database",
+    "subtype": "Distributed SQL",
+    "created_at": "2026-01-08T03:35:03.763Z",
+    "updated_at": "2026-01-08T03:35:03.763Z"
+  },
+  {
+    "name": "FaunaDB",
+    "type": "Database",
+    "subtype": "Distributed Database",
+    "created_at": "2026-01-08T03:35:03.837Z",
+    "updated_at": "2026-01-08T03:35:03.837Z"
+  },
+  {
+    "name": "Hasura",
+    "type": "GraphQL Engine",
+    "subtype": "GraphQL Backend",
+    "created_at": "2026-01-08T03:35:03.911Z",
+    "updated_at": "2026-01-08T03:35:03.911Z"
+  },
+  {
+    "name": "Apollo GraphQL",
+    "type": "GraphQL Engine",
+    "subtype": "GraphQL Platform",
+    "created_at": "2026-01-08T03:35:03.986Z",
+    "updated_at": "2026-01-08T03:35:03.986Z"
+  },
+  {
+    "name": "Relay",
+    "type": "GraphQL Client",
+    "subtype": "Facebook GraphQL Client",
+    "created_at": "2026-01-08T03:35:04.064Z",
+    "updated_at": "2026-01-08T03:35:04.064Z"
+  },
+  {
+    "name": "URQL",
+    "type": "GraphQL Client",
+    "subtype": "Lightweight GraphQL Client",
+    "created_at": "2026-01-08T03:35:04.138Z",
+    "updated_at": "2026-01-08T03:35:04.138Z"
+  },
+  {
+    "name": "i18next",
+    "type": "Internationalization",
+    "subtype": "i18n Framework",
+    "created_at": "2026-01-08T03:35:04.212Z",
+    "updated_at": "2026-01-08T03:35:04.212Z"
+  },
+  {
+    "name": "react-i18next",
+    "type": "Internationalization",
+    "subtype": "React i18n",
+    "created_at": "2026-01-08T03:35:04.286Z",
+    "updated_at": "2026-01-08T03:35:04.286Z"
+  },
+  {
+    "name": "FormatJS",
+    "type": "Internationalization",
+    "subtype": "i18n Library",
+    "created_at": "2026-01-08T03:35:04.363Z",
+    "updated_at": "2026-01-08T03:35:04.363Z"
+  },
+  {
+    "name": "Moment.js",
+    "type": "Date & Time",
+    "subtype": "Date Library (Legacy)",
+    "created_at": "2026-01-08T03:35:04.438Z",
+    "updated_at": "2026-01-08T03:35:04.438Z"
+  },
+  {
+    "name": "date-fns",
+    "type": "Date & Time",
+    "subtype": "Modern Date Library",
+    "created_at": "2026-01-08T03:35:04.512Z",
+    "updated_at": "2026-01-08T03:35:04.512Z"
+  },
+  {
+    "name": "Day.js",
+    "type": "Date & Time",
+    "subtype": "Lightweight Date Library",
+    "created_at": "2026-01-08T03:35:04.586Z",
+    "updated_at": "2026-01-08T03:35:04.586Z"
+  },
+  {
+    "name": "Luxon",
+    "type": "Date & Time",
+    "subtype": "DateTime Library",
+    "created_at": "2026-01-08T03:35:04.661Z",
+    "updated_at": "2026-01-08T03:35:04.661Z"
+  },
+  {
+    "name": "Lodash",
+    "type": "Utility Library",
+    "subtype": "JavaScript Utilities",
+    "created_at": "2026-01-08T03:35:04.736Z",
+    "updated_at": "2026-01-08T03:35:04.736Z"
+  },
+  {
+    "name": "Underscore.js",
+    "type": "Utility Library",
+    "subtype": "JavaScript Utilities",
+    "created_at": "2026-01-08T03:35:04.810Z",
+    "updated_at": "2026-01-08T03:35:04.810Z"
+  },
+  {
+    "name": "Ramda",
+    "type": "Utility Library",
+    "subtype": "Functional Programming",
+    "created_at": "2026-01-08T03:35:04.886Z",
+    "updated_at": "2026-01-08T03:35:04.886Z"
+  },
+  {
+    "name": "immer",
+    "type": "Utility Library",
+    "subtype": "Immutable State",
+    "created_at": "2026-01-08T03:35:04.960Z",
+    "updated_at": "2026-01-08T03:35:04.960Z"
+  },
+  {
+    "name": "PostHog",
+    "type": "Analytics and Product Insight",
+    "subtype": "Product Analytics",
+    "created_at": "2026-01-08T03:35:05.034Z",
+    "updated_at": "2026-01-08T03:35:05.034Z"
+  },
+  {
+    "name": "Plausible",
+    "type": "Analytics and Product Insight",
+    "subtype": "Privacy-Focused Analytics",
+    "created_at": "2026-01-08T03:35:05.109Z",
+    "updated_at": "2026-01-08T03:35:05.109Z"
+  },
+  {
+    "name": "Umami",
+    "type": "Analytics and Product Insight",
+    "subtype": "Open Source Analytics",
+    "created_at": "2026-01-08T03:35:05.183Z",
+    "updated_at": "2026-01-08T03:35:05.183Z"
+  },
+  {
+    "name": "Fathom",
+    "type": "Analytics and Product Insight",
+    "subtype": "Privacy-Focused Analytics",
+    "created_at": "2026-01-08T03:35:05.257Z",
+    "updated_at": "2026-01-08T03:35:05.257Z"
+  },
+  {
+    "name": "Hotjar",
+    "type": "Analytics and Product Insight",
+    "subtype": "User Behavior Analytics",
+    "created_at": "2026-01-08T03:35:05.334Z",
+    "updated_at": "2026-01-08T03:35:05.334Z"
+  },
+  {
+    "name": "Metabase",
+    "type": "Analytics and Product Insight",
+    "subtype": "Business Intelligence",
+    "created_at": "2026-01-08T03:35:05.410Z",
+    "updated_at": "2026-01-08T03:35:05.410Z"
+  },
+  {
+    "name": "Retool",
+    "type": "Internal Tools",
+    "subtype": "Low-Code Platform",
+    "created_at": "2026-01-08T03:35:05.484Z",
+    "updated_at": "2026-01-08T03:35:05.484Z"
+  },
+  {
+    "name": "Budibase",
+    "type": "Internal Tools",
+    "subtype": "Low-Code Platform",
+    "created_at": "2026-01-08T03:35:05.561Z",
+    "updated_at": "2026-01-08T03:35:05.561Z"
+  },
+  {
+    "name": "Appsmith",
+    "type": "Internal Tools",
+    "subtype": "Low-Code Platform",
+    "created_at": "2026-01-08T03:35:05.645Z",
+    "updated_at": "2026-01-08T03:35:05.645Z"
+  },
+  {
+    "name": "Tooljet",
+    "type": "Internal Tools",
+    "subtype": "Low-Code Platform",
+    "created_at": "2026-01-08T03:35:05.719Z",
+    "updated_at": "2026-01-08T03:35:05.719Z"
+  },
+  {
+    "name": "Temporal",
+    "type": "Workflow Engine",
+    "subtype": "Durable Execution",
+    "created_at": "2026-01-08T03:35:05.794Z",
+    "updated_at": "2026-01-08T03:35:05.794Z"
+  },
+  {
+    "name": "Inngest",
+    "type": "Workflow Engine",
+    "subtype": "Event-Driven Workflows",
+    "created_at": "2026-01-08T03:35:05.869Z",
+    "updated_at": "2026-01-08T03:35:05.869Z"
+  },
+  {
+    "name": "Upstash",
+    "type": "Serverless Data",
+    "subtype": "Serverless Redis & Kafka",
+    "created_at": "2026-01-08T03:35:05.943Z",
+    "updated_at": "2026-01-08T03:35:05.943Z"
+  },
+  {
+    "name": "Redis Labs",
+    "type": "In-Memory Database",
+    "subtype": "Managed Redis",
+    "created_at": "2026-01-08T03:35:06.020Z",
+    "updated_at": "2026-01-08T03:35:06.020Z"
+  },
+  {
+    "name": "Railway",
+    "type": "Hosting Platform",
+    "subtype": "Platform as a Service",
+    "created_at": "2026-01-08T03:35:06.094Z",
+    "updated_at": "2026-01-08T03:35:06.094Z"
+  },
+  {
+    "name": "Northflank",
+    "type": "Hosting Platform",
+    "subtype": "Platform as a Service",
+    "created_at": "2026-01-08T03:35:06.169Z",
+    "updated_at": "2026-01-08T03:35:06.169Z"
+  },
+  {
+    "name": "Coolify",
+    "type": "Hosting Platform",
+    "subtype": "Self-Hosted PaaS",
+    "created_at": "2026-01-08T03:35:06.242Z",
+    "updated_at": "2026-01-08T03:35:06.242Z"
+  },
+  {
+    "name": "Kamal",
+    "type": "Deployment Tool",
+    "subtype": "Zero-Downtime Deployment",
+    "created_at": "2026-01-08T03:35:06.316Z",
+    "updated_at": "2026-01-08T03:35:06.316Z"
+  },
+  {
+    "name": "PM2",
+    "type": "Process Manager",
+    "subtype": "Node.js Process Manager",
+    "created_at": "2026-01-08T03:35:06.391Z",
+    "updated_at": "2026-01-08T03:35:06.391Z"
+  },
+  {
+    "name": "Nodemon",
+    "type": "Development Tool",
+    "subtype": "Auto-Restart Tool",
+    "created_at": "2026-01-08T03:35:06.465Z",
+    "updated_at": "2026-01-08T03:35:06.465Z"
+  },
+  {
+    "name": "tsx",
+    "type": "Development Tool",
+    "subtype": "TypeScript Execution",
+    "created_at": "2026-01-08T03:35:06.540Z",
+    "updated_at": "2026-01-08T03:35:06.540Z"
+  },
+  {
+    "name": "ts-node",
+    "type": "Development Tool",
+    "subtype": "TypeScript Execution",
+    "created_at": "2026-01-08T03:35:06.615Z",
+    "updated_at": "2026-01-08T03:35:06.615Z"
+  },
+  {
+    "name": "Testing Library",
+    "type": "Testing Framework",
+    "subtype": "UI Testing Utilities",
+    "created_at": "2026-01-08T03:35:06.694Z",
+    "updated_at": "2026-01-08T03:35:06.694Z"
+  },
+  {
+    "name": "MSW (Mock Service Worker)",
+    "type": "Testing Framework",
+    "subtype": "API Mocking",
+    "created_at": "2026-01-08T03:35:06.767Z",
+    "updated_at": "2026-01-08T03:35:06.767Z"
+  }
+]
